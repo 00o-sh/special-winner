@@ -10,6 +10,7 @@ spec:
     - ../../../../components/volsync
   dependsOn:
     - name: volsync
+      namespace: volsync-system
   interval: 1h
   path: ./kubernetes/apps/observability/gatus/app
   postBuild:
