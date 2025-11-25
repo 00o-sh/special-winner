@@ -207,7 +207,7 @@ There are **5 stages** outlined below for completing this project, make sure you
 5. Check the status of your wildcard `Certificate`:
 
     ```sh
-    kubectl -n kube-system describe certificates
+    kubectl -n network describe certificates
     ```
 
 ### 🌐 Public DNS
