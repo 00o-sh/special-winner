@@ -22,8 +22,7 @@ spec:
         - notification-controller
       sync:
         kind: GitRepository
-        url: "ssh://git@github.com/00o-sh/special-winner.git"
-        pullSecret: github-deploy-key
+        url: "https://github.com/00o-sh/special-winner.git"
         ref: "refs/heads/main"
         path: kubernetes/flux/cluster
       commonMetadata:
