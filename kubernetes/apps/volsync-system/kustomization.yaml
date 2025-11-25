@@ -71,6 +71,7 @@ patches:
           name: KOPIA_LOG_DIR
           value: /repository/kopia-logs
 resources:
+  - ./namespace.yaml
   - ./kopia/ks.yaml
   - ./volsync/ks.yaml
   - ./garage/ks.yaml
