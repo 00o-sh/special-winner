@@ -8,6 +8,8 @@ spec:
   components:
     - ../../../../components/nfs-scaler
     - ../../../../components/volsync
+  dependsOn:
+    - name: volsync
   interval: 1h
   path: ./kubernetes/apps/observability/gatus/app
   postBuild:

@@ -9,9 +9,8 @@ spec:
   commonMetadata:
     labels:
       app.kubernetes.io/name: *app
-#  dependsOn:
-#    - name: external-secrets-stores
-#      namespace: external-secrets
+  dependsOn:
+    - name: volsync
 #  components:
 #    - ../../../../components/gatus/guarded
   interval: 1h
@@ -39,8 +38,8 @@ spec:
   commonMetadata:
     labels:
       app.kubernetes.io/name: *app
-#  dependsOn:
-#    - name: external-secrets-stores
+  dependsOn:
+    - name: volsync
 #      namespace: external-secrets
 #  components:
 #    - ../../../../components/ext-auth

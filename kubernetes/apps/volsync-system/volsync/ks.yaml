@@ -6,8 +6,6 @@ metadata:
   name: volsync
 spec:
   dependsOn:
-    - name: openebs
-      namespace: openebs-system
     - name: snapshot-controller
       namespace: kube-system
     - name: csi-driver-nfs
