@@ -73,9 +73,9 @@ spec:
         hostnames:
           - garage-api.00o.sh
         parentRefs:
-    - name: envoy-internal
-      namespace: network
-      sectionName: https
+          - name: envoy-internal
+            namespace: network
+            sectionName: https
         rules:
           - backendRefs:
               - name: *app
