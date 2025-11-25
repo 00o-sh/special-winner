@@ -1,0 +1,58 @@
+---
+clusterName: kubernetes
+
+talosVersion: "${talosVersion}"
+kubernetesVersion: "${kubernetesVersion}"
+
+endpoint: https://10.0.6.10:6443
+additionalApiServerCertSans: &sans
+  - "127.0.0.1"
+  - "10.0.6.10"
+additionalMachineCertSans: *sans
+
+clusterPodNets: ["172.30.0.0/16"]
+clusterSvcNets: ["172.31.0.0/16"]
+
+# Disable built-in CNI to use Cilium
+cniConfig:
+  name: none
+
+nodes:
+  - hostname: "singlenodemaster"
+    ipAddress: "10.0.6.211"
+    installDisk: "/dev/sda"
+    machineSpec:
+      secureboot: false
+    talosImageURL: factory.talos.dev/installer/ce4c980550dd2ab1b17bbf2b08801c7eb59418eafe8f279833297925d67c7515
+    controlPlane: true
+    networkInterfaces:
+      - deviceSelector:
+          hardwareAddr: "58:47:ca:74:e4:05"
+        dhcp: false
+        addresses:
+          - "10.0.6.211/24"
+        routes:
+          - network: "0.0.0.0/0"
+            gateway: "10.0.6.1"
+        mtu: 1500
+        vip:
+          ip: "10.0.6.10"
+        vlans:
+          - vlanId: 56
+            dhcp: false
+            mtu: 1500
+            addresses: []
+
+# Global patches
+patches:
+  - "@./patches/global/machine-files.yaml"
+  - "@./patches/global/machine-kubelet.yaml"
+  - "@./patches/global/machine-network.yaml"
+  - "@./patches/global/machine-sysctls.yaml"
+  - "@./patches/global/machine-time.yaml"
+
+# Controller patches
+controlPlane:
+  patches:
+    - "@./patches/controller/cluster.yaml"
+
