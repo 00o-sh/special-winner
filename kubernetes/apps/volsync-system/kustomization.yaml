@@ -1,0 +1,78 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/kustomization
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: volsync-system
+components:
+  - ../../components/sops
+patches:
+  # Patch maintenance CronJob template
+  - target:
+      kind: CronJob
+      name: kopia-maint-daily-.*
+      version: v1
+    patch: |-
+      - op: add
+        path: /spec/jobTemplate/spec/template/spec/volumes/-
+        value:
+          name: repository
+          nfs:
+            server: nas.3226texas.com
+            path: /mnt/Speed/VolsyncKopia
+      - op: add
+        path: /spec/jobTemplate/spec/template/spec/containers/0/volumeMounts/-
+        value:
+          name: repository
+          mountPath: /repository
+      - op: add
+        path: /spec/jobTemplate/spec/template/spec/containers/0/env/-
+        value:
+          name: KOPIA_CONFIG_PATH
+          value: /repository/repository.config
+      - op: add
+        path: /spec/jobTemplate/spec/template/spec/containers/0/env/-
+        value:
+          name: KOPIA_CACHE_DIRECTORY
+          value: /repository/kopia-cache
+      - op: add
+        path: /spec/jobTemplate/spec/template/spec/containers/0/env/-
+        value:
+          name: KOPIA_LOG_DIR
+          value: /repository/kopia-logs
+  # Patch backup/restore Jobs (replication source/destination)
+  - target:
+      kind: Job
+      name: volsync-(src|dst)-.*
+      version: v1
+    patch: |-
+      - op: add
+        path: /spec/template/spec/volumes/-
+        value:
+          name: repository
+          nfs:
+            server: nas.3226texas.com
+            path: /mnt/Speed/VolsyncKopia
+      - op: add
+        path: /spec/template/spec/containers/0/volumeMounts/-
+        value:
+          name: repository
+          mountPath: /repository
+      - op: add
+        path: /spec/template/spec/containers/0/env/-
+        value:
+          name: KOPIA_CONFIG_PATH
+          value: /repository/repository.config
+      - op: add
+        path: /spec/template/spec/containers/0/env/-
+        value:
+          name: KOPIA_CACHE_DIRECTORY
+          value: /repository/kopia-cache
+      - op: add
+        path: /spec/template/spec/containers/0/env/-
+        value:
+          name: KOPIA_LOG_DIR
+          value: /repository/kopia-logs
+resources:
+  - ./kopia/ks.yaml
+  - ./volsync/ks.yaml
+  - ./garage/ks.yaml

@@ -1,0 +1,13 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/snapshot.storage.k8s.io/volumesnapshotclass_v1.json
+apiVersion: snapshot.storage.k8s.io/v1
+kind: VolumeSnapshotClass
+metadata:
+  name: nfs-fast
+driver: nfs.csi.k8s.io
+deletionPolicy: Retain
+# Optional parameters - will use source volume's server/share by default
+# Uncomment and configure if you need specific snapshot mount options
+# parameters:
+#  mountOptions: "nfsvers=4.2,nconnect=16,hard,noatime"
+

@@ -1,0 +1,160 @@
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: ${APP}-volsync-auto-restore
+  namespace: ${NAMESPACE}
+  annotations:
+    kustomize.toolkit.fluxcd.io/prune: disabled
+spec:
+  # Run only once, but allow recreation
+  completions: 1
+  parallelism: 1
+  backoffLimit: 0
+  ttlSecondsAfterFinished: 3600  # Keep job for 1 hour after completion, then auto-cleanup
+  template:
+    metadata:
+      labels:
+        app: ${APP}
+        component: volsync-restore
+    spec:
+      serviceAccountName: volsync-restore-trigger
+      restartPolicy: Never
+      containers:
+        - name: restore
+          image: bitnami/kubectl:latest
+          command:
+            - /bin/sh
+            - -c
+            - |
+              set -e
+              echo "=== VolSync Auto-Restore Job ==="
+              echo "App: ${APP}"
+              echo "Namespace: ${NAMESPACE}"
+              echo ""
+
+              # Wait for ReplicationDestination to exist
+              echo "Waiting for ReplicationDestination to be ready..."
+              for i in $(seq 1 30); do
+                if kubectl get replicationdestination ${APP}-dst -n ${NAMESPACE} &>/dev/null; then
+                  echo "✅ ReplicationDestination found"
+                  break
+                fi
+                echo "  Attempt $i/30..."
+                sleep 2
+              done
+
+              # Check if restore is needed and scale down app if running
+              echo ""
+              echo "Checking if restore is needed..."
+
+              # Check if app deployment exists and scale down if running
+              if kubectl get deployment ${APP} -n ${NAMESPACE} &>/dev/null; then
+                REPLICAS=$(kubectl get deployment ${APP} -n ${NAMESPACE} -o jsonpath='{.spec.replicas}' 2>/dev/null || echo "0")
+                if [ "$REPLICAS" != "0" ]; then
+                  echo "App is running - scaling down first..."
+                  kubectl scale deployment ${APP} -n ${NAMESPACE} --replicas=0 || {
+                    echo "WARNING: Failed to scale down, but continuing..."
+                  }
+                  echo "Waiting for pods to terminate..."
+                  sleep 5
+                fi
+              fi
+
+              # Check if restore is needed
+              # Only restore if PVC doesn't exist or is not bound
+              if ! kubectl get pvc ${APP} -n ${NAMESPACE} &>/dev/null; then
+                echo "PVC ${APP} does not exist - restore needed"
+                NEEDS_RESTORE=true
+              else
+                PVC_PHASE=$(kubectl get pvc ${APP} -n ${NAMESPACE} -o jsonpath='{.status.phase}' 2>/dev/null || echo "Unknown")
+                if [ "$PVC_PHASE" != "Bound" ]; then
+                  echo "PVC exists but not bound - restore needed"
+                  NEEDS_RESTORE=true
+                else
+                  # PVC exists and is bound - check if it has been restored before
+                  # Check for annotation that indicates restore already happened
+                  RESTORED=$(kubectl get pvc ${APP} -n ${NAMESPACE} -o jsonpath='{.metadata.annotations.volsync\.backube/restored}' 2>/dev/null || echo "")
+                  if [ -z "$RESTORED" ]; then
+                    echo "PVC exists and is bound, but no restore annotation found"
+                    echo "This indicates a newly created PVC that needs data restored"
+                    NEEDS_RESTORE=true
+                  else
+                    echo "PVC already has restore annotation - skipping restore"
+                    NEEDS_RESTORE=false
+                  fi
+                fi
+              fi
+
+              if [ "$NEEDS_RESTORE" = "true" ]; then
+                echo ""
+                echo "=== Triggering restore ==="
+                RESTORE_ID="restore-auto-$(date +%s)"
+                kubectl patch replicationdestination ${APP}-dst -n ${NAMESPACE} \
+                  --type merge \
+                  -p "{\"spec\":{\"trigger\":{\"manual\":\"$RESTORE_ID\"}}}" || {
+                  echo "ERROR: Failed to trigger restore"
+                  exit 1
+                }
+
+                echo "Restore triggered: $RESTORE_ID"
+                echo ""
+                echo "Waiting for restore to complete (timeout: 10 minutes)..."
+
+                timeout=600
+                elapsed=0
+                while [ $elapsed -lt $timeout ]; do
+                  status=$(kubectl get replicationdestination ${APP}-dst -n ${NAMESPACE} \
+                    -o jsonpath='{.status.conditions[?(@.type=="Synchronizing")].status}' 2>/dev/null || echo "Unknown")
+                  result=$(kubectl get replicationdestination ${APP}-dst -n ${NAMESPACE} \
+                    -o jsonpath='{.status.latestMoverStatus.result}' 2>/dev/null || echo "Unknown")
+
+                  if [ "$status" = "False" ] && [ "$result" = "Successful" ]; then
+                    echo ""
+                    echo "✅ Restore completed successfully!"
+
+                    # Mark PVC as restored to prevent future restores
+                    echo ""
+                    echo "Marking PVC as restored..."
+                    kubectl annotate pvc ${APP} -n ${NAMESPACE} \
+                      volsync.backube/restored="$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+                      --overwrite || {
+                      echo "WARNING: Failed to annotate PVC, but restore completed"
+                    }
+
+                    # Scale up the app if it was scaled down
+                    if kubectl get deployment ${APP} -n ${NAMESPACE} &>/dev/null; then
+                      CURRENT_REPLICAS=$(kubectl get deployment ${APP} -n ${NAMESPACE} -o jsonpath='{.spec.replicas}' 2>/dev/null || echo "0")
+                      if [ "$CURRENT_REPLICAS" = "0" ]; then
+                        echo ""
+                        echo "Scaling up ${APP} deployment..."
+                        kubectl scale deployment ${APP} -n ${NAMESPACE} --replicas=1 || {
+                          echo "WARNING: Failed to scale up, but restore completed"
+                        }
+                      fi
+                    fi
+
+                    exit 0
+                  elif [ "$result" = "Failed" ]; then
+                    echo ""
+                    echo "❌ Restore failed"
+                    exit 1
+                  fi
+
+                  sleep 5
+                  elapsed=$((elapsed + 5))
+                  echo "  Still restoring... (${elapsed}s elapsed)"
+                done
+
+                echo ""
+                echo "❌ Restore timeout after ${timeout}s"
+                exit 1
+              else
+                echo ""
+                echo "=== Restore not needed ==="
+                exit 0
+              fi
+          securityContext:
+            runAsUser: 1000
+            runAsGroup: 1000
+

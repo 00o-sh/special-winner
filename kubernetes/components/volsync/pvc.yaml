@@ -1,0 +1,16 @@
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: ${APP}
+  annotations:
+    # This annotation is managed by the restore job
+    # Flux should not remove it (using merge strategy)
+    kustomize.toolkit.fluxcd.io/ssa: merge
+spec:
+  accessModes:
+    - ${VOLSYNC_ACCESSMODES:=ReadWriteOnce}
+  resources:
+    requests:
+      storage: ${VOLSYNC_CAPACITY:=5Gi}
+  storageClassName: ${VOLSYNC_STORAGECLASS:=nfs-fast}

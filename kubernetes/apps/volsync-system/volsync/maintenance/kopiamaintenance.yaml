@@ -1,0 +1,20 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/volsync.backube/kopiamaintenance_v1alpha1.json
+apiVersion: volsync.backube/v1alpha1
+kind: KopiaMaintenance
+metadata:
+  name: daily
+  namespace: volsync-system
+spec:
+  enabled: true
+  trigger:
+    schedule: "0 2 * * *"  # Daily at 2 AM
+  repository:
+    repository: volsync-maintenance-secret
+  # Ensure maintenance pods run as non-root and have fsGroup so NFS files are writable by UID 1000
+  podSecurityContext:
+    runAsNonRoot: true
+    runAsUser: 1000
+    fsGroup: 1000
+  # Optional: set service account for maintenance jobs
+  serviceAccountName: default
