@@ -79,8 +79,8 @@ spec:
         hostnames:
           - "{{ .Release.Name }}.00o.sh"
         parentRefs:
-          - name: internal
-            namespace: kube-system
+          - name: envoy-internal
+            namespace: network
         rules:
           - backendRefs:
               - identifier: app
