@@ -10,7 +10,7 @@ spec:
     - ../../../../components/volsync
   dependsOn:
     - name: multus-networks
-      namespace: kube-system
+      namespace: network
     - name: csi-driver-nfs
       namespace: kube-system
   interval: 1h
