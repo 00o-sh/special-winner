@@ -8,4 +8,4 @@ resources:
   - ./replicationdestination.yaml
   - ./replicationsource.yaml
   - ./rbac.yaml
-  - ./restore-job.yaml
+#  - ./restore-job.yaml
