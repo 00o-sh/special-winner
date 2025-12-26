@@ -1,4 +1,3 @@
----
 apiVersion: k8s.cni.cncf.io/v1
 kind: NetworkAttachmentDefinition
 metadata:
@@ -15,7 +14,10 @@ spec:
           "master": "bond0.56",
           "mode": "bridge",
           "ipam": {
-            "type": "static"
+            "type": "static",
+            "routes": [
+              {"dst": "0.0.0.0/0", "gw": "192.168.56.1"}
+            ]
           }
         }
       ]
