@@ -55,7 +55,9 @@ spec:
         k8s.v1.cni.cncf.io/networks: |-
           [{
             "name": "vpn",
-            "namespace": "network"
+            "namespace": "network",
+            "ips": ["192.168.56.10/24"],
+            "gateway": ["192.168.56.1"]
           }]
       securityContext:
         runAsNonRoot: true
