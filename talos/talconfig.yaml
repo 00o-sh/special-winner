@@ -4,10 +4,10 @@ clusterName: kubernetes
 talosVersion: "${talosVersion}"
 kubernetesVersion: "${kubernetesVersion}"
 
-endpoint: https://10.0.6.10:6443
+endpoint: https://10.32.26.10:6443
 additionalApiServerCertSans: &sans
   - "127.0.0.1"
-  - "10.0.6.10"
+  - "10.32.26.10"
 additionalMachineCertSans: *sans
 
 clusterPodNets: ["172.30.0.0/16"]
@@ -19,7 +19,7 @@ cniConfig:
 
 nodes:
   - hostname: "singlenodemaster"
-    ipAddress: "10.0.6.211"
+    ipAddress: "10.32.26.253"
     installDisk: "/dev/sda"
     machineSpec:
       secureboot: true
@@ -35,12 +35,12 @@ nodes:
         # Native VLAN 6 (untagged) set on the port as default and allowed all VLANs
         dhcp: false
         addresses:
-          - 10.0.6.211/24
+          - 10.32.26.253/24
         routes:
           - network: 0.0.0.0/0
-            gateway: 10.0.6.1
+            gateway: 10.32.26.1
         vip:
-          ip: 10.0.6.10
+          ip: 10.32.26.10
         # Tagged VLAN 56 VPN for Multus/macvlan
         vlans:
           - vlanId: 56
