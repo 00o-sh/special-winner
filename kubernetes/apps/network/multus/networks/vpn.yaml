@@ -10,9 +10,9 @@ spec:
       "name": "vpn",
       "plugins": [
         {
-          "type": "ipvlan",
-          "master": "bond0.56",
-          "mode": "l2",
+          "type": "vlan",
+          "master": "bond0",
+          "vlanId": "56",
           "ipam": {
             "type": "static",
             "routes": [
