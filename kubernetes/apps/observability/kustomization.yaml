@@ -7,4 +7,4 @@ resources:
   - ./namespace.yaml
   - ./gatus/ks.yaml
   - ./keda/ks.yaml
-  - ./grafana/ks.yaml
+#  - ./grafana/ks.yaml
