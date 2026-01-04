@@ -3,62 +3,53 @@
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: qbittorrent
+  name: qui
 spec:
   chartRef:
     kind: OCIRepository
-    name: qbittorrent
+    name: qui
   interval: 1h
   values:
     controllers:
-      qbittorrent:
+      qui:
         annotations:
           reloader.stakater.com/auto: "true"
         containers:
           app:
             image:
-              repository: ghcr.io/home-operations/qbittorrent
-              tag: 5.1.4@sha256:e9c2c24ad2b39fa0ee44de682bf26b14bf23cffea1de9e1f082f26caed4277f9
+              repository: ghcr.io/autobrr/qui
+              tag: develop@sha256:23e1393048060d9ab16d91ffe26eade0e6c3f59a65a8b325d866514ab6fdcbff
             env:
+              QUI__HOST: 0.0.0.0
+              QUI__PORT: &port 80
+              QUI__LOG_LEVEL: INFO
               TZ: America/New_York
-              QBT_WEBUI_PORT: &port 80
-              QBT_TORRENTING_PORT: 50469
+            envFrom:
+              - secretRef:
+                  name: "{{ .Release.Name }}-secret"
             probes:
               liveness: &probes
                 enabled: true
                 custom: true
                 spec:
                   httpGet:
-                    path: /api/v2/app/version
+                    path: /health
                     port: *port
                   initialDelaySeconds: 0
                   periodSeconds: 10
                   timeoutSeconds: 1
                   failureThreshold: 3
               readiness: *probes
-              startup:
-                enabled: true
-                spec:
-                  failureThreshold: 30
-                  periodSeconds: 10
+            resources:
+              requests:
+                cpu: 10m
+              limits:
+                memory: 512Mi
             securityContext:
               allowPrivilegeEscalation: false
               readOnlyRootFilesystem: true
               capabilities: {drop: ["ALL"]}
-            resources:
-              requests:
-                cpu: 100m
-              limits:
-                memory: 4Gi
     defaultPodOptions:
-      annotations:
-        k8s.v1.cni.cncf.io/networks: |-
-          [{
-            "name": "vpn",
-            "namespace": "network",
-            "ips": ["192.168.56.10/24"],
-            "mac": "32:0b:d8:1f:b6:e4"
-          }]
       securityContext:
         runAsNonRoot: true
         runAsUser: 1000
@@ -72,40 +63,18 @@ spec:
             port: *port
     route:
       app:
-        annotations:
-          gatus.home-operations.com/endpoint: |-
-            name: "qBittorrent - Torrent Management"
-            group: media
         hostnames:
           - "{{ .Release.Name }}.00o.sh"
         parentRefs:
           - name: envoy-internal
             namespace: network
-        rules:
-          - backendRefs:
-              - identifier: app
-                port: *port
-    configMaps:
-      config:
-        data:
-          .qbt.toml: |-
-            [qbittorrent]
-            addr = "http://localhost:80"
     persistence:
       config:
         existingClaim: "{{ .Release.Name }}"
-      config-file:
-        type: configMap
-        identifier: config
-        globalMounts:
-          - path: /config/.qbt.toml
-            subPath: .qbt.toml
       media:
         type: nfs
         server: nas.3226texas.com
         path: /mnt/Rust/Media
         globalMounts:
-          - path: /media/Downloads/qbittorrent
-            subPath: Downloads/qbittorrent
-      tmp:
-        type: emptyDir
+          - path: /media/Downloads
+            subPath: Downloads
