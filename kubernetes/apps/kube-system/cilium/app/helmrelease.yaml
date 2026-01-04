@@ -33,6 +33,7 @@ spec:
       enabled: false
     hubble:
       enabled: false
+    devices: bond+
     ipam:
       mode: kubernetes
     ipv4NativeRoutingCIDR: "172.30.0.0/16"
