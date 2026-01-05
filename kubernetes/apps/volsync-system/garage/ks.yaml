@@ -11,8 +11,6 @@ spec:
       app.kubernetes.io/name: *app
   dependsOn:
     - name: volsync
-    - name: onepassword
-      namespace: external-secrets
 #  components:
 #    - ../../../../components/gatus/guarded
   interval: 1h
@@ -42,8 +40,6 @@ spec:
       app.kubernetes.io/name: *app
   dependsOn:
     - name: volsync
-    - name: onepassword
-      namespace: external-secrets
 #      namespace: external-secrets
 #  components:
 #    - ../../../../components/ext-auth
