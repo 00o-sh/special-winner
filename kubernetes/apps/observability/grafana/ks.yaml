@@ -28,8 +28,6 @@ spec:
     - name: grafana
     - name: csi-driver-nfs
       namespace: kube-system
-    - name: onepassword
-      namespace: external-secrets
   interval: 1h
   path: ./kubernetes/apps/observability/grafana/instance
   prune: true

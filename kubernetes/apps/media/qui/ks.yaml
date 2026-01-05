@@ -11,10 +11,6 @@ spec:
   dependsOn:
     - name: multus-networks
       namespace: network
-    - name: csi-driver-nfs
-      namespace: kube-system
-    - name: onepassword
-      namespace: external-secrets
     - name: volsync
       namespace: volsync-system
   interval: 1h
