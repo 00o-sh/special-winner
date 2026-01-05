@@ -10,6 +10,8 @@ spec:
     - ../../../../components/nfs-scaler
   dependsOn:
     - name: volsync
+    - name: onepassword
+      namespace: external-secrets
   interval: 1h
   path: ./kubernetes/apps/volsync-system/kopia/app
   postBuild:

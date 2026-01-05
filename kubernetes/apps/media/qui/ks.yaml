@@ -13,6 +13,8 @@ spec:
       namespace: network
     - name: csi-driver-nfs
       namespace: kube-system
+    - name: onepassword
+      namespace: external-secrets
   interval: 1h
   path: ./kubernetes/apps/media/qui/app
   postBuild:
