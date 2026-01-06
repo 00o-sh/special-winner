@@ -8,13 +8,42 @@ This observability stack expects certain exporters to be running on your TrueNAS
 **Port:** 9100
 **Purpose:** Basic system metrics (CPU, memory, disk, network)
 
-#### Option A: Via TrueNAS Apps (Recommended)
+#### Deployment via TrueNAS SCALE Apps (Recommended)
 
-1. Go to **Apps** in TrueNAS SCALE UI
-2. Click **Discover Apps** or **Custom App**
-3. Deploy a Prometheus Node Exporter container
+1. Go to **Apps** in TrueNAS SCALE web UI
+2. Click **Discover Apps**
+3. Click **Custom App**
+4. Configure the deployment:
 
-#### Option B: Via CLI
+**Application Name:** `node-exporter`
+
+**Image Configuration:**
+- **Image Repository:** `prom/node-exporter`
+- **Image Tag:** `latest` (or `v1.8.2` for pinned version)
+- **Image Pull Policy:** `IfNotPresent`
+
+**Networking:**
+- **Host Network:** ✅ **Enable** (required for accurate host metrics)
+- **DNS Policy:** `ClusterFirstWithHostNet`
+
+**Security Context:**
+- **Privileged Mode:** ❌ Disable
+- **Run as User:** `65534` (nobody)
+- **Run as Group:** `65534`
+
+**Storage:** None needed
+
+**Command Arguments:**
+```
+--path.rootfs=/host
+```
+
+**Advanced: Host Path Volumes** (if not using host network):
+- Mount `/` to `/host` as read-only
+
+5. Click **Install**
+
+#### Alternative: Via CLI (Less Recommended)
 ```bash
 # SSH into TrueNAS
 ssh admin@nas.3226texas.com
@@ -57,7 +86,37 @@ systemctl status node-exporter
 
 **TrueNAS SCALE already has `smartctl` installed!**
 
-#### Installation:
+#### Deployment via TrueNAS SCALE Apps (Recommended)
+
+1. Go to **Apps** in TrueNAS SCALE web UI
+2. Click **Discover Apps**
+3. Click **Custom App**
+4. Configure the deployment:
+
+**Application Name:** `smartctl-exporter`
+
+**Image Configuration:**
+- **Image Repository:** `prometheuscommunity/smartctl-exporter`
+- **Image Tag:** `latest` (or `v0.12.0` for pinned version)
+- **Image Pull Policy:** `IfNotPresent`
+
+**Networking:**
+- **Host Network:** ✅ **Enable** (required for disk access)
+- **DNS Policy:** `ClusterFirstWithHostNet`
+
+**Security Context:**
+- **Privileged Mode:** ✅ **Enable** (required for SMART data access)
+- **Capabilities:** Add `SYS_RAWIO`, `SYS_ADMIN`
+
+**Storage:**
+- Mount `/dev` host path to `/dev` (read-only)
+
+**Environment Variables:**
+- `SMARTCTL_EXPORTER_PORT`: `9633`
+
+5. Click **Install**
+
+#### Alternative: Via CLI (Less Recommended)
 ```bash
 # SSH into TrueNAS
 ssh admin@nas.3226texas.com
@@ -94,12 +153,20 @@ systemctl status smartctl-exporter
 
 ## Verification
 
-Once exporters are running on the NAS, verify they're accessible:
+### Via TrueNAS SCALE Apps UI
+1. Go to **Apps** in TrueNAS SCALE
+2. Verify both `node-exporter` and `smartctl-exporter` show as **Running**
+3. Check logs if needed by clicking on the app
 
+### Via Command Line
 ```bash
 # Test from your local machine
-curl http://nas.3226texas.com:9100/metrics  # Should return metrics
-curl http://nas.3226texas.com:9633/metrics  # Should return disk metrics
+curl http://nas.3226texas.com:9100/metrics  # Should return node metrics
+curl http://nas.3226texas.com:9633/metrics  # Should return SMART metrics
+
+# Or test from TrueNAS shell
+curl http://localhost:9100/metrics
+curl http://localhost:9633/metrics
 ```
 
 ## TrueNAS SCALE Firewall Configuration
@@ -168,7 +235,12 @@ After setup, import these recommended Grafana dashboards:
    ```
 
 **Exporters not starting after TrueNAS reboot:**
-Services should auto-start via systemd. Check with:
+If deployed via TrueNAS Apps, they should auto-start. Check in **Apps** UI:
+1. Verify apps show as **Running**
+2. Check logs for errors
+3. Restart via the UI if needed
+
+For CLI deployments:
 ```bash
 systemctl status node-exporter smartctl-exporter
 ```
@@ -177,7 +249,9 @@ systemctl status node-exporter smartctl-exporter
 There's a silence configured for `NodeMemoryHighUtilization` on the NAS at `nas.3226texas.com:9100`. TrueNAS typically uses a lot of memory for ZFS ARC cache, which is normal. If you want to remove this silence, edit `kubernetes/apps/observability/silence-operator/silences/silences.yaml`.
 
 **After TrueNAS SCALE Update:**
-TrueNAS SCALE updates may remove custom systemd services. After major updates, you may need to:
-- Verify services are still enabled: `systemctl status node-exporter smartctl-exporter`
-- Reinstall if needed (follow installation steps above)
-- Consider using a TrueNAS Apps deployment instead for persistence
+Apps deployed via TrueNAS Apps UI are **persistent across updates**! Just verify they're still running:
+1. Go to **Apps** in TrueNAS UI
+2. Check that `node-exporter` and `smartctl-exporter` are **Running**
+3. Restart if needed via the UI
+
+If you used the CLI installation method, you may need to reinstall after major updates.
