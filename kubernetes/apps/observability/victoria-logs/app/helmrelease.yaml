@@ -22,9 +22,8 @@ spec:
         hostnames:
           - victoria-logs.00o.sh
         parentRefs:
-          - name: envoy-external
+          - name: envoy-internal
             namespace: network
-            sectionName: https
         extraRules:
           - filters:
               - type: RequestRedirect
