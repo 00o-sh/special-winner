@@ -11,21 +11,11 @@ spec:
   targets:
     staticConfig:
       static:
-        - expanse.internal
-        - garage-door.internal
-        - hdhomerun.internal
-        - idrac.internal
-        - jetkvm-0.internal
-        - jetkvm-1.internal
-        - jetkvm-2.internal
-        - k8s-0.internal
-        - k8s-1.internal
-        - k8s-2.internal
-        - kiosk.internal
-        - receiver.internal
-        - ups.internal
-        - zigbee-controller.internal
-        - zwave-controller.internal
+        - nas.3226texas.com
+        # Add your internal hosts here
+        # - router.local
+        # - switch.local
+        # - ups.local
   metricRelabelings:
     - targetLabel: service
       replacement: blackbox-exporter-lan
@@ -43,7 +33,10 @@ spec:
   targets:
     staticConfig:
       static:
-        - expanse.internal:2049
+        - nas.3226texas.com:2049  # NFS port
+        # Add other TCP probes here
+        # - router.local:443
+        # - switch.local:80
   metricRelabelings:
     - targetLabel: service
       replacement: blackbox-exporter-lan
