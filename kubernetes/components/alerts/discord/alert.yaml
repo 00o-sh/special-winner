@@ -21,6 +21,12 @@ spec:
       name: "*"
     - kind: OCIRepository
       name: "*"
+    - kind: TalosUpgrade
+      name: "*"
+      namespace: system-upgrade
+    - kind: KubernetesUpgrade
+      name: "*"
+      namespace: system-upgrade
   exclusionList:
     - error.*lookup.*github
     - dial.*tcp.*timeout
