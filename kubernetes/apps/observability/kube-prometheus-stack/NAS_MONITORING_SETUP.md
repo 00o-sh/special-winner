@@ -11,8 +11,8 @@ This observability stack expects certain exporters to be running on your TrueNAS
 #### Option A: Via TrueNAS Apps (Recommended)
 
 1. Go to **Apps** in TrueNAS SCALE UI
-2. Search for "Prometheus Node Exporter" or use custom app
-3. Or use the TrueCharts catalog if available
+2. Click **Discover Apps** or **Custom App**
+3. Deploy a Prometheus Node Exporter container
 
 #### Option B: Via CLI
 ```bash
