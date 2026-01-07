@@ -13,11 +13,6 @@ helmDefaults:
     - yq eval-all --exit-status 'select(.kind == "CustomResourceDefinition")'
 
 releases:
-  - name: external-secrets
-    namespace: external-secrets
-    chart: oci://ghcr.io/external-secrets/charts/external-secrets
-    version: 1.2.1
-
   - name: cloudflare-dns
     namespace: network
     chart: oci://ghcr.io/home-operations/charts-mirror/external-dns
