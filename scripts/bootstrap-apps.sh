@@ -82,6 +82,24 @@ function apply_sops_secrets() {
             log error "Failed to apply secret resource" "resource=$(basename "${secret}" ".sops.yaml")"
         fi
     done
+
+    # Apply onepassword secret to external-secrets namespace
+    local -r onepassword_secret="${ROOT_DIR}/bootstrap/onepassword-secret.sops.yaml"
+    if [ -f "${onepassword_secret}" ]; then
+        # Check if the secret is up-to-date
+        if ! sops exec-file "${onepassword_secret}" "kubectl diff --filename {}" &>/dev/null; then
+            # Apply secret resource
+            if sops exec-file "${onepassword_secret}" "kubectl apply --server-side --filename {}" &>/dev/null; then
+                log info "Secret resource applied successfully" "resource=onepassword-secret"
+            else
+                log error "Failed to apply secret resource" "resource=onepassword-secret"
+            fi
+        else
+            log info "Secret resource is up-to-date" "resource=onepassword-secret"
+        fi
+    else
+        log warn "File does not exist" "file=${onepassword_secret}"
+    fi
 }
 
 # CRDs to be applied before the helmfile charts are installed
@@ -127,6 +145,32 @@ function sync_helm_releases() {
     log info "Helm releases synced successfully"
 }
 
+# Apply ClusterSecretStore for onepassword
+function apply_clustersecretstore() {
+    log debug "Applying ClusterSecretStore"
+
+    local -r clustersecretstore="${ROOT_DIR}/bootstrap/onepassword-clustersecretstore.yaml"
+
+    if [[ ! -f "${clustersecretstore}" ]]; then
+        log warn "File does not exist" "file=${clustersecretstore}"
+        return
+    fi
+
+    # Check if the ClusterSecretStore is up-to-date
+    if kubectl diff --filename "${clustersecretstore}" &>/dev/null; then
+        log info "ClusterSecretStore is up-to-date"
+        return
+    fi
+
+    # Apply ClusterSecretStore
+    if ! kubectl apply --server-side --filename "${clustersecretstore}" &>/dev/null; then
+        log error "Failed to apply ClusterSecretStore"
+        return
+    fi
+
+    log info "ClusterSecretStore applied successfully"
+}
+
 function main() {
     check_env KUBECONFIG TALOSCONFIG
     check_cli helmfile kubectl kustomize sops talhelper yq
@@ -137,6 +181,7 @@ function main() {
     apply_sops_secrets
     apply_crds
     sync_helm_releases
+    apply_clustersecretstore
 
     log info "Congrats! The cluster is bootstrapped and Flux is syncing the Git repository"
 }
