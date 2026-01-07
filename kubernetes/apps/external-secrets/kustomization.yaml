@@ -10,7 +10,6 @@ components:
 
 resources:
   - ./namespace.yaml
-  # external-secrets and onepassword are managed by bootstrap, not Flux
-  # - ./external-secrets/ks.yaml
-  # - ./onepassword/ks.yaml
+  - ./external-secrets/ks.yaml
+  - ./onepassword/ks.yaml
   - ./discord-webhook/ks.yaml
