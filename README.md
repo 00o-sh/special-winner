@@ -1,30 +1,78 @@
-# ⛵ Cluster Template
+# 🏆 Special Winner - Kubernetes Home Cluster
 
-Welcome to my template designed for deploying a single Kubernetes cluster. Whether you're setting up a cluster at home on bare-metal or virtual machines (VMs), this project aims to simplify the process and make Kubernetes more accessible. This template is inspired by my personal [home-ops](https://github.com/onedr0p/home-ops) repository, providing a practical starting point for anyone interested in managing their own Kubernetes environment.
+> _GitHub's random name generator really outdid itself this time!_
 
-At its core, this project leverages [makejinja](https://github.com/mirkolenz/makejinja), a powerful tool for rendering templates. By reading configuration files—such as [cluster.yaml](./cluster.sample.yaml) and [nodes.yaml](./nodes.sample.yaml)—Makejinja generates the necessary configurations to deploy a Kubernetes cluster with the following features:
+A Kubernetes homelab cluster deployed with [Talos Linux](https://github.com/siderolabs/talos) and [Flux CD](https://github.com/fluxcd/flux2) for GitOps. This repository is based on the [onedr0p/cluster-template](https://github.com/onedr0p/cluster-template) and uses [makejinja](https://github.com/mirkolenz/makejinja) for configuration templating.
 
-- Easy configuration through YAML files.
-- Compatibility with home setups, whether on physical hardware or VMs.
-- A modular and extensible approach to cluster deployment and management.
+At its core, this project leverages [makejinja](https://github.com/mirkolenz/makejinja), a powerful tool for rendering templates. By reading configuration files—`cluster.yaml` and `nodes.yaml`—Makejinja generates the necessary configurations to deploy a Kubernetes cluster with the following features:
 
-With this approach, you'll gain a solid foundation to build and manage your Kubernetes cluster efficiently.
+- Easy configuration through YAML files
+- GitOps-based cluster management with Flux CD
+- Automated secret encryption with SOPS
+- Template-driven infrastructure as code
+- Modular and extensible approach to cluster deployment
 
 ## ✨ Features
 
 A Kubernetes cluster deployed with [Talos Linux](https://github.com/siderolabs/talos) and an opinionated implementation of [Flux](https://github.com/fluxcd/flux2) using [GitHub](https://github.com/) as the Git provider, [sops](https://github.com/getsops/sops) to manage secrets and [cloudflared](https://github.com/cloudflare/cloudflared) to access applications external to your local network.
 
-- **Required:** Some knowledge of [Containers](https://opencontainers.org/), [YAML](https://noyaml.com/), [Git](https://git-scm.com/), and a **Cloudflare account** with a **domain**.
-- **Included components:** [flux](https://github.com/fluxcd/flux2), [cilium](https://github.com/cilium/cilium), [cert-manager](https://github.com/cert-manager/cert-manager), [spegel](https://github.com/spegel-org/spegel), [reloader](https://github.com/stakater/Reloader), [envoy-gateway](https://github.com/envoyproxy/gateway), [external-dns](https://github.com/kubernetes-sigs/external-dns) and [cloudflared](https://github.com/cloudflare/cloudflared).
+### Core Infrastructure
 
-**Other features include:**
+**Operating System & Orchestration:**
+- [Talos Linux](https://github.com/siderolabs/talos) 1.12.1 - Immutable Kubernetes OS
+- [Kubernetes](https://kubernetes.io/) 1.34.0 - Container orchestration
+- [Flux CD](https://github.com/fluxcd/flux2) 2.7.5 - GitOps continuous delivery
 
-- Dev env managed w/ [mise](https://mise.jdx.dev/)
-- Workflow automation w/ [GitHub Actions](https://github.com/features/actions)
-- Dependency automation w/ [Renovate](https://www.mend.io/renovate)
-- Flux `HelmRelease` and `Kustomization` diffs w/ [flux-local](https://github.com/allenporter/flux-local)
+**Networking:**
+- [Cilium](https://github.com/cilium/cilium) 1.19.0 - eBPF-based CNI
+- [CoreDNS](https://coredns.io/) - Cluster DNS
+- [Envoy Gateway](https://github.com/envoyproxy/gateway) - HTTP routing and ingress
+- [k8s_gateway](https://github.com/ori-edge/k8s_gateway) - Internal DNS for cluster services
+- [Cloudflare Tunnel](https://github.com/cloudflare/cloudflared) - Secure external access
+- [Multus CNI](https://github.com/k8snetworkplumbingwg/multus-cni) - Multi-network support
 
-Does this sound cool to you? If so, continue to read on! 👇
+**Security & Secrets:**
+- [cert-manager](https://github.com/cert-manager/cert-manager) - TLS certificate automation
+- [External Secrets Operator](https://external-secrets.io/) - External secret management
+- [1Password](https://1password.com/) - Secret storage backend
+- [SOPS](https://github.com/getsops/sops) 3.11.0 - Encrypted secrets in Git
+
+**Storage:**
+- [OpenEBS](https://github.com/openebs/openebs) - Cloud-native storage
+- [VolSync](https://volsync.readthedocs.io/) - Volume replication and backup
+- [Kopia](https://kopia.io/) - Backup repository
+- [Garage](https://garagehq.deuxfleurs.fr/) - S3-compatible storage
+- [CSI Driver NFS](https://github.com/kubernetes-csi/csi-driver-nfs) - NFS storage support
+- [Snapshot Controller](https://github.com/kubernetes-csi/external-snapshotter) - Volume snapshots
+
+**Observability:**
+- [Grafana](https://grafana.com/) - Metrics visualization
+- [Gatus](https://github.com/TwiN/gatus) - Health monitoring
+- [KEDA](https://keda.sh/) - Event-driven autoscaling
+
+**System Management:**
+- [Reloader](https://github.com/stakater/Reloader) - Automatic pod restarts on config changes
+- [Metrics Server](https://github.com/kubernetes-sigs/metrics-server) - Resource metrics
+- [Tuppr](https://github.com/belak/tuppr) - Automated system upgrades
+
+### Applications
+
+**Media:**
+- [qBittorrent](https://www.qbittorrent.org/) - Torrent client
+- [Qui](https://github.com/qui-dev/qui) - qBittorrent UI
+
+**Additional DNS:**
+- Cloudflare DNS integration
+- UniFi DNS integration
+
+### Development & Automation
+
+- Development environment managed with [mise](https://mise.jdx.dev/)
+- CI/CD workflows with [GitHub Actions](https://github.com/features/actions)
+- Automated dependency updates with [Renovate](https://www.mend.io/renovate)
+- Flux manifest validation and diffs with [flux-local](https://github.com/allenporter/flux-local)
+
+**Note:** [Spegel](https://github.com/spegel-org/spegel) (container image mirror) automatically enables when running with 2+ nodes.
 
 ## 🚀 Let's Go!
 
@@ -54,14 +102,11 @@ There are **5 stages** outlined below for completing this project, make sure you
 
 ### Stage 2: Local Workstation
 
-> [!TIP]
-> It is recommended to set the visibility of your repository to `Public` so you can easily request help if you get stuck.
-
-1. Create a new repository by clicking the green `Use this template` button at the top of this page, then clone the new repo you just created and `cd` into it. Alternatively you can us the [GitHub CLI](https://cli.github.com/) ...
+1. Clone this repository and navigate to it:
 
     ```sh
-    export REPONAME="home-ops"
-    gh repo create $REPONAME --template onedr0p/cluster-template --disable-wiki --public --clone && cd $REPONAME
+    git clone https://github.com/00o-sh/special-winner.git
+    cd special-winner
     ```
 
 2. **Install** the [Mise CLI](https://mise.jdx.dev/getting-started.html#installing-mise-cli) on your workstation.
@@ -155,11 +200,13 @@ There are **5 stages** outlined below for completing this project, make sure you
     git push
     ```
 
-3. Install cilium, coredns, spegel, flux and sync the cluster to the repository state:
+3. Install cilium, coredns, flux and sync the cluster to the repository state:
 
     ```sh
     task bootstrap:apps
     ```
+
+    **Note:** Spegel will be automatically installed when you add a second node to the cluster.
 
 4. Watch the rollout of your cluster happen:
 
@@ -389,40 +436,42 @@ Once your cluster is fully configured and you no longer need to run `task config
 
 There's a lot to absorb here, especially if you're new to these tools. Take some time to familiarize yourself with the tooling and understand how all the components interconnect. Dive into the documentation of the various tools included — they are a valuable resource. This shouldn't be a production environment yet, so embrace the freedom to experiment. Move fast, break things intentionally, and challenge yourself to fix them.
 
-Below are some optional considerations you may want to explore.
+### What's Already Configured
 
-### DNS
+This cluster already includes several advanced features beyond the base template:
 
-The template uses [k8s_gateway](https://github.com/ori-edge/k8s_gateway) to provide DNS for your applications, consider exploring [external-dns](https://github.com/kubernetes-sigs/external-dns) as an alternative.
+- **✅ External Secrets Operator** - Integrated with 1Password for centralized secret management
+- **✅ Storage Solutions** - OpenEBS, VolSync, CSI-driver-NFS, and snapshot controller
+- **✅ Backup & Replication** - Kopia and Garage for S3-compatible backups
+- **✅ Advanced DNS** - Cloudflare DNS and UniFi DNS webhooks configured
+- **✅ Observability Stack** - Grafana, Gatus, and KEDA for monitoring and autoscaling
+- **✅ Media Applications** - qBittorrent and Qui ready to deploy
 
-External-DNS offers broad support for various DNS providers, including but not limited to:
+### Additional Enhancements to Consider
 
-- [Pi-hole](https://github.com/kubernetes-sigs/external-dns/blob/master/docs/tutorials/pihole.md)
-- [UniFi](https://github.com/kashalls/external-dns-unifi-webhook)
-- [Adguard Home](https://github.com/muhlba91/external-dns-provider-adguard)
-- [Bind](https://github.com/kubernetes-sigs/external-dns/blob/master/docs/tutorials/rfc2136.md)
+**DNS Alternatives:**
 
-This flexibility allows you to integrate seamlessly with a range of DNS solutions to suit your environment and offload DNS from your cluster to your router, or external device.
+While this cluster uses [k8s_gateway](https://github.com/ori-edge/k8s_gateway), you can explore additional DNS integrations:
 
-### Secrets
+- [Pi-hole](https://github.com/kubernetes-sigs/external-dns/blob/master/docs/tutorials/pihole.md) - Network-wide ad blocking
+- [Adguard Home](https://github.com/muhlba91/external-dns-provider-adguard) - Privacy-focused DNS
+- [Bind](https://github.com/kubernetes-sigs/external-dns/blob/master/docs/tutorials/rfc2136.md) - Traditional DNS server
 
-SOPs is an excellent tool for managing secrets in a GitOps workflow. However, it can become cumbersome when rotating secrets or maintaining a single source of truth for secret items.
+**Storage Alternatives:**
 
-For a more streamlined approach to those issues, consider [External Secrets](https://external-secrets.io/latest/). This tool allows you to move away from SOPs and leverage an external provider for managing your secrets. External Secrets supports a wide range of providers, from cloud-based solutions to self-hosted options.
+If you want to explore alternatives to OpenEBS:
 
-### Storage
+- [rook-ceph](https://github.com/rook/rook) - Distributed block, object, and file storage
+- [longhorn](https://github.com/longhorn/longhorn) - Lightweight cloud-native storage
+- [democratic-csi](https://github.com/democratic-csi/democratic-csi) - Storage integration for TrueNAS/FreeNAS
+- [synology-csi](https://github.com/SynologyOpenSource/synology-csi) - Synology NAS integration
 
-If your workloads require persistent storage with features like replication or connectivity to NFS, SMB, or iSCSI servers, there are several projects worth exploring:
+**Multi-Node Features:**
 
-- [rook-ceph](https://github.com/rook/rook)
-- [longhorn](https://github.com/longhorn/longhorn)
-- [openebs](https://github.com/openebs/openebs)
-- [democratic-csi](https://github.com/democratic-csi/democratic-csi)
-- [csi-driver-nfs](https://github.com/kubernetes-csi/csi-driver-nfs)
-- [csi-driver-smb](https://github.com/kubernetes-csi/csi-driver-smb)
-- [synology-csi](https://github.com/SynologyOpenSource/synology-csi)
-
-These tools offer a variety of solutions to meet your persistent storage needs, whether you’re using cloud-native or self-hosted infrastructures.
+When you add a second node:
+- **Spegel** will automatically enable for distributed image caching
+- Consider enabling **BGP** for advanced load balancing with Cilium
+- Explore **high availability** configurations for critical workloads
 
 ### Community Repositories
 
@@ -430,29 +479,15 @@ Community member [@whazor](https://github.com/whazor) created [Kubesearch](https
 
 ## 🙋 Support
 
-### Community
+### Community Resources
 
-- Make a post in this repository's Github [Discussions](https://github.com/onedr0p/cluster-template/discussions).
-- Start a thread in the `#support` or `#cluster-template` channels in the [Home Operations](https://discord.gg/home-operations) Discord server.
+- **Upstream Template**: [onedr0p/cluster-template discussions](https://github.com/onedr0p/cluster-template/discussions)
+- **Discord**: [Home Operations](https://discord.gg/home-operations) - Join the `#cluster-template` channel
+- **Documentation**: Check [CLAUDE.md](./CLAUDE.md) for detailed AI assistant guidance
 
-### GitHub Sponsors
+### Acknowledgments
 
-If you're having difficulty with this project, can't find the answers you need through the community support options above, or simply want to show your appreciation while gaining deeper insights, I’m offering one-on-one paid support through GitHub Sponsors for a limited time. Payment and scheduling will be coordinated through [GitHub Sponsors](https://github.com/sponsors/onedr0p).
-
-<details>
-
-<summary>Click to expand the details</summary>
-
-<br>
-
-- **Rate**: $50/hour (no longer than 2 hours / day).
-- **What’s Included**: Assistance with deployment, debugging, or answering questions related to this project.
-- **What to Expect**:
-  1. Sessions will focus on specific questions or issues you are facing.
-  2. I will provide guidance, explanations, and actionable steps to help resolve your concerns.
-  3. Support is limited to this project and does not extend to unrelated tools or custom feature development.
-
-</details>
+This repository is based on [@onedr0p](https://github.com/onedr0p)'s excellent [cluster-template](https://github.com/onedr0p/cluster-template). Many thanks to the Home Operations community for their continuous improvements and support.
 
 ## 🙌 Related Projects
 
@@ -464,20 +499,18 @@ If this repo is too hot to handle or too cold to hold check out these following 
 - [ricsanfre/pi-cluster](https://github.com/ricsanfre/pi-cluster) - _Pi Kubernetes Cluster. Homelab kubernetes cluster automated with Ansible and FluxCD_
 - [techno-tim/k3s-ansible](https://github.com/techno-tim/k3s-ansible) - _The easiest way to bootstrap a self-hosted High Availability Kubernetes cluster. A fully automated HA k3s etcd install with kube-vip, MetalLB, and more. Build. Destroy. Repeat._
 
-## ⭐ Stargazers
+## 📊 Repository Stats
+
+**Deployed Components:** 29+ applications across 12 namespaces
+**Template Source:** [onedr0p/cluster-template](https://github.com/onedr0p/cluster-template)
+**Infrastructure:** GitOps with Flux CD + Talos Linux
+
+---
 
 <div align="center">
 
-<a href="https://star-history.com/#onedr0p/cluster-template&Date">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=onedr0p/cluster-template&type=Date&theme=dark" />
-    <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=onedr0p/cluster-template&type=Date" />
-    <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=onedr0p/cluster-template&type=Date" />
-  </picture>
-</a>
+_"In a world of randomly generated repository names, this one turned out to be a winner."_ 🏆
+
+Built with ☕ and ⚡ by the Home Operations community
 
 </div>
-
-## 🤝 Thanks
-
-Big shout out to all the contributors, sponsors and everyone else who has helped on this project.
