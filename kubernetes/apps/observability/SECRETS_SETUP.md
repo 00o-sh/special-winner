@@ -11,9 +11,8 @@ Create a new 1Password item named `alertmanager` with the following fields:
 | Field Name | Value | Description |
 |------------|-------|-------------|
 | `DISCORD_WEBHOOK_URL` | `https://discord.com/api/webhooks/YOUR_WEBHOOK_ID/YOUR_WEBHOOK_TOKEN` | Discord webhook URL for Alertmanager notifications. Get this from Discord: Server Settings → Integrations → Webhooks → New Webhook |
-| `BUDDY_HEARTBEAT_TOKEN` | `c8d8f220-ddd7-4fa9-9807-e19c531a45dd` | **IMPORTANT:** This token authenticates Alertmanager's heartbeat requests to Gatus. Must match the same field in the `gatus` key. |
 
-**Note:** The `BUDDY_HEARTBEAT_URL` is automatically constructed from `BUDDY_STATUS_HOSTNAME` in the gatus key.
+**Note:** The alertmanager ExternalSecret also pulls from the `gatus` key to get `BUDDY_HEARTBEAT_TOKEN` and `BUDDY_STATUS_HOSTNAME`.
 
 ---
 
@@ -24,8 +23,8 @@ Create a new 1Password item named `gatus` with the following fields:
 | Field Name | Value | Description |
 |------------|-------|-------------|
 | `BUDDY_DISCORD_WEBHOOK_URL` | `https://discord.com/api/webhooks/YOUR_WEBHOOK_ID/YOUR_WEBHOOK_TOKEN` | Discord webhook URL for Gatus buddy monitoring alerts. Can be the same webhook as alertmanager or a different one. |
-| `BUDDY_HEARTBEAT_TOKEN` | `c8d8f220-ddd7-4fa9-9807-e19c531a45dd` | **IMPORTANT:** Must be the exact same value as in the `alertmanager` key. This token is used to validate heartbeat requests. |
-| `BUDDY_STATUS_HOSTNAME` | `status.00o.sh` | The hostname where Gatus status page is accessible. This is used to construct the heartbeat URL. |
+| `BUDDY_HEARTBEAT_TOKEN` | `c8d8f220-ddd7-4fa9-9807-e19c531a45dd` | Token that authenticates Alertmanager's heartbeat requests to Gatus. Shared between alertmanager and gatus via their ExternalSecrets. |
+| `BUDDY_STATUS_HOSTNAME` | `status.00o.sh` | The hostname where Gatus status page is accessible. Used to construct the heartbeat URL for alertmanager. |
 
 ---
 
@@ -61,17 +60,14 @@ You can use:
 
 ## Critical Notes
 
-⚠️ **BUDDY_HEARTBEAT_TOKEN must match in both keys**
+⚠️ **No duplicate fields**
 
-The `BUDDY_HEARTBEAT_TOKEN` field must have the **exact same value** in both:
-- `alertmanager` key
-- `gatus` key
+Each field is stored in **only one** 1Password key:
+- `BUDDY_HEARTBEAT_TOKEN` → stored in `gatus` key only
+- `BUDDY_STATUS_HOSTNAME` → stored in `gatus` key only
+- `DISCORD_WEBHOOK_URL` → stored in `alertmanager` key only
 
-This is because:
-- Alertmanager sends a Watchdog alert every 2 minutes to Gatus
-- The token in the URL authenticates this request
-- Gatus validates the token against its configuration
-- If tokens don't match, the buddy heartbeat will fail
+The alertmanager ExternalSecret pulls from multiple 1Password keys (`alertmanager`, `flux`, and `gatus`), so it automatically gets access to all these fields without duplication.
 
 ---
 
@@ -111,7 +107,7 @@ All should show `SecretSynced: True`
 ## Summary
 
 **Total 1Password keys needed:** 3
-- `alertmanager` (2 fields)
+- `alertmanager` (1 field)
 - `gatus` (3 fields)
 - `grafana` (1 field)
 
