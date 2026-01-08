@@ -1,0 +1,36 @@
+---
+# Buddy monitoring endpoints - monitors the monitoring system itself
+alerting:
+  discord:
+    webhook-url: ${BUDDY_DISCORD_WEBHOOK_URL}
+    default-alert:
+      description: health-check failed
+      failure-threshold: 3
+      minimum-reminder-interval: 1h
+      send-on-resolved: true
+      success-threshold: 2
+    title: "Gatus Alert"
+
+endpoints:
+  - name: Status Page
+    group: buddy
+    url: https://${BUDDY_STATUS_HOSTNAME}
+    interval: 1m
+    ui:
+      hide-url: true
+      hide-hostname: true
+    conditions:
+      - "[STATUS] == 200"
+    alerts:
+      - type: discord
+
+# External endpoint for Alertmanager heartbeat
+# Alertmanager pushes Watchdog alerts here every 2 minutes
+external-endpoints:
+  - name: Alertmanager Heartbeat
+    group: buddy
+    token: ${BUDDY_HEARTBEAT_TOKEN}
+    heartbeat:
+      interval: 5m  # Alert if no heartbeat received in 5 minutes
+    alerts:
+      - type: discord
