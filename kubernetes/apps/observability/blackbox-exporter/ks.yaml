@@ -23,7 +23,7 @@ metadata:
 spec:
   dependsOn:
     - name: multus-networks
-      namespace: kube-system
+      namespace: network
   interval: 1h
   path: ./kubernetes/apps/observability/blackbox-exporter/vpn
   prune: true
