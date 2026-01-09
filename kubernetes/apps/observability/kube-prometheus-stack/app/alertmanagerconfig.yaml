@@ -60,9 +60,8 @@ spec:
             key: BUDDY_HEARTBEAT_URL
     - name: discord
       discord_configs:
-        - sendResolved: true
-          webhook_url:
-            key: DISCORD_WEBHOOK_URL
+        - webhook_url: DISCORD_WEBHOOK_URL
+          sendResolved: true
           title: '[{{ .Status | toUpper }}{{ if eq .Status "firing" }}:{{ .Alerts.Firing | len }}{{ end }}] {{ .CommonLabels.alertname }}'
           text: |-
             {{- range .Alerts }}
