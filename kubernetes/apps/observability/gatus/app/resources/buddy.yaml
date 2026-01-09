@@ -27,7 +27,7 @@ endpoints:
 # External endpoint for Alertmanager heartbeat
 # Alertmanager pushes Watchdog alerts here every 2 minutes
 external-endpoints:
-  - name: Alertmanager Heartbeat
+  - name: buddy_heartbeat
     group: buddy
     token: ${BUDDY_HEARTBEAT_TOKEN}
     heartbeat:
