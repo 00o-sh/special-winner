@@ -3,7 +3,7 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: prowlarr
+  name: autobrr
 spec:
   components:
     - ../../../../components/nfs-scaler
@@ -16,11 +16,11 @@ spec:
     - name: volsync
       namespace: volsync-system
   interval: 1h
-  path: ./kubernetes/apps/media/prowlarr/app
+  path: ./kubernetes/apps/media/autobrr/app
   postBuild:
     substitute:
-      APP: prowlarr
-      VOLSYNC_CAPACITY: 1Gi
+      APP: autobrr
+      VOLSYNC_CAPACITY: 5Gi
   prune: true
   sourceRef:
     kind: GitRepository
