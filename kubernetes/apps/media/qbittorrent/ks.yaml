@@ -9,6 +9,8 @@ spec:
     - ../../../../components/nfs-scaler
     - ../../../../components/volsync
   dependsOn:
+    - name: kube-prometheus-stack
+      namespace: observability
     - name: multus-networks
       namespace: network
     - name: volsync
