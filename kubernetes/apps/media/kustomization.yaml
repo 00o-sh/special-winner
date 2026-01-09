@@ -12,3 +12,4 @@ resources:
   - ./qbittorrent/ks.yaml
   - ./qui/ks.yaml
   - ./prowlarr/ks.yaml
+  - ./autobrr/ks.yaml
