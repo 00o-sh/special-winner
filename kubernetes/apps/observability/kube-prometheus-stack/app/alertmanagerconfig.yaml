@@ -59,7 +59,7 @@ spec:
             name: alertmanager-secret
             key: BUDDY_HEARTBEAT_URL
     - name: discord
-      slackConfigs:
+      discord_configs:
         - sendResolved: true
           title: '[{{ .Status | toUpper }}{{ if eq .Status "firing" }}:{{ .Alerts.Firing | len }}{{ end }}] {{ .CommonLabels.alertname }}'
           text: |-
@@ -81,6 +81,5 @@ spec:
                 {{- end }}
               {{- end }}
             {{- end }}
-          apiURLSecret:
-            name: alertmanager-secret
-            key: DISCORD_SLACK_WEBHOOK_URL
+          webhook_url:
+            key: DISCORD_WEBHOOK_URL
