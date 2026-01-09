@@ -61,7 +61,7 @@ spec:
     - name: discord
       discord_configs:
         - sendResolved: true
-            webhook_url:
+          webhook_url:
             key: DISCORD_WEBHOOK_URL
           title: '[{{ .Status | toUpper }}{{ if eq .Status "firing" }}:{{ .Alerts.Firing | len }}{{ end }}] {{ .CommonLabels.alertname }}'
           text: |-
