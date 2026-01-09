@@ -41,7 +41,7 @@ spec:
               TZ: America/New_York
             envFrom:
               - secretRef:
-                  name: gatus-secret
+                  name: gatus
             probes:
               liveness: &probes
                 enabled: true
