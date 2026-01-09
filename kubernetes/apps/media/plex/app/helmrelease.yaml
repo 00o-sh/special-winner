@@ -99,7 +99,7 @@ spec:
       media:
         type: nfs
         server: nas.3226texas.com
-        path: /mnt/rust/Media
+        path: /mnt/Rust/Media
         globalMounts:
           - path: /media
             readOnly: true
