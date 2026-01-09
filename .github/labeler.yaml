@@ -1,43 +1,188 @@
 ---
+# Area Labels - General
 area/bootstrap:
   - changed-files:
       - any-glob-to-any-file:
           - bootstrap/**/*
+
 area/docs:
   - changed-files:
       - any-glob-to-any-file:
-          - README.md
+          - "*.md"
+          - docs/**/*
+          - CLAUDE.md
+
 area/github:
   - changed-files:
       - any-glob-to-any-file:
           - .github/**/*
+
 area/kubernetes:
   - changed-files:
       - any-glob-to-any-file:
           - kubernetes/**/*
+
 area/mise:
   - changed-files:
       - any-glob-to-any-file:
           - .mise.toml
+
 area/renovate:
   - changed-files:
       - any-glob-to-any-file:
           - .renovate/**/*
           - .renovaterc.json5
+
 area/scripts:
   - changed-files:
       - any-glob-to-any-file:
           - scripts/**/*
+
 area/talos:
   - changed-files:
       - any-glob-to-any-file:
           - talos/**/*
+
 area/taskfile:
   - changed-files:
       - any-glob-to-any-file:
           - .taskfiles/**/*
           - Taskfile.yaml
+
 area/templates:
   - changed-files:
       - any-glob-to-any-file:
           - templates/**/*
+          - makejinja.toml
+
+# Area Labels - Kubernetes Namespaces
+area/cert-manager:
+  - changed-files:
+      - any-glob-to-any-file:
+          - kubernetes/apps/cert-manager/**/*
+
+area/external-secrets:
+  - changed-files:
+      - any-glob-to-any-file:
+          - kubernetes/apps/external-secrets/**/*
+
+area/flux-system:
+  - changed-files:
+      - any-glob-to-any-file:
+          - kubernetes/apps/flux-system/**/*
+          - kubernetes/flux/**/*
+
+area/kube-system:
+  - changed-files:
+      - any-glob-to-any-file:
+          - kubernetes/apps/kube-system/**/*
+
+area/media:
+  - changed-files:
+      - any-glob-to-any-file:
+          - kubernetes/apps/media/**/*
+
+area/network:
+  - changed-files:
+      - any-glob-to-any-file:
+          - kubernetes/apps/network/**/*
+
+area/observability:
+  - changed-files:
+      - any-glob-to-any-file:
+          - kubernetes/apps/observability/**/*
+
+area/storage:
+  - changed-files:
+      - any-glob-to-any-file:
+          - kubernetes/apps/volsync-system/**/*
+          - kubernetes/apps/openebs-system/**/*
+          - kubernetes/components/volsync/**/*
+
+# Component Labels
+component/cilium:
+  - changed-files:
+      - any-glob-to-any-file:
+          - kubernetes/apps/kube-system/cilium/**/*
+
+component/flux:
+  - changed-files:
+      - any-glob-to-any-file:
+          - kubernetes/apps/flux-system/**/*
+          - kubernetes/flux/**/*
+
+component/envoy:
+  - changed-files:
+      - any-glob-to-any-file:
+          - kubernetes/apps/network/envoy-gateway/**/*
+
+component/coredns:
+  - changed-files:
+      - any-glob-to-any-file:
+          - kubernetes/apps/kube-system/coredns/**/*
+
+component/cert-manager:
+  - changed-files:
+      - any-glob-to-any-file:
+          - kubernetes/apps/cert-manager/**/*
+
+component/external-dns:
+  - changed-files:
+      - any-glob-to-any-file:
+          - kubernetes/apps/network/k8s-gateway/**/*
+          - kubernetes/apps/network/cloudflare-dns/**/*
+
+component/sops:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "**/*.sops.yaml"
+          - "**/*.sops.yml"
+          - .sops.yaml
+          - kubernetes/components/sops/**/*
+
+component/prometheus:
+  - changed-files:
+      - any-glob-to-any-file:
+          - kubernetes/apps/observability/kube-prometheus-stack/**/*
+          - kubernetes/apps/observability/blackbox-exporter/**/*
+          - kubernetes/components/alerts/**/*
+
+component/grafana:
+  - changed-files:
+      - any-glob-to-any-file:
+          - kubernetes/apps/observability/grafana/**/*
+
+component/volsync:
+  - changed-files:
+      - any-glob-to-any-file:
+          - kubernetes/apps/volsync-system/volsync/**/*
+          - kubernetes/components/volsync/**/*
+
+# Type Labels - Based on file patterns and commit messages
+type/ci:
+  - changed-files:
+      - any-glob-to-any-file:
+          - .github/workflows/**/*
+          - .github/actions/**/*
+
+type/docs:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "*.md"
+          - docs/**/*
+      - all-globs-to-all-files:
+          - "!**/*.{yaml,yml,sh,py,toml,json}"
+
+type/security:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "**/*.sops.yaml"
+          - "**/*.sops.yml"
+          - .sops.yaml
+          - kubernetes/apps/external-secrets/**/*
+
+dependencies:
+  - changed-files:
+      - any-glob-to-any-file:
+          - .mise.toml
+          - bootstrap/helmfile.d/**/*
