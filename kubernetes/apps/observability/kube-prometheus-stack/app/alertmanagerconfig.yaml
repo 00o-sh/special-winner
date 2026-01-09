@@ -59,26 +59,8 @@ spec:
             name: alertmanager-secret
             key: BUDDY_HEARTBEAT_URL
     - name: discord
-      discord_configs:
-        - webhook_url: DISCORD_WEBHOOK_URL
+      webhookConfigs:
+        - urlSecret:
+            name: alertmanager-secret
+            key: DISCORD_WEBHOOK_URL
           sendResolved: true
-          title: '[{{ .Status | toUpper }}{{ if eq .Status "firing" }}:{{ .Alerts.Firing | len }}{{ end }}] {{ .CommonLabels.alertname }}'
-          text: |-
-            {{- range .Alerts }}
-              {{- if ne .Annotations.description "" }}
-                {{ .Annotations.description }}
-              {{- else if ne .Annotations.summary "" }}
-                {{ .Annotations.summary }}
-              {{- else if ne .Annotations.message "" }}
-                {{ .Annotations.message }}
-              {{- else }}
-                Alert description not available
-              {{- end }}
-              {{- if gt (len .Labels.SortedPairs) 0 }}
-
-                **Labels:**
-                {{- range .Labels.SortedPairs }}
-                  **{{ .Name }}:** {{ .Value }}
-                {{- end }}
-              {{- end }}
-            {{- end }}
