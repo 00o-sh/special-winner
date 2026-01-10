@@ -18,6 +18,7 @@ This document provides comprehensive guidance for AI assistants working with thi
 - **Secrets**: SOPS 3.11.0 + Age 1.3.1 encryption
 - **DNS**: k8s_gateway + CoreDNS + External-DNS
 - **Certificates**: cert-manager with Cloudflare integration
+- **Package Management**: Helm 4.0.4 (Helm v4 for chart management)
 
 ## Directory Structure
 
@@ -57,9 +58,13 @@ special-winner/
 │   │   │   └── kustomization.yaml
 │   │   └── kustomization.yaml
 │   ├── components/                  # Shared components
-│   │   ├── alerts/                 # Prometheus alerts
-│   │   ├── sops/                   # SOPS integration
-│   │   └── volsync/                # Backup config
+│   │   ├── alerts/                 # Prometheus alerts & integrations
+│   │   │   ├── alertmanager/      # AlertManager configuration
+│   │   │   ├── discord/           # Discord webhook integration
+│   │   │   └── github-status/     # GitHub status updates
+│   │   ├── nfs-scaler/            # KEDA-based NFS scaling
+│   │   ├── sops/                  # SOPS integration
+│   │   └── volsync/               # Backup config
 │   └── flux/                        # Flux configuration
 │       └── cluster/ks.yaml         # Root Kustomization
 │
@@ -339,15 +344,21 @@ Types:
 - docs: Documentation
 - refactor: Code refactoring
 
-Scopes:
+Scopes (Common):
 - container: Docker images
 - helm: Helm charts
 - github-action: GitHub Actions
+- kubernetes: Kubernetes manifests
+- observability: Monitoring and alerting
+- volsync: Backup and replication
+- github: GitHub configuration
 
 Examples:
 - fix(container): update image ghcr.io/app/name ( 1.0.0 → 1.1.0 )
 - feat(helm): update chart app-template ( 3.0.0 → 4.0.0 )
 - ci(github-action): update action/checkout ( v3 → v4 )
+- chore(observability): disable buddy heartbeat monitor and alerts
+- fix(volsync): change backup schedule from every 5 minutes to daily at 2 AM
 ```
 
 ## AI Assistant Guidelines
@@ -414,6 +425,7 @@ When adding a new Kubernetes application:
 5. **Don't add unnecessary complexity** - Follow the principle of minimal necessary changes
 6. **Don't add comments/docstrings** to code you didn't modify
 7. **Don't create abstractions** for one-time operations
+8. **Be aware of Helm v4** - The repository uses Helm 4.0.4, which has breaking changes from v3 (see bootstrap scripts)
 
 ### File Location Reference
 
@@ -483,6 +495,24 @@ Tests complete configuration pipeline:
 - Validates with flux-local
 - Matrix: public and private configurations
 
+### labeler.yaml
+Automated PR labeling workflow:
+- Labels PRs based on changed file paths (area labels)
+- Labels PRs based on size (xs/s/m/l/xl)
+- Uses `.github/labeler.yaml` for path-based rules
+- Size thresholds: xs(<10), s(<30), m(<100), l(<500), xl(500+)
+- Ignores markdown and documentation files for size calculation
+
+### label-sync.yaml
+Synchronizes GitHub repository labels:
+- Triggered on pushes to main when `.github/labels.yaml` changes
+- Syncs labels defined in `.github/labels.yaml`
+- Deletes labels not defined in configuration
+- Maintains consistent labeling across the repository
+
+### release.yaml
+Handles repository releases (if applicable)
+
 ## Template System Details
 
 ### Custom Jinja2 Filters
@@ -540,6 +570,71 @@ talosctl get members --nodes <ip> --insecure
 talosctl logs --nodes <ip> --insecure
 ```
 
+## Deployed Applications
+
+### Current Namespaces and Applications
+
+**cert-manager**: Certificate management
+- cert-manager
+
+**default**: Default namespace
+- echo (test application)
+
+**external-secrets**: Secret management
+- discord-webhook (Discord integration)
+- external-secrets (operator)
+- onepassword (1Password integration)
+
+**flux-system**: GitOps
+- flux-instance
+- flux-operator
+
+**kube-system**: Core Kubernetes
+- cilium (CNI)
+- coredns (DNS)
+- csi-driver-nfs (NFS storage)
+- metrics-server
+- reloader (automatic pod restarts)
+- snapshot-controller (volume snapshots)
+
+**media**: Media applications
+- autobrr (automation for trackers)
+- bazarr (subtitle management)
+- plex (media server)
+- prowlarr (indexer manager)
+- qbittorrent (torrent client)
+- qui (qBittorrent UI)
+
+**network**: Network infrastructure
+- cloudflare-dns
+- cloudflare-tunnel (external access)
+- envoy-gateway (ingress)
+- k8s-gateway (internal DNS)
+- multus (multi-network CNI)
+- unifi-dns
+
+**observability**: Monitoring and alerting
+- blackbox-exporter (endpoint monitoring)
+- fluent-bit (log forwarding)
+- gatus (health checks and uptime monitoring)
+- grafana (metrics visualization)
+- keda (event-driven autoscaling)
+- kromgo (custom metrics)
+- kube-prometheus-stack (Prometheus, AlertManager, Grafana)
+- silence-operator (alert silencing)
+- victoria-logs (log aggregation)
+
+**openebs-system**: Storage
+- openebs (cloud-native storage)
+
+**system-upgrade**: System management
+- tuppr (automated upgrades)
+
+**volsync-system**: Backup and replication
+- garage (S3-compatible storage backend)
+- kopia (backup repository)
+- volsync (volume replication)
+
 ## Additional Resources
 
 - **Official Docs**: See README.md for detailed user documentation
@@ -549,6 +644,7 @@ talosctl logs --nodes <ip> --insecure
   - [Flux CD](https://fluxcd.io/)
   - [Cilium](https://cilium.io/)
   - [SOPS](https://github.com/getsops/sops)
+  - [Helm](https://helm.sh/) (Note: Using v4)
 
 ## Version Information
 
@@ -557,10 +653,63 @@ This documentation applies to:
 - Kubernetes: 1.34.0
 - Flux CD: 2.7.5
 - Cilium: 1.19.0
+- Helm: 4.0.4
 
 Check `.mise.toml` for exact versions of all tools.
 
+## Recent Notable Changes
+
+- **2026-01-09**: Buddy heartbeat monitoring disabled in observability stack
+- **2026-01-09**: Added comprehensive GitHub label automation (labeler and label-sync workflows)
+- **2026-01-08**: Multiple media applications added (Plex, Bazarr, Autobrr, Prowlarr)
+- **2026-01-08**: Volsync backup schedule changed from every 5 minutes to daily at 2 AM
+- **2026-01-08**: Discord webhook integration added to AlertManager
+- **2026-01-08**: NFS-scaler component added using KEDA for smart scaling
+
+## Component Deep Dives
+
+### NFS Scaler Component
+
+Located in `kubernetes/components/nfs-scaler/`, this component uses KEDA (Kubernetes Event Driven Autoscaling) to intelligently scale applications that depend on NFS storage.
+
+**How it works**:
+- Uses a KEDA ScaledObject to monitor NFS availability
+- Queries Prometheus for `probe_success{instance=~".+:2049"}` metric
+- Scales deployments from 0 to 1 replica when NFS is available
+- Scales down to 0 when NFS is unavailable
+- Prevents pods from crash-looping when NFS mount points are down
+
+**Usage**: Apply this component to applications that mount NFS volumes and should only run when NFS is healthy.
+
+### Alerts Component Structure
+
+The `kubernetes/components/alerts/` directory contains:
+- **alertmanager/**: AlertManager configuration and routing rules
+- **discord/**: Discord webhook integration for notifications
+- **github-status/**: GitHub status update integration
+
+This modular approach allows different notification channels to be enabled/disabled independently.
+
+### GitHub Label System
+
+The repository uses an automated label management system:
+
+**Label Categories**:
+- `area/*`: Denotes which part of the codebase was changed (bootstrap, kubernetes, talos, etc.)
+- `size/*`: Indicates PR size (xs, s, m, l, xl)
+- Namespace-specific labels: `area/cert-manager`, `area/media`, `area/observability`, etc.
+
+**Configuration Files**:
+- `.github/labels.yaml`: Defines all available labels with colors and descriptions
+- `.github/labeler.yaml`: Maps file paths to labels for automatic PR labeling
+
+**Benefits**:
+- Consistent labeling across all PRs
+- Easy filtering and organization of issues/PRs
+- Automatic size warnings for large PRs
+- Clear indication of which components are affected by changes
+
 ---
 
-**Last Updated**: 2026-01-08
+**Last Updated**: 2026-01-10
 **Template Source**: [onedr0p/cluster-template](https://github.com/onedr0p/cluster-template)
