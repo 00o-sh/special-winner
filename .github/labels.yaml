@@ -1,47 +1,215 @@
 ---
-# Areas
+# Area Labels - General
 - name: area/bootstrap
   color: "0e8a16"
+  description: "Changes to bootstrap configuration"
 - name: area/docs
   color: "0e8a16"
+  description: "Documentation updates"
 - name: area/github
   color: "0e8a16"
+  description: "GitHub workflows and configuration"
 - name: area/kubernetes
   color: "0e8a16"
+  description: "Kubernetes manifests and configuration"
 - name: area/mise
   color: "0e8a16"
+  description: "Development tooling configuration"
 - name: area/renovate
   color: "0e8a16"
+  description: "Renovate dependency updates"
 - name: area/scripts
   color: "0e8a16"
+  description: "Shell scripts and automation"
 - name: area/talos
   color: "0e8a16"
+  description: "Talos Linux configuration"
 - name: area/templates
   color: "0e8a16"
+  description: "Jinja2 template changes"
 - name: area/taskfile
   color: "0e8a16"
-# Renovate Types
-- name: renovate/container
-  color: "027fa0"
-- name: renovate/github-action
-  color: "027fa0"
-- name: renovate/grafana-dashboard
-  color: "027fa0"
-- name: renovate/github-release
-  color: "027fa0"
-- name: renovate/helm
-  color: "027fa0"
-# Semantic Types
+  description: "Task automation definitions"
+
+# Area Labels - Kubernetes Namespaces
+- name: area/cert-manager
+  color: "1d76db"
+  description: "Certificate management"
+- name: area/external-secrets
+  color: "1d76db"
+  description: "External secrets integration"
+- name: area/flux-system
+  color: "1d76db"
+  description: "Flux GitOps system"
+- name: area/kube-system
+  color: "1d76db"
+  description: "Core Kubernetes system components"
+- name: area/media
+  color: "1d76db"
+  description: "Media applications"
+- name: area/network
+  color: "1d76db"
+  description: "Network configuration and tools"
+- name: area/observability
+  color: "1d76db"
+  description: "Monitoring and observability stack"
+- name: area/storage
+  color: "1d76db"
+  description: "Storage and backup systems"
+
+# Component Labels
+- name: component/cilium
+  color: "5319e7"
+  description: "Cilium CNI networking"
+- name: component/flux
+  color: "5319e7"
+  description: "Flux CD GitOps"
+- name: component/envoy
+  color: "5319e7"
+  description: "Envoy Gateway ingress"
+- name: component/coredns
+  color: "5319e7"
+  description: "CoreDNS configuration"
+- name: component/cert-manager
+  color: "5319e7"
+  description: "cert-manager TLS"
+- name: component/external-dns
+  color: "5319e7"
+  description: "External DNS management"
+- name: component/sops
+  color: "5319e7"
+  description: "SOPS secrets encryption"
+- name: component/prometheus
+  color: "5319e7"
+  description: "Prometheus monitoring"
+- name: component/grafana
+  color: "5319e7"
+  description: "Grafana dashboards"
+- name: component/volsync
+  color: "5319e7"
+  description: "Volsync backup system"
+
+# Type Labels - Development
+- name: type/bug
+  color: "d73a4a"
+  description: "Bug fix"
+- name: type/feature
+  color: "a2eeef"
+  description: "New feature"
+- name: type/enhancement
+  color: "84b6eb"
+  description: "Enhancement to existing feature"
+- name: type/refactor
+  color: "fbca04"
+  description: "Code refactoring"
+- name: type/chore
+  color: "fef2c0"
+  description: "Maintenance and chores"
+- name: type/ci
+  color: "ededed"
+  description: "CI/CD changes"
+- name: type/security
+  color: "b60205"
+  description: "Security improvements"
+- name: type/breaking
+  color: "d93f0b"
+  description: "Breaking change"
+- name: type/docs
+  color: "0075ca"
+  description: "Documentation only"
+
+# Type Labels - Renovate Semantic
 - name: type/digest
   color: "ffeC19"
+  description: "Digest update"
 - name: type/patch
   color: "ffeC19"
+  description: "Patch version update"
 - name: type/minor
   color: "ff9800"
+  description: "Minor version update"
 - name: type/major
   color: "f6412d"
-# Uncategorized
+  description: "Major version update"
+
+# Renovate Source Types
+- name: renovate/container
+  color: "027fa0"
+  description: "Container image update"
+- name: renovate/github-action
+  color: "027fa0"
+  description: "GitHub Action update"
+- name: renovate/grafana-dashboard
+  color: "027fa0"
+  description: "Grafana dashboard update"
+- name: renovate/github-release
+  color: "027fa0"
+  description: "GitHub release update"
+- name: renovate/helm
+  color: "027fa0"
+  description: "Helm chart update"
+
+# Priority Labels
+- name: priority/critical
+  color: "b60205"
+  description: "Critical priority"
+- name: priority/high
+  color: "d93f0b"
+  description: "High priority"
+- name: priority/medium
+  color: "fbca04"
+  description: "Medium priority"
+- name: priority/low
+  color: "0e8a16"
+  description: "Low priority"
+
+# Status Labels
+- name: status/needs-review
+  color: "d4c5f9"
+  description: "Needs code review"
+- name: status/needs-testing
+  color: "d4c5f9"
+  description: "Needs testing"
+- name: status/blocked
+  color: "d73a4a"
+  description: "Blocked by dependencies"
+- name: status/wip
+  color: "fbca04"
+  description: "Work in progress"
+- name: status/ready
+  color: "0e8a16"
+  description: "Ready to merge"
+
+# Size Labels
+- name: size/xs
+  color: "c2e0c6"
+  description: "Extra small change (1-9 lines)"
+- name: size/s
+  color: "a8d9ae"
+  description: "Small change (10-29 lines)"
+- name: size/m
+  color: "7ec984"
+  description: "Medium change (30-99 lines)"
+- name: size/l
+  color: "60b86b"
+  description: "Large change (100-499 lines)"
+- name: size/xl
+  color: "3f8c4f"
+  description: "Extra large change (500+ lines)"
+
+# Special Labels
 - name: community
   color: "370fb2"
+  description: "Community contribution"
 - name: hold
   color: "ee0701"
+  description: "Do not merge"
+- name: good-first-issue
+  color: "7057ff"
+  description: "Good for newcomers"
+- name: help-wanted
+  color: "008672"
+  description: "Help wanted"
+- name: dependencies
+  color: "0366d6"
+  description: "Dependency updates"
