@@ -24,13 +24,13 @@ endpoints:
     alerts:
       - type: discord
 
-# External endpoint for Alertmanager heartbeat
+# External endpoint for Alertmanager heartbeat - DISABLED
 # Alertmanager pushes Watchdog alerts here every 2 minutes
-external-endpoints:
-  - name: buddy_heartbeat
-    group: buddy
-    token: ${BUDDY_HEARTBEAT_TOKEN}
-    heartbeat:
-      interval: 5m  # Alert if no heartbeat received in 5 minutes
-    alerts:
-      - type: discord
+#external-endpoints:
+#  - name: buddy_heartbeat
+#    group: buddy
+#    token: ${BUDDY_HEARTBEAT_TOKEN}
+#    heartbeat:
+#      interval: 5m  # Alert if no heartbeat received in 5 minutes
+#    alerts:
+#      - type: discord
