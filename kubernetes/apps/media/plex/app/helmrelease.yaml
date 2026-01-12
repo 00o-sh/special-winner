@@ -64,7 +64,7 @@ spec:
         controller: plex
         annotations:
           external-dns.alpha.kubernetes.io/hostname: plex-direct.00o.sh
-          lbipam.cilium.io/ips: 10.0.6.11
+          lbipam.cilium.io/ips: 10.0.6.14
         externalTrafficPolicy: Cluster
         ports:
           http:
