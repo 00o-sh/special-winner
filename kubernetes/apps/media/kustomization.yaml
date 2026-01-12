@@ -16,3 +16,4 @@ resources:
   - ./bazarr/ks.yaml
   - ./plex/ks.yaml
   - ./radarr/ks.yaml
+  - ./recyclarr/ks.yaml
