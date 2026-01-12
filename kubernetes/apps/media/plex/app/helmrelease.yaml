@@ -23,7 +23,6 @@ spec:
               TZ: America/Chicago
               PLEX_ADVERTISE_URL: https://plex.00o.sh:443,http://10.0.6.14:32400,http://plex-direct.00o.sh:32400,http://plex.media.svc.cluster.local:32400
               PLEX_NO_AUTH_NETWORKS: 10.32.26.0/24, 192.168.2.0/24
-              FriendlyName: "Special Winner"
             probes:
               liveness: &probes
                 enabled: true
@@ -32,7 +31,7 @@ spec:
                   httpGet:
                     path: /identity
                     port: &port 32400
-                  initialDelaySeconds: 30
+                  initialDelaySeconds: 0
                   periodSeconds: 10
                   timeoutSeconds: 1
                   failureThreshold: 3
