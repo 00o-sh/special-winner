@@ -35,7 +35,6 @@ spec:
               PORT: &port 80
               PROMETHEUS_ENABLED: true
               PROMETHEUS_PORT: &metricsPort 8080
-              HOST: 192.168.56.20
             probes:
               liveness: &probes
                 enabled: true
@@ -57,15 +56,6 @@ spec:
                 memory: 128Mi
               limits:
                 memory: 2Gi
-    defaultPodOptions:
-      annotations:
-        k8s.v1.cni.cncf.io/networks: |-
-          [{
-            "name": "vpn",
-            "namespace": "network",
-            "ips": ["192.168.56.20/24"],
-            "mac": "32:0B:D8:29:5B:56"
-          }]
     service:
       app:
         controller: flaresolverr
