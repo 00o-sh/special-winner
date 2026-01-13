@@ -42,14 +42,7 @@ nodes:
           ip: 10.0.6.10
 
     patches:
-      - |-
-        ---
-        apiVersion: v1alpha1
-        kind: VLANConfig
-        name: bond0.56
-        vlanID: 56
-        parent: bond0
-        mtu: 1500
+      - "@./patches/singlenodemaster/vlan56.yaml"
 
 # Global patches
 patches:
