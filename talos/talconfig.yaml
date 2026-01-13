@@ -41,9 +41,6 @@ nodes:
         vip:
           ip: 10.0.6.10
 
-    patches:
-      - "@./patches/singlenodemaster/vlan56.yaml"
-
 # Global patches
 patches:
   - "@./patches/global/machine-files.yaml"
@@ -51,6 +48,7 @@ patches:
   - "@./patches/global/machine-network.yaml"
   - "@./patches/global/machine-sysctls.yaml"
   - "@./patches/global/machine-time.yaml"
+  - "@./patches/global/machine-vlan56.yaml"
 
 # Controller patches
 controlPlane:
