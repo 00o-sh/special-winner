@@ -1,6 +1,0 @@
-machine:
-  network:
-    interfaces:
-      - interface: bond0.56
-        mtu: 1500
-        dhcp: false

@@ -1,7 +1,6 @@
----
-apiVersion: v1alpha1
-kind: VLANConfig
-name: bond0.56
-link: bond0
-vlanId: 56
-mtu: 1500
+machine:
+  network:
+    interfaces:
+      - interface: bond0.56
+        mtu: 1500
+        dhcp: false
