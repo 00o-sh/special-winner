@@ -6,6 +6,7 @@ metadata:
   name: flaresolverr
   interval: 1h
   path: ./kubernetes/apps/media/flaresolverr/app
+spec:
   prune: true
   sourceRef:
     kind: GitRepository
