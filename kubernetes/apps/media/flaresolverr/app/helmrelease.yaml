@@ -35,6 +35,7 @@ spec:
               PORT: &port 80
               PROMETHEUS_ENABLED: true
               PROMETHEUS_PORT: &metricsPort 8080
+              HOST: 192.168.56.20
             probes:
               liveness: &probes
                 enabled: true
