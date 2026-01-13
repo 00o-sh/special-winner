@@ -29,5 +29,5 @@ spec:
       weekly: 4
       monthly: 6
       yearly: 2
-    storageClassName: ${VOLSYNC_STORAGECLASS:=nfs-fast}
+    storageClassName: ${VOLSYNC_STORAGECLASS:=openebs-hostpath}
     volumeSnapshotClassName: ${VOLSYNC_SNAPSHOTCLASS:=nfs-fast}
