@@ -32,7 +32,6 @@ nodes:
           mode: active-backup
           deviceSelectors: [{ hardwareAddr: "58:47:ca:74:e4:*", driver: igc }]
         mtu: 1500
-        # Native VLAN 6 (untagged) set on the port as default and allowed all VLANs
         dhcp: false
         addresses:
           - 10.0.6.211/24
@@ -41,13 +40,7 @@ nodes:
             gateway: 10.0.6.1
         vip:
           ip: 10.0.6.10
-        # Tagged VLAN 56 VPN for Multus/macvlan
-      - interface: bond0.56
-        vlans:
-          - vlanId: 56
-            dhcp: false
-            mtu: 1500
-            addresses: []
+
 
 # Global patches
 patches:
@@ -56,9 +49,10 @@ patches:
   - "@./patches/global/machine-network.yaml"
   - "@./patches/global/machine-sysctls.yaml"
   - "@./patches/global/machine-time.yaml"
+  - "@./patches/global/machine-vlan56.yaml"
+
 
 # Controller patches
 controlPlane:
   patches:
     - "@./patches/controller/cluster.yaml"
-
