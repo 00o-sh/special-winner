@@ -41,13 +41,6 @@ nodes:
             gateway: 10.0.6.1
         vip:
           ip: 10.0.6.10
-      # Tagged VLAN 56 VPN for Multus/macvlan
-      - interface: bond0.56
-        vlan:
-          vlanId: 56
-          mtu: 1500
-        dhcp: false
-        addresses: []
 
 # Global patches
 patches:
