@@ -5,6 +5,8 @@ kind: Kustomization
 metadata:
   name: kube-prometheus-stack
 spec:
+  dependsOn:
+    - name: grafana-instance
   interval: 1h
   path: ./kubernetes/apps/observability/kube-prometheus-stack/app
   prune: true
