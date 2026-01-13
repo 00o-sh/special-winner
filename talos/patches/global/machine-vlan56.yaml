@@ -1,0 +1,7 @@
+---
+apiVersion: v1alpha1
+kind: VLANConfig
+name: bond0.56
+link: bond0
+vlanId: 56
+mtu: 1500
