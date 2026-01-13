@@ -40,6 +40,9 @@ nodes:
             gateway: 10.0.6.1
         vip:
           ip: 10.0.6.10
+      - interface: bond0.56
+        mtu: 1500
+        dhcp: false
 
 # Global patches
 patches:
@@ -48,7 +51,6 @@ patches:
   - "@./patches/global/machine-network.yaml"
   - "@./patches/global/machine-sysctls.yaml"
   - "@./patches/global/machine-time.yaml"
-  - "@./patches/global/machine-vlan56.yaml"
 
 # Controller patches
 controlPlane:
