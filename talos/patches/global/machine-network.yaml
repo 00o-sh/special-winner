@@ -7,5 +7,3 @@ machine:
       - interface: bond0.56
         mtu: 1500
         dhcp: false
-        vlan:
-          vlanId: 56
