@@ -40,10 +40,16 @@ nodes:
             gateway: 10.0.6.1
         vip:
           ip: 10.0.6.10
-        vlans:
-          - vlanId: 56
-            mtu: 1500
-            dhcp: false
+
+    patches:
+      - |-
+        ---
+        apiVersion: v1alpha1
+        kind: VLANConfig
+        name: bond0.56
+        vlanID: 56
+        parent: bond0
+        mtu: 1500
 
 # Global patches
 patches:
