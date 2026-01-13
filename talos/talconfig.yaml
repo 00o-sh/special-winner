@@ -27,8 +27,7 @@ nodes:
     controlPlane: true
 
     networkInterfaces:
-      - interface: bond0
-        bond:
+      - bond:
           mode: active-backup
           deviceSelectors: [{ hardwareAddr: "58:47:ca:74:e4:*", driver: igc }]
         mtu: 1500
