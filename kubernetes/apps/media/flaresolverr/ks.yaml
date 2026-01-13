@@ -5,6 +5,11 @@ kind: Kustomization
 metadata:
   name: flaresolverr
 spec:
+  dependsOn:
+    - name: kube-prometheus-stack
+      namespace: observability
+    - name: multus-networks
+      namespace: network
   interval: 1h
   path: ./kubernetes/apps/media/flaresolverr/app
   prune: true
