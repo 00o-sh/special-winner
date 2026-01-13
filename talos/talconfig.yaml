@@ -27,7 +27,8 @@ nodes:
     controlPlane: true
 
     networkInterfaces:
-      - bond:
+      - interface: bond0
+        bond:
           mode: active-backup
           deviceSelectors: [{ hardwareAddr: "58:47:ca:74:e4:*", driver: igc }]
         mtu: 1500
@@ -39,10 +40,6 @@ nodes:
             gateway: 10.0.6.1
         vip:
           ip: 10.0.6.10
-        vlans:
-          - vlanId: 56
-            dhcp: false
-            mtu: 1500
 
 # Global patches
 patches:

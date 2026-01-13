@@ -3,3 +3,9 @@ machine:
     disableSearchDomain: true
     nameservers:
       - 10.0.6.1
+    interfaces:
+      - interface: bond0.56
+        mtu: 1500
+        dhcp: false
+        vlan:
+          vlanId: 56
