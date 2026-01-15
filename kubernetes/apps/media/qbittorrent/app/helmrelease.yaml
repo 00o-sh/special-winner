@@ -71,20 +71,6 @@ spec:
         ports:
           http:
             port: *port
-      bittorrent:
-        type: LoadBalancer
-        controller: qbittorrent
-        annotations:
-          external-dns.alpha.kubernetes.io/hostname: qbittorrent-direct.00o.sh
-          lbipam.cilium.io/ips: 192.168.56.123
-        externalTrafficPolicy: Cluster
-        ports:
-          bittorrent-tcp:
-            port: *torrentPort
-            protocol: TCP
-          bittorrent-udp:
-            port: *torrentPort
-            protocol: UDP
     route:
       app:
         annotations:
