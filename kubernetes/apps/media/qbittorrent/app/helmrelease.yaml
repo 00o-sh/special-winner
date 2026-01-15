@@ -22,7 +22,7 @@ spec:
             env:
               TZ: America/New_York
               QBT_WEBUI_PORT: &port 80
-              QBT_TORRENTING_PORT: 5593
+              QBT_TORRENTING_PORT: &torrentPort 5593
             probes:
               liveness: &probes
                 enabled: true
@@ -71,6 +71,18 @@ spec:
         ports:
           http:
             port: *port
+      bittorrent:
+        type: LoadBalancer
+        annotations:
+          lbipam.cilium.io/ips: 192.168.56.123
+        externalTrafficPolicy: Cluster
+        ports:
+          bittorrent-tcp:
+            port: *torrentPort
+            protocol: TCP
+          bittorrent-udp:
+            port: *torrentPort
+            protocol: UDP
     route:
       app:
         annotations:
