@@ -6,11 +6,11 @@ metadata:
   name: smtp-relay
 spec:
   interval: 1h
-  path: ./kubernetes/apps/default/smtp-relay/app
+  path: ./kubernetes/apps/utils/smtp-relay/app
   prune: true
   sourceRef:
     kind: GitRepository
     name: flux-system
     namespace: flux-system
-  targetNamespace: default
+  targetNamespace: utils
   wait: false
