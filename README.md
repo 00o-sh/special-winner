@@ -505,6 +505,39 @@ When you add a second node:
 
 Community member [@whazor](https://github.com/whazor) created [Kubesearch](https://kubesearch.dev) to allow searching Flux HelmReleases across Github and Gitlab repositories with the `kubesearch` topic.
 
+## 📋 TODO
+
+### Infrastructure Expansion
+
+**Multi-Node & Virtualization (Priority 1)**
+- [ ] Expand cluster to 3 nodes (integrate 2 Proxmox nodes)
+- [ ] Deploy Longhorn for distributed block storage
+- [ ] Install KubeVirt + CDI for VM management
+- [ ] Configure Multus NetworkAttachmentDefinitions for VM networking
+- [ ] Migrate VMs from Proxmox to KubeVirt
+
+**Database & State Management (Priority 2)**
+- [ ] CloudNativePG operator for managed PostgreSQL clusters
+- [ ] Redis operator for managed Redis instances
+
+**Cloud Service Mirroring (Priority 3)**
+- [ ] Nextcloud + OnlyOffice (Google Drive, Office 365, Calendar, Contacts mirror)
+- [ ] Immich (Google Photos backup)
+- [ ] Vaultwarden (Bitwarden/1Password supplementary instance)
+- [ ] rclone CronJobs for automated cloud sync
+- [ ] Linkding (bookmark backup)
+
+**Security & Observability (Priority 4)**
+- [ ] Kyverno or OPA Gatekeeper for policy enforcement
+- [ ] Network policies for namespace isolation
+- [ ] Grafana Tempo for distributed tracing
+- [ ] Falco or Trivy Operator for runtime security
+
+**Additional Services**
+- [ ] Forgejo (self-hosted Git platform)
+- [ ] Home Assistant + IoT stack (if needed)
+- [ ] Authelia or Authentik for SSO
+
 ## 🙋 Support
 
 ### Community Resources
