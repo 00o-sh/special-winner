@@ -47,8 +47,14 @@ A Kubernetes cluster deployed with [Talos Linux](https://github.com/siderolabs/t
 
 **Observability:**
 - [Grafana](https://grafana.com/) - Metrics visualization
-- [Gatus](https://github.com/TwiN/gatus) - Health monitoring
+- [Gatus](https://github.com/TwiN/gatus) - Health monitoring and uptime tracking
 - [KEDA](https://keda.sh/) - Event-driven autoscaling
+- [Kube Prometheus Stack](https://github.com/prometheus-operator/kube-prometheus) - Full monitoring stack (Prometheus, AlertManager)
+- [Victoria Logs](https://victoriametrics.com/products/victorialogs/) - Log aggregation and search
+- [Fluent Bit](https://fluentbit.io/) - Log forwarding and collection
+- [Blackbox Exporter](https://github.com/prometheus/blackbox_exporter) - Endpoint monitoring
+- [Kromgo](https://github.com/kashalls/kromgo) - Custom metrics publishing
+- [Silence Operator](https://github.com/kbudde/silence-operator) - Alert silencing automation
 
 **System Management:**
 - [Reloader](https://github.com/stakater/Reloader) - Automatic pod restarts on config changes
@@ -57,9 +63,24 @@ A Kubernetes cluster deployed with [Talos Linux](https://github.com/siderolabs/t
 
 ### Applications
 
-**Media:**
+**Media Stack:**
+- [Plex](https://www.plex.tv/) - Media server
+- [Radarr](https://radarr.video/) - Movie collection management
+- [Sonarr](https://sonarr.tv/) - TV series collection management
+- [Prowlarr](https://prowlarr.com/) - Indexer manager
+- [Bazarr](https://www.bazarr.media/) - Subtitle management
 - [qBittorrent](https://www.qbittorrent.org/) - Torrent client
-- [Qui](https://github.com/qui-dev/qui) - qBittorrent UI
+- [Qui](https://github.com/autobrr/qui) - qBittorrent web UI
+- [Autobrr](https://autobrr.com/) - Automation for torrent trackers
+- [Recyclarr](https://recyclarr.dev/) - Quality profile management for *arr apps
+- [Seerr](https://github.com/seerr-team/seerr) - Media request and discovery platform
+- [Tautulli](https://tautulli.com/) - Plex monitoring and statistics
+- [FlareSolverr](https://github.com/FlareSolverr/FlareSolverr) - Cloudflare bypass proxy
+- [TheLounge](https://thelounge.chat/) - Self-hosted IRC client
+
+**Infrastructure & Utilities:**
+- [GitHub Actions Runner Controller](https://github.com/actions/actions-runner-controller) - Self-hosted GitHub Actions runners
+- [SMTP Relay](https://github.com/foxcpp/maddy) - Outbound email relay using Maddy
 
 **Additional DNS:**
 - Cloudflare DNS integration
@@ -69,8 +90,12 @@ A Kubernetes cluster deployed with [Talos Linux](https://github.com/siderolabs/t
 
 - Development environment managed with [mise](https://mise.jdx.dev/)
 - CI/CD workflows with [GitHub Actions](https://github.com/features/actions)
+  - Self-hosted runners for cluster-aware operations
+  - Automated container image pre-pulling to nodes
+  - CRD schema extraction and publishing
 - Automated dependency updates with [Renovate](https://www.mend.io/renovate)
 - Flux manifest validation and diffs with [flux-local](https://github.com/allenporter/flux-local)
+- Automated PR labeling (area and size labels)
 
 **Note:** [Spegel](https://github.com/spegel-org/spegel) (container image mirror) automatically enables when running with 2+ nodes.
 
@@ -444,8 +469,11 @@ This cluster already includes several advanced features beyond the base template
 - **✅ Storage Solutions** - OpenEBS, VolSync, CSI-driver-NFS, and snapshot controller
 - **✅ Backup & Replication** - Kopia and Garage for S3-compatible backups
 - **✅ Advanced DNS** - Cloudflare DNS and UniFi DNS webhooks configured
-- **✅ Observability Stack** - Grafana, Gatus, and KEDA for monitoring and autoscaling
-- **✅ Media Applications** - qBittorrent and Qui ready to deploy
+- **✅ Comprehensive Observability** - Full monitoring stack with Prometheus, Grafana, AlertManager, Victoria Logs, and more
+- **✅ Complete Media Stack** - Plex, Radarr, Sonarr, Prowlarr, Bazarr, qBittorrent, and supporting tools
+- **✅ GitHub Actions Infrastructure** - Self-hosted runners with cluster access for CI/CD
+- **✅ SMTP Relay** - Centralized email relay for cluster applications
+- **✅ Advanced Automation** - KEDA autoscaling, NFS-aware scaling, Discord alerts, automated image pre-pulling
 
 ### Additional Enhancements to Consider
 
@@ -501,9 +529,10 @@ If this repo is too hot to handle or too cold to hold check out these following 
 
 ## 📊 Repository Stats
 
-**Deployed Components:** 29+ applications across 12 namespaces
+**Deployed Components:** 50+ applications across 13 namespaces
 **Template Source:** [onedr0p/cluster-template](https://github.com/onedr0p/cluster-template)
 **Infrastructure:** GitOps with Flux CD + Talos Linux
+**Last Updated:** 2026-01-21
 
 ---
 
