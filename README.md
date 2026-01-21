@@ -507,27 +507,20 @@ Community member [@whazor](https://github.com/whazor) created [Kubesearch](https
 
 ## 📋 TODO
 
-### Infrastructure Expansion
+### Phase 1: Build on Single Node (Current)
 
-**Multi-Node & Virtualization (Priority 1)**
-- [ ] Expand cluster to 3 nodes (integrate 2 Proxmox nodes)
-- [ ] Deploy Longhorn for distributed block storage
-- [ ] Install KubeVirt + CDI for VM management
-- [ ] Configure Multus NetworkAttachmentDefinitions for VM networking
-- [ ] Migrate VMs from Proxmox to KubeVirt
-
-**Database & State Management (Priority 2)**
+**Foundation Services**
 - [ ] CloudNativePG operator for managed PostgreSQL clusters
 - [ ] Redis operator for managed Redis instances
 
-**Cloud Service Mirroring (Priority 3)**
+**Cloud Service Mirroring**
 - [ ] Nextcloud + OnlyOffice (Google Drive, Office 365, Calendar, Contacts mirror)
 - [ ] Immich (Google Photos backup)
 - [ ] Vaultwarden (Bitwarden/1Password supplementary instance)
 - [ ] rclone CronJobs for automated cloud sync
 - [ ] Linkding (bookmark backup)
 
-**Security & Observability (Priority 4)**
+**Security & Observability**
 - [ ] Kyverno or OPA Gatekeeper for policy enforcement
 - [ ] Network policies for namespace isolation
 - [ ] Grafana Tempo for distributed tracing
@@ -537,6 +530,33 @@ Community member [@whazor](https://github.com/whazor) created [Kubesearch](https
 - [ ] Forgejo (self-hosted Git platform)
 - [ ] Home Assistant + IoT stack (if needed)
 - [ ] Authelia or Authentik for SSO
+
+**Validation**
+- [ ] Test volsync backups/restore
+- [ ] Verify all apps work with current storage (NFS + OpenEBS)
+- [ ] Document any manual steps not in Git
+
+### Phase 2: Nuclear Option 💥
+
+- [ ] Backup any state not in Git or volsync
+- [ ] Add 2 Proxmox nodes to cluster (3 nodes total)
+- [ ] Nuke entire cluster (`task talos:reset`)
+- [ ] Re-bootstrap 3-node cluster (`task bootstrap:talos` + `task bootstrap:apps`)
+- [ ] Watch Flux restore everything magically ✨
+
+### Phase 3: Multi-Node Features
+
+**Distributed Storage & VMs**
+- [ ] Deploy Longhorn for distributed block storage
+- [ ] Install KubeVirt + CDI for VM management
+- [ ] Configure Multus NetworkAttachmentDefinitions for VM networking
+- [ ] Migrate VMs from Proxmox to KubeVirt
+- [ ] Decommission Proxmox completely
+
+**High Availability**
+- [ ] Verify HA for critical workloads
+- [ ] Test node failure scenarios
+- [ ] Configure pod disruption budgets
 
 ## 🙋 Support
 
