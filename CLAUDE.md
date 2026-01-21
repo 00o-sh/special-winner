@@ -18,7 +18,7 @@ This document provides comprehensive guidance for AI assistants working with thi
 - **Secrets**: SOPS 3.11.0 + Age 1.3.1 encryption
 - **DNS**: k8s_gateway + CoreDNS + External-DNS
 - **Certificates**: cert-manager with Cloudflare integration
-- **Package Management**: Helm 4.0.4 (Helm v4 for chart management)
+- **Package Management**: Helm 4.0.5 (Helm v4 for chart management)
 
 ## Directory Structure
 
@@ -352,6 +352,10 @@ Scopes (Common):
 - observability: Monitoring and alerting
 - volsync: Backup and replication
 - github: GitHub configuration
+- mise: Development tools
+- media: Media applications
+- network: Network infrastructure
+- utils: Utility services
 
 Examples:
 - fix(container): update image ghcr.io/app/name ( 1.0.0 → 1.1.0 )
@@ -425,7 +429,8 @@ When adding a new Kubernetes application:
 5. **Don't add unnecessary complexity** - Follow the principle of minimal necessary changes
 6. **Don't add comments/docstrings** to code you didn't modify
 7. **Don't create abstractions** for one-time operations
-8. **Be aware of Helm v4** - The repository uses Helm 4.0.4, which has breaking changes from v3 (see bootstrap scripts)
+8. **Be aware of Helm v4** - The repository uses Helm 4.0.5, which has breaking changes from v3 (see bootstrap scripts)
+9. **Self-hosted runners** - Be aware that some workflows run on `special-winner-runner` (self-hosted) which has cluster access
 
 ### File Location Reference
 
@@ -513,6 +518,24 @@ Synchronizes GitHub repository labels:
 ### release.yaml
 Handles repository releases (if applicable)
 
+### image-pull.yaml
+Automated container image pre-pulling workflow:
+- Extracts images from Flux manifests on PRs
+- Compares images between PR and main branch
+- Automatically pulls new images to cluster nodes using Talosctl
+- Runs on self-hosted runner (special-winner-runner)
+- Prevents image pull delays during deployments
+- Max parallel pulls: 4
+
+### schemas.yaml
+CRD schema extraction and publishing:
+- Scheduled daily and on workflow changes
+- Extracts Kubernetes CRD schemas using datreeio/crd-extractor
+- Publishes schemas to Cloudflare Pages (kubernetes-schemas project)
+- Runs on self-hosted runner (special-winner-runner)
+- Uses Python 3.14 and Node 24.x for processing
+- Enables IDE autocompletion and validation for custom resources
+
 ## Template System Details
 
 ### Custom Jinja2 Filters
@@ -574,6 +597,9 @@ talosctl logs --nodes <ip> --insecure
 
 ### Current Namespaces and Applications
 
+**actions-runner-system**: GitHub Actions Infrastructure
+- actions-runner-controller (self-hosted runner controller)
+
 **cert-manager**: Certificate management
 - cert-manager
 
@@ -598,12 +624,19 @@ talosctl logs --nodes <ip> --insecure
 - snapshot-controller (volume snapshots)
 
 **media**: Media applications
-- autobrr (automation for trackers)
+- autobrr (automation for torrent trackers)
 - bazarr (subtitle management)
+- flaresolverr (Cloudflare bypass for web scraping)
 - plex (media server)
 - prowlarr (indexer manager)
 - qbittorrent (torrent client)
-- qui (qBittorrent UI)
+- qui (qBittorrent web UI)
+- radarr (movie collection manager)
+- recyclarr (quality profile management for *arr apps)
+- seerr (media request and discovery)
+- sonarr (TV series collection manager)
+- tautulli (Plex monitoring and statistics)
+- thelounge (IRC client)
 
 **network**: Network infrastructure
 - cloudflare-dns
@@ -630,6 +663,9 @@ talosctl logs --nodes <ip> --insecure
 **system-upgrade**: System management
 - tuppr (automated upgrades)
 
+**utils**: Utility services
+- smtp-relay (SMTP relay for outbound email using Maddy)
+
 **volsync-system**: Backup and replication
 - garage (S3-compatible storage backend)
 - kopia (backup repository)
@@ -653,20 +689,74 @@ This documentation applies to:
 - Kubernetes: 1.34.0
 - Flux CD: 2.7.5
 - Cilium: 1.19.0
-- Helm: 4.0.4
+- Helm: 4.0.5
 
 Check `.mise.toml` for exact versions of all tools.
 
 ## Recent Notable Changes
 
+- **2026-01-21**: Added GitHub Actions self-hosted runner system (actions-runner-system namespace)
+- **2026-01-21**: Added SMTP relay service for outbound email (utils namespace with Maddy)
+- **2026-01-21**: New CI/CD workflows for automated image pulling and CRD schema publishing
+- **2026-01-21**: Helm version updated from 4.0.4 to 4.0.5
+- **2026-01-15**: Expanded media stack with Radarr, Sonarr, Seerr, Recyclarr, Tautulli, FlareSolverr, TheLounge
 - **2026-01-09**: Buddy heartbeat monitoring disabled in observability stack
 - **2026-01-09**: Added comprehensive GitHub label automation (labeler and label-sync workflows)
-- **2026-01-08**: Multiple media applications added (Plex, Bazarr, Autobrr, Prowlarr)
+- **2026-01-08**: Multiple media applications added (Plex, Bazarr, Autobrr, Prowlarr, qBittorrent)
 - **2026-01-08**: Volsync backup schedule changed from every 5 minutes to daily at 2 AM
 - **2026-01-08**: Discord webhook integration added to AlertManager
 - **2026-01-08**: NFS-scaler component added using KEDA for smart scaling
 
 ## Component Deep Dives
+
+### GitHub Actions Self-Hosted Runner System
+
+Located in `kubernetes/apps/actions-runner-system/`, this system provides self-hosted GitHub Actions runners within the Kubernetes cluster.
+
+**Components**:
+- **actions-runner-controller**: Manages GitHub Actions Runner Scale Sets
+- **runners**: Ephemeral runner pods that execute GitHub Actions workflows
+
+**How it works**:
+- Uses GitHub's official Actions Runner Controller (ARC) architecture
+- Creates on-demand runner pods for workflow jobs
+- Scales based on GitHub webhook events
+- Provides isolated execution environment with cluster access
+- Used by workflows like `image-pull.yaml` and `schemas.yaml` that need cluster access
+
+**Benefits**:
+- Access to internal cluster resources (Talosctl for image pulling)
+- Faster job execution (no cold start, local image cache)
+- Cost savings (no GitHub-hosted runner minutes)
+- Custom runner configurations and tools
+
+**Configuration**: Runner scale sets are defined in `kubernetes/apps/actions-runner-system/actions-runner-controller/runners/`
+
+### SMTP Relay Service
+
+Located in `kubernetes/apps/utils/smtp-relay/`, this service provides a centralized SMTP relay for outbound email from cluster applications.
+
+**How it works**:
+- Uses Maddy mail server (lightweight, modern SMTP server)
+- Accepts email on port 25 via LoadBalancer service (10.0.6.15)
+- Relays through external SMTP provider (configured via secrets)
+- Supports STARTTLS and authentication
+- Hostname: smtp-relay.00o.sh (via external-dns)
+
+**Configuration**:
+- SMTP relay credentials stored in encrypted secrets
+- Config file mounted from ConfigMap
+- State and runtime data stored in emptyDir
+- Single replica with RollingUpdate strategy
+- Auto-reloads on secret changes (via Reloader)
+
+**Security**:
+- Non-root user (UID/GID 1000)
+- Read-only root filesystem
+- No privilege escalation
+- All capabilities dropped
+
+**Usage**: Applications can send email to `smtp-relay.utils.svc.cluster.local:25` or via the LoadBalancer IP.
 
 ### NFS Scaler Component
 
@@ -711,5 +801,5 @@ The repository uses an automated label management system:
 
 ---
 
-**Last Updated**: 2026-01-10
+**Last Updated**: 2026-01-21
 **Template Source**: [onedr0p/cluster-template](https://github.com/onedr0p/cluster-template)
