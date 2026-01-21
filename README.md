@@ -513,6 +513,14 @@ Community member [@whazor](https://github.com/whazor) created [Kubesearch](https
 - [ ] CloudNativePG operator for managed PostgreSQL clusters
 - [ ] Redis operator for managed Redis instances
 
+**VM Infrastructure (Critical - Test Before Nuke!)**
+- [ ] Install KubeVirt + CDI for VM management
+- [ ] Configure Multus NetworkAttachmentDefinitions for VM networking
+- [ ] Test VM creation with local/NFS storage (Longhorn comes later)
+- [ ] Export VMs from Proxmox nodes
+- [ ] Import and test VMs in KubeVirt
+- [ ] Verify VM networking, storage, and migration work
+
 **Cloud Service Mirroring**
 - [ ] Nextcloud + OnlyOffice (Google Drive, Office 365, Calendar, Contacts mirror)
 - [ ] Immich (Google Photos backup)
@@ -534,6 +542,7 @@ Community member [@whazor](https://github.com/whazor) created [Kubesearch](https
 **Validation**
 - [ ] Test volsync backups/restore
 - [ ] Verify all apps work with current storage (NFS + OpenEBS)
+- [ ] Confirm all VMs are running in KubeVirt (Proxmox can be wiped)
 - [ ] Document any manual steps not in Git
 
 ### Phase 2: Nuclear Option 💥
@@ -546,17 +555,16 @@ Community member [@whazor](https://github.com/whazor) created [Kubesearch](https
 
 ### Phase 3: Multi-Node Features
 
-**Distributed Storage & VMs**
+**Distributed Storage**
 - [ ] Deploy Longhorn for distributed block storage
-- [ ] Install KubeVirt + CDI for VM management
-- [ ] Configure Multus NetworkAttachmentDefinitions for VM networking
-- [ ] Migrate VMs from Proxmox to KubeVirt
-- [ ] Decommission Proxmox completely
+- [ ] Migrate VMs from local/NFS storage to Longhorn volumes
+- [ ] Migrate application PVCs to Longhorn (optional)
 
 **High Availability**
 - [ ] Verify HA for critical workloads
-- [ ] Test node failure scenarios
+- [ ] Test node failure scenarios (VM live migration, pod rescheduling)
 - [ ] Configure pod disruption budgets
+- [ ] Test cluster resilience (take down a node, watch workloads survive)
 
 ## 🙋 Support
 
