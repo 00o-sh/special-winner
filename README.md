@@ -507,19 +507,17 @@ Community member [@whazor](https://github.com/whazor) created [Kubesearch](https
 
 ## 📋 TODO
 
-### Phase 1: Build on Single Node (Current)
+### Phase 1: Build Everything on Test Cluster
 
 **Foundation Services**
 - [ ] CloudNativePG operator for managed PostgreSQL clusters
 - [ ] Redis operator for managed Redis instances
 
-**VM Infrastructure (Critical - Test Before Nuke!)**
+**VM Infrastructure**
 - [ ] Install KubeVirt + CDI for VM management
 - [ ] Configure Multus NetworkAttachmentDefinitions for VM networking
-- [ ] Test VM creation with local/NFS storage (Longhorn comes later)
 - [ ] Export VMs from Proxmox nodes
-- [ ] Import and test VMs in KubeVirt
-- [ ] Verify VM networking, storage, and migration work
+- [ ] Import and test VMs in KubeVirt (single node, local/NFS storage)
 
 **Cloud Service Mirroring**
 - [ ] Nextcloud + OnlyOffice (Google Drive, Office 365, Calendar, Contacts mirror)
@@ -539,32 +537,60 @@ Community member [@whazor](https://github.com/whazor) created [Kubesearch](https
 - [ ] Home Assistant + IoT stack (if needed)
 - [ ] Authelia or Authentik for SSO
 
-**Validation**
-- [ ] Test volsync backups/restore
-- [ ] Verify all apps work with current storage (NFS + OpenEBS)
-- [ ] Confirm all VMs are running in KubeVirt (Proxmox can be wiped)
-- [ ] Document any manual steps not in Git
+### Phase 2: Test Multi-Node Features
 
-### Phase 2: Nuclear Option 💥
-
-- [ ] Backup any state not in Git or volsync
-- [ ] Add 2 Proxmox nodes to cluster (3 nodes total)
-- [ ] Nuke entire cluster (`task talos:reset`)
-- [ ] Re-bootstrap 3-node cluster (`task bootstrap:talos` + `task bootstrap:apps`)
-- [ ] Watch Flux restore everything magically ✨
-
-### Phase 3: Multi-Node Features
-
-**Distributed Storage**
+**Add Second Node (VM)**
+- [ ] Create Talos VM as second cluster node
+- [ ] Verify Spegel auto-enables (distributed image caching)
 - [ ] Deploy Longhorn for distributed block storage
-- [ ] Migrate VMs from local/NFS storage to Longhorn volumes
-- [ ] Migrate application PVCs to Longhorn (optional)
 
-**High Availability**
-- [ ] Verify HA for critical workloads
-- [ ] Test node failure scenarios (VM live migration, pod rescheduling)
+**VM Testing**
+- [ ] Migrate test VMs to Longhorn storage
+- [ ] Test VM live migration between nodes
+- [ ] Test VM startup on different nodes
+- [ ] Verify VM networking across nodes
+
+**High Availability Testing**
+- [ ] Deploy critical workloads with replicas across nodes
+- [ ] Test pod rescheduling (kill a node, watch pods move)
+- [ ] Test volsync backup/restore
 - [ ] Configure pod disruption budgets
-- [ ] Test cluster resilience (take down a node, watch workloads survive)
+- [ ] Simulate node failure scenarios
+- [ ] Verify all services survive node loss
+
+**Final Validation**
+- [ ] All apps running and accessible
+- [ ] All VMs running in KubeVirt
+- [ ] HA confirmed working
+- [ ] Backups tested and working
+- [ ] Everything defined in Git (no manual kubectl resources)
+- [ ] Document any manual steps still needed
+
+### Phase 3: Nuclear Option 💥
+
+- [ ] Take final backups of anything not in Git/volsync
+- [ ] Nuke entire test cluster (`task talos:reset`)
+- [ ] Add 2 Proxmox nodes as cluster hardware
+- [ ] Re-bootstrap 3-node production cluster (`task bootstrap:talos` + `task bootstrap:apps`)
+- [ ] Watch Flux restore everything magically ✨
+- [ ] Watch volsync restore all data
+- [ ] Verify all apps come back healthy
+- [ ] Verify all VMs come back healthy
+- [ ] Run same HA tests from Phase 2
+- [ ] Celebrate successful GitOps validation 🎉
+
+### Phase 4: Production Hardening
+
+**Performance & Optimization**
+- [ ] Review resource limits and requests
+- [ ] Optimize Longhorn replica settings for 3 nodes
+- [ ] Configure proper backup schedules
+- [ ] Set up monitoring alerts
+
+**Documentation**
+- [ ] Document the disaster recovery procedure
+- [ ] Document VM management workflow
+- [ ] Update CLAUDE.md with lessons learned
 
 ## 🙋 Support
 
