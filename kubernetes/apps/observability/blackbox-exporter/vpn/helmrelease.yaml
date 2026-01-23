@@ -14,12 +14,11 @@ spec:
     strategy:
       type: Recreate
     podAnnotations:
-      annotations:
         k8s.v1.cni.cncf.io/networks: |-
           [{
             "name": "vpn",
             "namespace": "network",
-            "ips": ["192.168.56.10/24"],
+            "ips": ["192.168.56.13/24"],
             "mac": "32:0b:d8:1f:b6:e4"
           }]
     config:
