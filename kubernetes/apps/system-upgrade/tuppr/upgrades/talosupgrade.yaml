@@ -15,7 +15,9 @@ spec:
       kind: ReplicationSource
       expr: |-
         status.conditions.filter(c, c.type == "Synchronizing").all(c, c.status == "False")
-    - apiVersion: ceph.rook.io/v1
-      kind: CephCluster
-      expr: |-
-        status.ceph.health in ['HEALTH_OK']
+  # Check all nodes are ready
+    - apiVersion: v1
+      kind: Node
+      expr: |
+        status.conditions.filter(c, c.type == "Ready").all(c, c.status == "True")
+      timeout: 10m
