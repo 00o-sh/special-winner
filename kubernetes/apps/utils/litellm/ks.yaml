@@ -3,24 +3,14 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: clawdbot
+  name: litellm
 spec:
-  components:
-    - ../../../../components/volsync
   dependsOn:
     - name: external-secrets-onepassword
       namespace: external-secrets
-    - name: litellm
-    - name: openebs
-      namespace: openebs-system
-    - name: volsync
-      namespace: volsync-system
   interval: 1h
-  path: ./kubernetes/apps/utils/clawdbot/app
+  path: ./kubernetes/apps/utils/litellm/app
   postBuild:
-    substitute:
-      APP: clawdbot
-      VOLSYNC_CAPACITY: 5Gi
     substituteFrom:
       - name: cluster-secrets
         kind: Secret

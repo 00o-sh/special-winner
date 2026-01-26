@@ -3,15 +3,15 @@
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: clawdbot
+  name: litellm
 spec:
   chartRef:
     kind: OCIRepository
-    name: clawdbot
+    name: litellm
   interval: 1h
   values:
     controllers:
-      clawdbot:
+      litellm:
         replicas: 1
         strategy: RollingUpdate
         annotations:
@@ -19,23 +19,15 @@ spec:
         containers:
           app:
             image:
-              repository: ghcr.io/00o-sh/clawdbot
-              tag: latest
+              repository: ghcr.io/berriai/litellm
+              tag: main-v1.63.11-stable
             args:
-              - node
-              - dist/index.js
-              - gateway
-              - --bind
-              - "0.0.0.0"
+              - --config
+              - /app/config.yaml
               - --port
-              - "18789"
+              - "4000"
             env:
-              HOME: /home/node
-              TERM: xterm-256color
-              GATEWAY_MODE: local
-              GATEWAY_BIND: lan
-              # Point to LiteLLM for OpenAI-compatible API routing
-              OPENAI_API_BASE: http://litellm.utils.svc.cluster.local:4000
+              LITELLM_LOG: INFO
             envFrom:
               - secretRef:
                   name: "{{ .Release.Name }}-secret"
@@ -45,9 +37,9 @@ spec:
                 custom: true
                 spec:
                   httpGet:
-                    path: /
-                    port: &port 18789
-                  initialDelaySeconds: 30
+                    path: /health/liveliness
+                    port: &port 4000
+                  initialDelaySeconds: 15
                   periodSeconds: 10
                   timeoutSeconds: 5
                   failureThreshold: 3
@@ -56,7 +48,7 @@ spec:
                 custom: true
                 spec:
                   httpGet:
-                    path: /
+                    path: /health/readiness
                     port: *port
                   initialDelaySeconds: 10
                   periodSeconds: 10
@@ -71,7 +63,7 @@ spec:
                 cpu: 50m
                 memory: 256Mi
               limits:
-                memory: 1Gi
+                memory: 512Mi
     defaultPodOptions:
       securityContext:
         runAsNonRoot: true
@@ -80,24 +72,21 @@ spec:
         fsGroup: 1000
     service:
       app:
-        controller: clawdbot
+        controller: litellm
         ports:
           http:
             port: *port
-          bridge:
-            port: 18790
     persistence:
       config:
-        existingClaim: "{{ .Release.Name }}"
+        type: configMap
+        name: litellm-config
         globalMounts:
-          - path: /home/node/.clawdbot
-      workspace:
-        type: emptyDir
-        globalMounts:
-          - path: /home/node/clawd
+          - path: /app/config.yaml
+            subPath: config.yaml
+            readOnly: true
     route:
       app:
-        hostnames: ["clawdbot.${SECRET_DOMAIN}"]
+        hostnames: ["litellm.${SECRET_DOMAIN}"]
         parentRefs:
           - name: envoy-internal
             namespace: network
