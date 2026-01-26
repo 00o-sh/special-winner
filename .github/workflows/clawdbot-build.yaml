@@ -1,0 +1,62 @@
+---
+name: Build Clawdbot Image
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 6 * * 1" # Weekly on Monday at 6 AM UTC
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository_owner }}/clawdbot
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout upstream clawdbot
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+        with:
+          repository: clawdbot/clawdbot
+          fetch-depth: 0
+
+      - name: Get latest release tag
+        id: version
+        run: |
+          LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "latest")
+          echo "tag=${LATEST_TAG}" >> "$GITHUB_OUTPUT"
+          echo "Using version: ${LATEST_TAG}"
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@b5ca514318bd6ebac0fb2aedd5d36ec1b5c232a2 # v3
+
+      - name: Log in to Container Registry
+        uses: docker/login-action@74a5d142397b4f367a81961eba4e8cd7edddf772 # v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@902fa8ec7d6ecbf8d84d538b9b233a880e428804 # v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=raw,value=${{ steps.version.outputs.tag }}
+            type=raw,value=latest
+
+      - name: Build and push
+        uses: docker/build-push-action@14487ce63c7a62a4a324b0bfb37086795e31c6c1 # v6
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          platforms: linux/amd64

@@ -1,0 +1,106 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s-labs/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: clawdbot
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: clawdbot
+  interval: 1h
+  values:
+    controllers:
+      clawdbot:
+        replicas: 1
+        strategy: RollingUpdate
+        annotations:
+          reloader.stakater.com/auto: "true"
+        containers:
+          app:
+            image:
+              repository: ghcr.io/00o-sh/clawdbot
+              tag: latest
+            args:
+              - node
+              - dist/index.js
+              - gateway
+              - --bind
+              - "0.0.0.0"
+              - --port
+              - "18789"
+            env:
+              HOME: /home/node
+              TERM: xterm-256color
+              GATEWAY_MODE: local
+              GATEWAY_BIND: lan
+            envFrom:
+              - secretRef:
+                  name: "{{ .Release.Name }}-secret"
+            probes:
+              liveness:
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /
+                    port: &port 18789
+                  initialDelaySeconds: 30
+                  periodSeconds: 10
+                  timeoutSeconds: 5
+                  failureThreshold: 3
+              readiness:
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /
+                    port: *port
+                  initialDelaySeconds: 10
+                  periodSeconds: 10
+                  timeoutSeconds: 5
+                  failureThreshold: 3
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: false
+              capabilities: {drop: ["ALL"]}
+            resources:
+              requests:
+                cpu: 50m
+                memory: 256Mi
+              limits:
+                memory: 1Gi
+    defaultPodOptions:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+    service:
+      app:
+        controller: clawdbot
+        ports:
+          http:
+            port: *port
+          bridge:
+            port: 18790
+    persistence:
+      config:
+        existingClaim: clawdbot-config
+        globalMounts:
+          - path: /home/node/.clawdbot
+      workspace:
+        existingClaim: clawdbot-workspace
+        globalMounts:
+          - path: /home/node/clawd
+    route:
+      app:
+        hostnames: ["clawdbot.${SECRET_DOMAIN}"]
+        parentRefs:
+          - name: envoy-internal
+            namespace: network
+            sectionName: https
+        rules:
+          - backendRefs:
+              - identifier: app
+                port: *port
