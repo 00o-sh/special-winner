@@ -86,11 +86,11 @@ spec:
             port: 18790
     persistence:
       config:
-        existingClaim: clawdbot-config
+        existingClaim: "{{ .Release.Name }}"
         globalMounts:
           - path: /home/node/.clawdbot
       workspace:
-        existingClaim: clawdbot-workspace
+        type: emptyDir
         globalMounts:
           - path: /home/node/clawd
     route:

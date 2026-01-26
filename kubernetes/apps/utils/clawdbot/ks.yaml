@@ -5,14 +5,21 @@ kind: Kustomization
 metadata:
   name: clawdbot
 spec:
+  components:
+    - ../../../../components/volsync
   dependsOn:
     - name: external-secrets-onepassword
       namespace: external-secrets
     - name: openebs
       namespace: openebs-system
+    - name: volsync
+      namespace: volsync-system
   interval: 1h
   path: ./kubernetes/apps/utils/clawdbot/app
   postBuild:
+    substitute:
+      APP: clawdbot
+      VOLSYNC_CAPACITY: 5Gi
     substituteFrom:
       - name: cluster-secrets
         kind: Secret
