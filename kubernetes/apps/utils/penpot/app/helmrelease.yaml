@@ -148,7 +148,7 @@ spec:
         controller: frontend
         ports:
           http:
-            port: 80
+            port: 8080
       exporter:
         controller: exporter
         ports:
