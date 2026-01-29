@@ -1,0 +1,78 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/helm.toolkit.fluxcd.io/helmrelease_v2.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: penpot
+spec:
+  interval: 1h
+  chart:
+    spec:
+      chart: penpot
+      version: 0.6.0
+      sourceRef:
+        kind: HelmRepository
+        name: penpot
+        namespace: flux-system
+  values:
+    global:
+      postgresqlEnabled: false
+      redisEnabled: false
+      valkeyEnabled: true
+
+    config:
+      publicUri: "https://penpot.${SECRET_DOMAIN}"
+      flags: "enable-registration enable-login-with-password disable-email-verification"
+
+      postgresql:
+        host: postgres16-rw.database.svc.cluster.local
+        port: 5432
+        username: penpot
+        database: penpot
+        existingSecret: penpot-secret
+        secretKeys:
+          usernameKey: INIT_POSTGRES_USER
+          passwordKey: INIT_POSTGRES_PASS
+          postgresqlUriKey: PENPOT_DATABASE_URI
+
+      redis:
+        host: penpot-valkey-primary
+        port: 6379
+        database: "0"
+
+    backend:
+      replicaCount: 1
+      env:
+        - name: PENPOT_SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              name: penpot-secret
+              key: PENPOT_SECRET_KEY
+      initContainers:
+        - name: init-db
+          image: ghcr.io/home-operations/postgres-init:18@sha256:3c54d39f19fdb82ed5b3f286450e4071133cc6025bd0e25856bc2c522f8fc030
+          envFrom:
+            - secretRef:
+                name: penpot-secret
+
+    frontend:
+      replicaCount: 1
+
+    exporter:
+      replicaCount: 1
+
+    persistence:
+      assets:
+        enabled: true
+        existingClaim: penpot
+
+    ingress:
+      enabled: true
+      className: envoy-internal
+      annotations:
+        external-dns.alpha.kubernetes.io/target: internal.${SECRET_DOMAIN}
+      hosts:
+        - host: "penpot.${SECRET_DOMAIN}"
+          paths:
+            - path: /
+              pathType: Prefix
