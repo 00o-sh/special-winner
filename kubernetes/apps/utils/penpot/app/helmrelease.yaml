@@ -90,6 +90,17 @@ spec:
               PENPOT_FLAGS: enable-registration enable-login-with-password disable-email-verification
               PENPOT_BACKEND_URI: http://penpot-backend:6060
               PENPOT_EXPORTER_URI: http://penpot-exporter:6061
+            probes:
+              liveness: &frontendProbes
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /
+                    port: 80
+                  initialDelaySeconds: 5
+                  periodSeconds: 10
+              readiness: *frontendProbes
             resources:
               requests:
                 cpu: 10m
@@ -137,7 +148,7 @@ spec:
         controller: frontend
         ports:
           http:
-            port: 8080
+            port: 80
       exporter:
         controller: exporter
         ports:
@@ -159,7 +170,7 @@ spec:
         rules:
           - backendRefs:
               - identifier: frontend
-                port: 8080
+                port: 80
 
     persistence:
       assets:
