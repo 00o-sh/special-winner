@@ -10,3 +10,4 @@ components:
 resources:
   - ./namespace.yaml
   - ./smtp-relay/ks.yaml
+#  - ./penpot/ks.yaml waiting on cloudnative PG cluster to be up make sure secrets are setup first
