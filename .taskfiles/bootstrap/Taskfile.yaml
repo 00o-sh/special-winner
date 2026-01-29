@@ -30,7 +30,7 @@ tasks:
       - test -f {{.SOPS_AGE_KEY_FILE}}
 
   postgres-recovery:
-    desc: Restore PostgreSQL from Garage S3 backup (run after bootstrap:apps, before Flux deploys postgres17-cluster)
+    desc: Restore PostgreSQL from Garage S3 backup (run after bootstrap:apps, before Flux deploys postgres-cluster)
     cmds:
       - kubectl create namespace database --dry-run=client -o yaml | kubectl apply -f -
       - echo "Waiting for onepassword ClusterSecretStore..."
@@ -38,7 +38,7 @@ tasks:
       - echo "Applying PostgreSQL recovery manifest..."
       - kubectl apply -k {{.KUBERNETES_DIR}}/apps/database/cloudnative-pg/recovery/
       - echo "Waiting for PostgreSQL cluster to be ready..."
-      - until kubectl -n database get cluster postgres17 -o jsonpath='{.status.phase}' 2>/dev/null | grep -q "Cluster in healthy state"; do sleep 10; done
+      - until kubectl -n database get cluster postgres -o jsonpath='{.status.phase}' 2>/dev/null | grep -q "Cluster in healthy state"; do sleep 10; done
       - echo "PostgreSQL restored successfully. Flux will now manage the cluster."
     preconditions:
       - test -f {{.KUBECONFIG}}

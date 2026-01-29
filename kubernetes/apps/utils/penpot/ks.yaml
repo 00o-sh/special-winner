@@ -15,7 +15,7 @@ spec:
   dependsOn:
     - name: volsync
       namespace: volsync-system
-    - name: postgres17-cluster
+    - name: postgres-cluster
       namespace: database
     - name: onepassword
       namespace: external-secrets

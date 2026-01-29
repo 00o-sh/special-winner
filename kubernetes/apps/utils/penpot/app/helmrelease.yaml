@@ -20,7 +20,7 @@ spec:
       flags: "enable-registration enable-login-with-password disable-email-verification"
 
       postgresql:
-        host: postgres17-rw.database.svc.cluster.local
+        host: postgres-rw.database.svc.cluster.local
         port: 5432
         username: penpot
         database: penpot

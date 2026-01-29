@@ -5,7 +5,7 @@
 apiVersion: postgresql.cnpg.io/v1
 kind: Cluster
 metadata:
-  name: postgres17
+  name: postgres
   namespace: database
 spec:
   instances: 2
@@ -24,10 +24,10 @@ spec:
   # RECOVERY: Bootstrap from existing Garage S3 backup
   bootstrap:
     recovery:
-      source: postgres17-backup
+      source: postgres-backup
 
   externalClusters:
-    - name: postgres17-backup
+    - name: postgres-backup
       barmanObjectStore:
         destinationPath: s3://cnpg/
         endpointURL: http://garage.volsync-system.svc.cluster.local:3900
