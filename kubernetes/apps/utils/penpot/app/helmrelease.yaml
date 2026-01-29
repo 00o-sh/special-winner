@@ -1,65 +1,176 @@
 ---
-# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/helm.toolkit.fluxcd.io/helmrelease_v2.json
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s-labs/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
   name: penpot
 spec:
-  interval: 1h
   chartRef:
     kind: OCIRepository
     name: penpot
+  interval: 1h
   values:
-    global:
-      postgresqlEnabled: false
-      redisEnabled: false
-      valkeyEnabled: true
+    controllers:
+      backend:
+        annotations:
+          reloader.stakater.com/auto: "true"
+        initContainers:
+          init-db:
+            image:
+              repository: ghcr.io/home-operations/postgres-init
+              tag: 18@sha256:3c54d39f19fdb82ed5b3f286450e4071133cc6025bd0e25856bc2c522f8fc030
+            envFrom:
+              - secretRef:
+                  name: penpot-secret
+        containers:
+          app:
+            image:
+              repository: penpotapp/backend
+              tag: 2.4.3
+            env:
+              PENPOT_PUBLIC_URI: https://penpot.00o.sh
+              PENPOT_FLAGS: enable-registration enable-login-with-password disable-email-verification
+              PENPOT_DATABASE_URI:
+                valueFrom:
+                  secretKeyRef:
+                    name: penpot-secret
+                    key: PENPOT_DATABASE_URI
+              PENPOT_DATABASE_USERNAME:
+                valueFrom:
+                  secretKeyRef:
+                    name: penpot-secret
+                    key: INIT_POSTGRES_USER
+              PENPOT_DATABASE_PASSWORD:
+                valueFrom:
+                  secretKeyRef:
+                    name: penpot-secret
+                    key: INIT_POSTGRES_PASS
+              PENPOT_REDIS_URI: redis://penpot-valkey:6379/0
+              PENPOT_ASSETS_STORAGE_BACKEND: assets-fs
+              PENPOT_STORAGE_ASSETS_FS_DIRECTORY: /opt/data/assets
+              PENPOT_SECRET_KEY:
+                valueFrom:
+                  secretKeyRef:
+                    name: penpot-secret
+                    key: PENPOT_SECRET_KEY
+              PENPOT_TELEMETRY_ENABLED: "false"
+            probes:
+              liveness:
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /readyz
+                    port: 6060
+                  initialDelaySeconds: 15
+                  periodSeconds: 10
+              readiness:
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /readyz
+                    port: 6060
+                  initialDelaySeconds: 15
+                  periodSeconds: 10
+            resources:
+              requests:
+                cpu: 100m
+                memory: 512Mi
+              limits:
+                memory: 2Gi
 
-    config:
-      publicUri: "https://penpot.00o.sh"
-      flags: "enable-registration enable-login-with-password disable-email-verification"
+      frontend:
+        containers:
+          app:
+            image:
+              repository: penpotapp/frontend
+              tag: 2.4.3
+            env:
+              PENPOT_FLAGS: enable-registration enable-login-with-password disable-email-verification
+              PENPOT_BACKEND_URI: http://penpot-backend:6060
+              PENPOT_EXPORTER_URI: http://penpot-exporter:6061
+            resources:
+              requests:
+                cpu: 10m
+                memory: 64Mi
+              limits:
+                memory: 256Mi
 
-      postgresql:
-        host: postgres-rw.database.svc.cluster.local
-        port: 5432
-        username: penpot
-        database: penpot
-        existingSecret: penpot-secret
-        secretKeys:
-          usernameKey: INIT_POSTGRES_USER
-          passwordKey: INIT_POSTGRES_PASS
-          postgresqlUriKey: PENPOT_DATABASE_URI
+      exporter:
+        containers:
+          app:
+            image:
+              repository: penpotapp/exporter
+              tag: 2.4.3
+            env:
+              PENPOT_PUBLIC_URI: https://penpot.00o.sh
+              PENPOT_REDIS_URI: redis://penpot-valkey:6379/0
+            resources:
+              requests:
+                cpu: 10m
+                memory: 128Mi
+              limits:
+                memory: 1Gi
 
-      redis:
-        host: penpot-valkey-primary
-        port: 6379
-        database: "0"
+      valkey:
+        containers:
+          app:
+            image:
+              repository: valkey/valkey
+              tag: 8.1.1-alpine
+            args: ["--save", "60", "1"]
+            resources:
+              requests:
+                cpu: 10m
+                memory: 64Mi
+              limits:
+                memory: 256Mi
 
-    backend:
-      replicaCount: 1
-      env:
-        - name: PENPOT_SECRET_KEY
-          valueFrom:
-            secretKeyRef:
-              name: penpot-secret
-              key: PENPOT_SECRET_KEY
-      initContainers:
-        - name: init-db
-          image: ghcr.io/home-operations/postgres-init:18@sha256:3c54d39f19fdb82ed5b3f286450e4071133cc6025bd0e25856bc2c522f8fc030
-          envFrom:
-            - secretRef:
-                name: penpot-secret
+    service:
+      backend:
+        controller: backend
+        ports:
+          http:
+            port: 6060
+      frontend:
+        controller: frontend
+        ports:
+          http:
+            port: 8080
+      exporter:
+        controller: exporter
+        ports:
+          http:
+            port: 6061
+      valkey:
+        controller: valkey
+        ports:
+          redis:
+            port: 6379
 
-    frontend:
-      replicaCount: 1
-
-    exporter:
-      replicaCount: 1
+    route:
+      app:
+        hostnames:
+          - penpot.00o.sh
+        parentRefs:
+          - name: envoy-internal
+            namespace: network
+        rules:
+          - backendRefs:
+              - identifier: frontend
+                port: 8080
 
     persistence:
       assets:
-        enabled: true
         existingClaim: penpot
-
-    ingress:
-      enabled: false
+        advancedMounts:
+          backend:
+            app:
+              - path: /opt/data/assets
+      valkey-data:
+        type: emptyDir
+        advancedMounts:
+          valkey:
+            app:
+              - path: /data
