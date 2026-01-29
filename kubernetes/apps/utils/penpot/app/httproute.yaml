@@ -4,15 +4,12 @@ apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
   name: penpot
-  annotations:
-    external-dns.alpha.kubernetes.io/target: internal.${SECRET_DOMAIN}
 spec:
   hostnames:
-    - "penpot.${SECRET_DOMAIN}"
+    - penpot.00o.sh
   parentRefs:
     - name: envoy-internal
       namespace: network
-      sectionName: https
   rules:
     - backendRefs:
         - name: penpot
