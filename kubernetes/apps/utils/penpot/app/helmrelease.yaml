@@ -129,7 +129,7 @@ spec:
           app:
             image:
               repository: valkey/valkey
-              tag: 8.1.5-alpine
+              tag: 9.0.1-alpine
             args: ["--save", "60", "1"]
             resources:
               requests:
