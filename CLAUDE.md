@@ -10,7 +10,7 @@ This document provides comprehensive guidance for AI assistants working with thi
 
 ### Core Components
 
-- **OS**: Talos Linux 1.12.1 (immutable Kubernetes OS)
+- **OS**: Talos Linux 1.12.2 (immutable Kubernetes OS)
 - **Orchestration**: Kubernetes 1.34.0
 - **GitOps**: Flux CD 2.7.5 (declarative continuous delivery)
 - **CNI**: Cilium 1.19.0 (eBPF-based networking)
@@ -18,7 +18,8 @@ This document provides comprehensive guidance for AI assistants working with thi
 - **Secrets**: SOPS 3.11.0 + Age 1.3.1 encryption
 - **DNS**: k8s_gateway + CoreDNS + External-DNS
 - **Certificates**: cert-manager with Cloudflare integration
-- **Package Management**: Helm 4.0.5 (Helm v4 for chart management)
+- **Package Management**: Helm 4.1.0 (Helm v4 for chart management)
+- **Database**: CloudNative-PG (PostgreSQL 17.7) + Dragonfly (Redis-compatible)
 
 ## Directory Structure
 
@@ -603,6 +604,11 @@ talosctl logs --nodes <ip> --insecure
 **cert-manager**: Certificate management
 - cert-manager
 
+**database**: Database infrastructure
+- cloudnative-pg (PostgreSQL operator)
+- postgres-cluster (PostgreSQL 17.7 HA cluster with 2 instances)
+- dragonfly (Redis-compatible in-memory datastore operator)
+
 **default**: Default namespace
 - echo (test application)
 
@@ -664,6 +670,7 @@ talosctl logs --nodes <ip> --insecure
 - tuppr (automated upgrades)
 
 **utils**: Utility services
+- penpot (open-source design and prototyping platform)
 - smtp-relay (SMTP relay for outbound email using Maddy)
 
 **volsync-system**: Backup and replication
@@ -685,20 +692,27 @@ talosctl logs --nodes <ip> --insecure
 ## Version Information
 
 This documentation applies to:
-- Talos Linux: 1.12.1
+- Talos Linux: 1.12.2
 - Kubernetes: 1.34.0
 - Flux CD: 2.7.5
 - Cilium: 1.19.0
-- Helm: 4.0.5
+- Helm: 4.1.0
+- Python: 3.14.2
+- CloudNative-PG: PostgreSQL 17.7
 
 Check `.mise.toml` for exact versions of all tools.
 
 ## Recent Notable Changes
 
+- **2026-01-31**: Added database namespace with CloudNative-PG (PostgreSQL 17.7 HA cluster) and Dragonfly operator
+- **2026-01-31**: Added Penpot design platform to utils namespace (backend, frontend, exporter, valkey)
+- **2026-01-31**: Talos Linux updated from 1.12.1 to 1.12.2
+- **2026-01-31**: Helm updated from 4.0.5 to 4.1.0
+- **2026-01-31**: Penpot images updated to 2.12.1, Valkey upgraded to 9.0.1
+- **2026-01-31**: kube-prometheus-stack updated to 81.4.2, Dragonfly operator to v1.4.0
 - **2026-01-21**: Added GitHub Actions self-hosted runner system (actions-runner-system namespace)
 - **2026-01-21**: Added SMTP relay service for outbound email (utils namespace with Maddy)
 - **2026-01-21**: New CI/CD workflows for automated image pulling and CRD schema publishing
-- **2026-01-21**: Helm version updated from 4.0.4 to 4.0.5
 - **2026-01-15**: Expanded media stack with Radarr, Sonarr, Seerr, Recyclarr, Tautulli, FlareSolverr, TheLounge
 - **2026-01-09**: Buddy heartbeat monitoring disabled in observability stack
 - **2026-01-09**: Added comprehensive GitHub label automation (labeler and label-sync workflows)
@@ -799,7 +813,69 @@ The repository uses an automated label management system:
 - Automatic size warnings for large PRs
 - Clear indication of which components are affected by changes
 
+### Database Infrastructure
+
+Located in `kubernetes/apps/database/`, this namespace provides centralized database services for the cluster.
+
+**CloudNative-PG (PostgreSQL)**:
+- Kubernetes-native PostgreSQL operator
+- Runs PostgreSQL 17.7 with 2 instances for high availability
+- Uses OpenEBS hostpath storage (20Gi per instance)
+- Automated backups to Garage S3 storage with 30-day retention
+- Monitoring enabled via PodMonitor
+- Tuned for performance: 200 max connections, optimized buffer settings
+
+**Cluster Architecture**:
+```
+kubernetes/apps/database/cloudnative-pg/
+├── app/                    # Operator deployment
+│   ├── helmrelease.yaml
+│   └── ocirepository.yaml
+├── cluster/               # PostgreSQL cluster definition
+│   ├── cluster.yaml       # Main cluster spec
+│   ├── scheduledbackup.yaml
+│   └── externalsecret.yaml
+└── recovery/              # Disaster recovery configs
+    └── cluster.yaml
+```
+
+**Dragonfly**:
+- Modern Redis-compatible in-memory datastore
+- Deploys the Dragonfly Operator for managing Dragonfly instances
+- Higher performance alternative to Redis/Valkey
+- Used by applications requiring fast caching or session storage
+
+**Usage**: Applications can connect to PostgreSQL via the `postgres-rw.database.svc.cluster.local` service.
+
+### Penpot Design Platform
+
+Located in `kubernetes/apps/utils/penpot/`, Penpot is an open-source design and prototyping platform.
+
+**Components**:
+- **Backend**: Main application server (penpotapp/backend:2.12.1)
+- **Frontend**: Web UI (penpotapp/frontend:2.12.1)
+- **Exporter**: Export service for file generation (penpotapp/exporter:2.12.1)
+- **Valkey**: Redis-compatible cache (valkey/valkey:9.0.1-alpine)
+
+**Architecture**:
+- Multi-controller deployment using app-template Helm chart
+- PostgreSQL database (via CloudNative-PG postgres-cluster)
+- Valkey for session storage and caching
+- Persistent storage for assets via Volsync (20Gi)
+- Exposed at `penpot.00o.sh` via Envoy Gateway
+
+**Dependencies**:
+- Volsync (for persistent storage)
+- postgres-cluster (for database)
+- onepassword (for secrets)
+
+**Configuration**:
+- Registration and password login enabled
+- Email verification disabled
+- Telemetry disabled
+- Automatic pod restarts via Reloader on secret changes
+
 ---
 
-**Last Updated**: 2026-01-21
+**Last Updated**: 2026-01-31
 **Template Source**: [onedr0p/cluster-template](https://github.com/onedr0p/cluster-template)
