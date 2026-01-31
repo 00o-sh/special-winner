@@ -12,9 +12,9 @@ spec:
     spec:
       domain:
         cpu:
-          cores: 4
+          cores: 1
         memory:
-          guest: 8Gi
+          guest: 1Gi
         devices:
           disks:
             - name: rootdisk
