@@ -9,15 +9,4 @@ spec:
     kind: OCIRepository
     name: kubevirt
   interval: 1h
-  values:
-    kubevirt:
-      configuration:
-        developerConfiguration:
-          featureGates:
-            - LiveMigration
-            - Macvtap
-            - HotplugVolumes
-            - HostDevices
-            - GPU
-        network:
-          permitBridgeInterfaceOnPodNetwork: true
+  values: {}
