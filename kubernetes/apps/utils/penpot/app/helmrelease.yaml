@@ -117,6 +117,11 @@ spec:
             env:
               PENPOT_PUBLIC_URI: https://penpot.00o.sh
               PENPOT_REDIS_URI: redis://penpot-valkey:6379/0
+              PENPOT_SECRET_KEY:
+                valueFrom:
+                  secretKeyRef:
+                    name: penpot-secret
+                    key: PENPOT_SECRET_KEY
             resources:
               requests:
                 cpu: 10m
