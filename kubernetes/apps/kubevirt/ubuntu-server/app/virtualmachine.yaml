@@ -9,6 +9,13 @@ spec:
     metadata:
       labels:
         kubevirt.io/vm: ubuntu-server
+      annotations:
+        k8s.v1.cni.cncf.io/networks: |-
+          [{
+            "name": "vm",
+            "namespace": "network",
+            "ips": ["192.168.57.10/24"]
+          }]
     spec:
       domain:
         cpu:
@@ -52,3 +59,15 @@ spec:
                 - qemu-guest-agent
               runcmd:
                 - systemctl enable --now qemu-guest-agent
+            networkData: |
+              version: 2
+              ethernets:
+                enp1s0:
+                  addresses:
+                    - 192.168.57.10/24
+                  routes:
+                    - to: default
+                      via: 192.168.57.1
+                  nameservers:
+                    addresses:
+                      - 10.0.6.1
