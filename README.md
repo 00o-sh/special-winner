@@ -19,7 +19,7 @@ A Kubernetes cluster deployed with [Talos Linux](https://github.com/siderolabs/t
 ### Core Infrastructure
 
 **Operating System & Orchestration:**
-- [Talos Linux](https://github.com/siderolabs/talos) 1.12.1 - Immutable Kubernetes OS
+- [Talos Linux](https://github.com/siderolabs/talos) 1.12.2 - Immutable Kubernetes OS
 - [Kubernetes](https://kubernetes.io/) 1.34.0 - Container orchestration
 - [Flux CD](https://github.com/fluxcd/flux2) 2.7.5 - GitOps continuous delivery
 
@@ -44,6 +44,10 @@ A Kubernetes cluster deployed with [Talos Linux](https://github.com/siderolabs/t
 - [Garage](https://garagehq.deuxfleurs.fr/) - S3-compatible storage
 - [CSI Driver NFS](https://github.com/kubernetes-csi/csi-driver-nfs) - NFS storage support
 - [Snapshot Controller](https://github.com/kubernetes-csi/external-snapshotter) - Volume snapshots
+
+**Database:**
+- [CloudNative-PG](https://cloudnative-pg.io/) - PostgreSQL 17.7 HA cluster (2 instances)
+- [Dragonfly](https://www.dragonflydb.io/) - Redis-compatible in-memory datastore
 
 **Observability:**
 - [Grafana](https://grafana.com/) - Metrics visualization
@@ -81,6 +85,7 @@ A Kubernetes cluster deployed with [Talos Linux](https://github.com/siderolabs/t
 **Infrastructure & Utilities:**
 - [GitHub Actions Runner Controller](https://github.com/actions/actions-runner-controller) - Self-hosted GitHub Actions runners
 - [SMTP Relay](https://github.com/foxcpp/maddy) - Outbound email relay using Maddy
+- [Penpot](https://penpot.app/) - Open-source design and prototyping platform
 
 **Additional DNS:**
 - Cloudflare DNS integration
@@ -510,8 +515,8 @@ Community member [@whazor](https://github.com/whazor) created [Kubesearch](https
 ### Phase 1: Build Everything on Test Cluster
 
 **Foundation Services**
-- [ ] CloudNativePG operator for managed PostgreSQL clusters
-- [ ] Redis operator for managed Redis instances
+- [x] CloudNativePG operator for managed PostgreSQL clusters
+- [x] Dragonfly operator for Redis-compatible instances
 
 **VM Infrastructure**
 - [ ] Install KubeVirt + CDI for VM management
@@ -616,10 +621,10 @@ If this repo is too hot to handle or too cold to hold check out these following 
 
 ## 📊 Repository Stats
 
-**Deployed Components:** 50+ applications across 13 namespaces
+**Deployed Components:** 55+ applications across 14 namespaces
 **Template Source:** [onedr0p/cluster-template](https://github.com/onedr0p/cluster-template)
 **Infrastructure:** GitOps with Flux CD + Talos Linux
-**Last Updated:** 2026-01-21
+**Last Updated:** 2026-01-31
 
 ---
 
