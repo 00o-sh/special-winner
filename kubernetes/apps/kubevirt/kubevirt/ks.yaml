@@ -16,4 +16,4 @@ spec:
     name: flux-system
     namespace: flux-system
   targetNamespace: kubevirt
-  wait: false
+  wait: true
