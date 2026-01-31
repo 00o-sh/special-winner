@@ -1,0 +1,25 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: cdi
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: cdi
+  interval: 1h
+  values:
+    operator:
+      resources:
+        requests:
+          cpu: 10m
+          memory: 256Mi
+        limits:
+          memory: 512Mi
+    cdi:
+      spec:
+        config:
+          uploadProxyURLOverride: ""
+          scratchSpaceStorageClass: ""
+          filesystemOverhead:
+            global: "0.055"

@@ -50,6 +50,7 @@ patches:
   - "@./patches/global/machine-sysctls.yaml"
   - "@./patches/global/machine-time.yaml"
   - "@./patches/global/machine-vlan56.yaml"
+  - "@./patches/global/machine-vlan57.yaml"
 
 
 # Controller patches

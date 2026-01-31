@@ -1,0 +1,30 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: kubevirt
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: kubevirt
+  interval: 1h
+  values:
+    operator:
+      resources:
+        requests:
+          cpu: 10m
+          memory: 256Mi
+        limits:
+          memory: 512Mi
+    kubevirt:
+      spec:
+        configuration:
+          developerConfiguration:
+            featureGates:
+              - LiveMigration
+              - Macvtap
+              - HotplugVolumes
+              - HostDevices
+              - GPU
+          network:
+            permitBridgeInterfaceOnPodNetwork: true
