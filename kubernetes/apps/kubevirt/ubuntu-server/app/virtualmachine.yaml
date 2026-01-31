@@ -10,6 +10,7 @@ spec:
       labels:
         kubevirt.io/vm: ubuntu-server
       annotations:
+        kubevirt.io/allow-pod-bridge-network-live-migration: "true"
         k8s.v1.cni.cncf.io/networks: |-
           [{
             "name": "vm",
@@ -18,17 +19,19 @@ spec:
             "mac": "52:54:00:57:00:10"
           }]
     spec:
+      evictionStrategy: LiveMigrate
       domain:
         cpu:
           cores: 1
-        memory:
-          guest: 1Gi
+        resources:
+          requests:
+            memory: 1G
         devices:
           disks:
             - name: rootdisk
               disk:
                 bus: virtio
-            - name: cloudinit
+            - name: cloudinitdisk
               disk:
                 bus: virtio
           interfaces:
@@ -41,9 +44,21 @@ spec:
       volumes:
         - name: rootdisk
           dataVolume:
-            name: ubuntu-server
-        - name: cloudinit
+            name: ubuntu-server-pvc
+        - name: cloudinitdisk
           cloudInitNoCloud:
+            networkData: |
+              network:
+                version: 1
+                config:
+                  - type: physical
+                    name: enp1s0
+                    subnets:
+                      - type: static
+                        address: 192.168.57.10/24
+                        gateway: 192.168.57.1
+                        dns_nameservers:
+                          - 10.0.6.1
             userData: |
               #cloud-config
               hostname: ubuntu-server
@@ -60,15 +75,17 @@ spec:
                 - qemu-guest-agent
               runcmd:
                 - systemctl enable --now qemu-guest-agent
-            networkData: |
-              version: 2
-              ethernets:
-                enp1s0:
-                  addresses:
-                    - 192.168.57.10/24
-                  routes:
-                    - to: default
-                      via: 192.168.57.1
-                  nameservers:
-                    addresses:
-                      - 10.0.6.1
+  dataVolumeTemplates:
+    - metadata:
+        name: ubuntu-server-pvc
+      spec:
+        storage:
+          resources:
+            requests:
+              storage: 30Gi
+          accessModes:
+            - ReadWriteOnce
+          storageClassName: nfs-fast
+        source:
+          http:
+            url: "https://cloud-images.ubuntu.com/noble/current/noble-server-cloudimg-amd64.img"
