@@ -8,14 +8,9 @@ spec:
     - name: kubevirt
   interval: 1h
   path: ./kubernetes/apps/kubevirt/cdi/app
-  postBuild:
-    substituteFrom:
-      - name: cluster-secrets
-        kind: Secret
   prune: true
   sourceRef:
     kind: GitRepository
     name: flux-system
     namespace: flux-system
-  targetNamespace: kubevirt
   wait: false

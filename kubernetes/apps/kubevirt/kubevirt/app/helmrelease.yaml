@@ -4,13 +4,9 @@ kind: HelmRelease
 metadata:
   name: kubevirt
 spec:
-  chart:
-    spec:
-      chart: kubevirt
-      version: 1.6.2
-      sourceRef:
-        kind: HelmRepository
-        name: encircle360-oss
+  chartRef:
+    kind: OCIRepository
+    name: kubevirt
   interval: 1h
   values:
     operator:

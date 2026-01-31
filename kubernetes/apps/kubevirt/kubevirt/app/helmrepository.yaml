@@ -1,8 +1,0 @@
----
-apiVersion: source.toolkit.fluxcd.io/v1
-kind: HelmRepository
-metadata:
-  name: encircle360-oss
-spec:
-  interval: 1h
-  url: https://encircle360-oss.github.io/helm-charts
