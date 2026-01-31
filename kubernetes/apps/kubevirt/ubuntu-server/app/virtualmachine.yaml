@@ -40,7 +40,7 @@ spec:
       networks:
         - name: lan
           multus:
-            networkName: network/vm
+            networkName: vm
       volumes:
         - name: rootdisk
           dataVolume:
