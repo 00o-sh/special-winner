@@ -4,9 +4,14 @@ kind: HelmRelease
 metadata:
   name: cdi
 spec:
-  chartRef:
-    kind: OCIRepository
-    name: cdi
+  chart:
+    spec:
+      chart: cdi
+      version: 1.61.2
+      sourceRef:
+        kind: HelmRepository
+        name: encircle360-oss
+        namespace: kubevirt
   interval: 1h
   values:
     operator:
