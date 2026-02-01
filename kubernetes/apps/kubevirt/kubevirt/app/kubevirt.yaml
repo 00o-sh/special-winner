@@ -14,6 +14,12 @@ spec:
         - HostDevices
         - GPU
         - NetworkBindingPlugins
+    smbios:
+      sku: "TalosCloud"
+      version: "v0.1.0"
+      manufacturer: "Talos Virtualization"
+      product: "talosvm"
+      family: "ccio"
     network:
       permitBridgeInterfaceOnPodNetwork: true
   workloadUpdateStrategy:
