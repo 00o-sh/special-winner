@@ -1,0 +1,30 @@
+---
+# Headless service for external-dns registration only.
+# Port definition is required by Kubernetes but has no effect -
+# VM uses macvtap for direct L2 network access, all ports are allowed.
+apiVersion: v1
+kind: Service
+metadata:
+  name: ubuntu-server
+  annotations:
+    external-dns.alpha.kubernetes.io/hostname: ubuntu-server.00o.sh
+spec:
+  clusterIP: None
+  ports:
+    - name: placeholder
+      port: 1
+---
+apiVersion: discovery.k8s.io/v1
+kind: EndpointSlice
+metadata:
+  name: ubuntu-server
+  labels:
+    kubernetes.io/service-name: ubuntu-server
+addressType: IPv4
+ports:
+  - name: placeholder
+    port: 1
+    protocol: TCP
+endpoints:
+  - addresses:
+      - 192.168.57.10
