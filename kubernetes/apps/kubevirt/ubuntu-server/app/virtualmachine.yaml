@@ -83,7 +83,7 @@ spec:
             requests:
               storage: 30Gi
           accessModes:
-            - ReadWriteOnce
+            - ReadWriteMany
           storageClassName: nfs-fast
         source:
           http:
