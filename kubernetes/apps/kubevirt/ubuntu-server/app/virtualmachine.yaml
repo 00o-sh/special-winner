@@ -64,13 +64,18 @@ spec:
               hostname: ubuntu-server
               manage_etc_hosts: true
               ssh_pwauth: true
+              chpasswd:
+                expire: false
+                users:
+                  - name: admin
+                    password: "123456aA"
+                    type: text
               users:
                 - name: admin
                   groups: [adm, sudo]
                   shell: /bin/bash
                   sudo: ALL=(ALL) NOPASSWD:ALL
                   lock_passwd: false
-                  plain_text_passwd: "123456aA"
                   ssh_authorized_keys:
                     - "${SECRET_SSH_PUBLIC_KEY}"
               package_update: true
