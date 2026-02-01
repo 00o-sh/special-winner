@@ -1,4 +1,7 @@
 ---
+# Headless service for external-dns registration only.
+# Port definition is required by Kubernetes but has no effect -
+# VM uses macvtap for direct L2 network access, all ports are allowed.
 apiVersion: v1
 kind: Service
 metadata:
@@ -8,9 +11,8 @@ metadata:
 spec:
   clusterIP: None
   ports:
-    - name: ssh
-      port: 22
-      targetPort: 22
+    - name: placeholder
+      port: 1
 ---
 apiVersion: discovery.k8s.io/v1
 kind: EndpointSlice
@@ -20,8 +22,8 @@ metadata:
     kubernetes.io/service-name: ubuntu-server
 addressType: IPv4
 ports:
-  - name: ssh
-    port: 22
+  - name: placeholder
+    port: 1
     protocol: TCP
 endpoints:
   - addresses:
