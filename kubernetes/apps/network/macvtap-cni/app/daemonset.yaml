@@ -1,0 +1,71 @@
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: macvtap-cni
+spec:
+  selector:
+    matchLabels:
+      name: macvtap-cni
+  template:
+    metadata:
+      labels:
+        name: macvtap-cni
+    spec:
+      hostNetwork: true
+      hostPID: true
+      priorityClassName: system-node-critical
+      containers:
+        - name: macvtap-cni
+          command: ["/macvtap-deviceplugin", "-v", "3", "-logtostderr"]
+          envFrom:
+            - configMapRef:
+                name: macvtap-deviceplugin-config
+          image: quay.io/kubevirt/macvtap-cni:v0.7.0
+          resources:
+            requests:
+              cpu: 60m
+              memory: 30Mi
+          securityContext:
+            privileged: true
+          volumeMounts:
+            - name: deviceplugin
+              mountPath: /var/lib/kubelet/device-plugins
+          terminationMessagePolicy: FallbackToLogsOnError
+          readinessProbe:
+            exec:
+              command:
+                - sh
+                - -c
+                - test -S /var/lib/kubelet/device-plugins/macvtap.network.kubevirt.io*
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            exec:
+              command:
+                - sh
+                - -c
+                - test -S /var/lib/kubelet/device-plugins/macvtap.network.kubevirt.io*
+            initialDelaySeconds: 15
+            periodSeconds: 60
+      initContainers:
+        - name: install-cni
+          command: ["cp", "/macvtap-cni", "/host/opt/cni/bin/macvtap"]
+          image: quay.io/kubevirt/macvtap-cni:v0.7.0
+          resources:
+            requests:
+              cpu: 10m
+              memory: 15Mi
+          securityContext:
+            privileged: true
+          volumeMounts:
+            - name: cni
+              mountPath: /host/opt/cni/bin
+              mountPropagation: Bidirectional
+      volumes:
+        - name: deviceplugin
+          hostPath:
+            path: /var/lib/kubelet/device-plugins
+        - name: cni
+          hostPath:
+            path: /opt/cni/bin
