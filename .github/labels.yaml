@@ -32,9 +32,18 @@
   description: "Task automation definitions"
 
 # Area Labels - Kubernetes Namespaces
+- name: area/actions-runner-system
+  color: "1d76db"
+  description: "GitHub Actions self-hosted runners"
 - name: area/cert-manager
   color: "1d76db"
   description: "Certificate management"
+- name: area/database
+  color: "1d76db"
+  description: "Database infrastructure"
+- name: area/default
+  color: "1d76db"
+  description: "Default namespace applications"
 - name: area/external-secrets
   color: "1d76db"
   description: "External secrets integration"
@@ -44,6 +53,9 @@
 - name: area/kube-system
   color: "1d76db"
   description: "Core Kubernetes system components"
+- name: area/kubevirt
+  color: "1d76db"
+  description: "KubeVirt virtualization"
 - name: area/media
   color: "1d76db"
   description: "Media applications"
@@ -56,6 +68,12 @@
 - name: area/storage
   color: "1d76db"
   description: "Storage and backup systems"
+- name: area/system-upgrade
+  color: "1d76db"
+  description: "System upgrade automation"
+- name: area/utils
+  color: "1d76db"
+  description: "Utility services"
 
 # Component Labels
 - name: component/cilium

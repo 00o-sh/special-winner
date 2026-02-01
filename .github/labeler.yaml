@@ -56,10 +56,25 @@ area/templates:
           - makejinja.toml
 
 # Area Labels - Kubernetes Namespaces
+area/actions-runner-system:
+  - changed-files:
+      - any-glob-to-any-file:
+          - kubernetes/apps/actions-runner-system/**/*
+
 area/cert-manager:
   - changed-files:
       - any-glob-to-any-file:
           - kubernetes/apps/cert-manager/**/*
+
+area/database:
+  - changed-files:
+      - any-glob-to-any-file:
+          - kubernetes/apps/database/**/*
+
+area/default:
+  - changed-files:
+      - any-glob-to-any-file:
+          - kubernetes/apps/default/**/*
 
 area/external-secrets:
   - changed-files:
@@ -76,6 +91,11 @@ area/kube-system:
   - changed-files:
       - any-glob-to-any-file:
           - kubernetes/apps/kube-system/**/*
+
+area/kubevirt:
+  - changed-files:
+      - any-glob-to-any-file:
+          - kubernetes/apps/kubevirt/**/*
 
 area/media:
   - changed-files:
@@ -98,6 +118,16 @@ area/storage:
           - kubernetes/apps/volsync-system/**/*
           - kubernetes/apps/openebs-system/**/*
           - kubernetes/components/volsync/**/*
+
+area/system-upgrade:
+  - changed-files:
+      - any-glob-to-any-file:
+          - kubernetes/apps/system-upgrade/**/*
+
+area/utils:
+  - changed-files:
+      - any-glob-to-any-file:
+          - kubernetes/apps/utils/**/*
 
 # Component Labels
 component/cilium:
