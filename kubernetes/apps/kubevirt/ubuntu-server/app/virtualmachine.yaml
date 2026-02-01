@@ -13,9 +13,8 @@ spec:
         kubevirt.io/allow-pod-bridge-network-live-migration: "true"
         k8s.v1.cni.cncf.io/networks: |-
           [{
-            "name": "vm",
+            "name": "vm-macvtap",
             "namespace": "network",
-            "ips": ["192.168.57.10/24"],
             "mac": "52:54:00:57:00:10"
           }]
     spec:
@@ -40,7 +39,7 @@ spec:
       networks:
         - name: lan
           multus:
-            networkName: network/vm
+            networkName: network/vm-macvtap
       volumes:
         - name: rootdisk
           dataVolume:

@@ -1,0 +1,15 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/kustomization
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - https://raw.githubusercontent.com/kubevirt/macvtap-cni/main/manifests/macvtap.yaml
+  - ./networkattachmentdefinition.yaml
+patches:
+  - patch: |-
+      - op: replace
+        path: /spec/template/spec/containers/0/env/0/value
+        value: '[{"name":"vm","lowerDevice":"bond0.57","mode":"bridge","capacity":10}]'
+    target:
+      kind: DaemonSet
+      name: macvtap-cni
