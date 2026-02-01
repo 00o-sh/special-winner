@@ -188,6 +188,17 @@ component/volsync:
           - kubernetes/apps/volsync-system/volsync/**/*
           - kubernetes/components/volsync/**/*
 
+component/kubevirt:
+  - changed-files:
+      - any-glob-to-any-file:
+          - kubernetes/apps/kubevirt/kubevirt/**/*
+          - kubernetes/apps/kubevirt/cdi/**/*
+
+component/kubevirt-vms:
+  - changed-files:
+      - any-glob-to-any-file:
+          - kubernetes/apps/kubevirt/ubuntu-server/**/*
+
 # Type Labels - Based on file patterns and commit messages
 type/ci:
   - changed-files:

@@ -106,6 +106,12 @@
 - name: component/volsync
   color: "5319e7"
   description: "Volsync backup system"
+- name: component/kubevirt
+  color: "5319e7"
+  description: "KubeVirt core and CDI"
+- name: component/kubevirt-vms
+  color: "5319e7"
+  description: "KubeVirt virtual machines"
 
 # Type Labels - Development
 - name: type/bug
