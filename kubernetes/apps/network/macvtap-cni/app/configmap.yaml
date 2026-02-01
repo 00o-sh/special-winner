@@ -1,0 +1,7 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: macvtap-deviceplugin-config
+data:
+  DP_MACVTAP_CONF: '[{"name":"vm","lowerDevice":"bond0.57","mode":"bridge","capacity":10}]'
