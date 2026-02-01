@@ -22,6 +22,9 @@ spec:
       family: "ccio"
     network:
       permitBridgeInterfaceOnPodNetwork: true
+      binding:
+        macvtap:
+          domainAttachmentType: tap
   workloadUpdateStrategy:
     workloadUpdateMethods:
       - LiveMigrate
