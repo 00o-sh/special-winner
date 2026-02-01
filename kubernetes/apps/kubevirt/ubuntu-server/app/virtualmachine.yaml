@@ -65,9 +65,9 @@ spec:
               manage_etc_hosts: true
               ssh_pwauth: true
               chpasswd:
-                list: |
-                  admin:123456aA
                 expire: false
+                users:
+                  - {name: admin, password: 123456aA, type: text}
               users:
                 - name: admin
                   groups: [adm, sudo]
