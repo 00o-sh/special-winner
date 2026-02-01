@@ -35,7 +35,8 @@ spec:
                 bus: virtio
           interfaces:
             - name: lan
-              macvtap: {}
+              binding:
+                name: macvtap
       networks:
         - name: lan
           multus:
