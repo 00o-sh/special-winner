@@ -73,8 +73,6 @@ spec:
                   groups: [adm, sudo]
                   shell: /bin/bash
                   sudo: ALL=(ALL) NOPASSWD:ALL
-                  lock_passwd: false
-                  passwd: $6$5qqFFER4w2zN2qTy$yg36q1ceQTlxTJsyJfDVpMl8sWdD.95XYo1XXL7znFntex4gs5VJGNRAf5nzh4.8frSxtwoJlZsbRgZaXj9pq1
                   ssh_import_id:
                     - gh:00o-sh
               package_update: true
@@ -82,8 +80,6 @@ spec:
                 - qemu-guest-agent
               runcmd:
                 - systemctl enable --now qemu-guest-agent
-                - sed -i 's/^#\?PasswordAuthentication .*/PasswordAuthentication yes/' /etc/ssh/sshd_config
-                - systemctl restart ssh
   dataVolumeTemplates:
     - metadata:
         name: ubuntu-server-pvc
