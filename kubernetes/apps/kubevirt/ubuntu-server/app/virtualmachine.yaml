@@ -64,7 +64,9 @@ spec:
               hostname: ubuntu-server
               manage_etc_hosts: true
               users:
+                - default
                 - name: admin
+                  gecos: Admin User
                   groups: [adm, sudo]
                   shell: /bin/bash
                   sudo: ALL=(ALL) NOPASSWD:ALL
