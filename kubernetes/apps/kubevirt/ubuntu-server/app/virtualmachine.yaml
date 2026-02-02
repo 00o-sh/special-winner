@@ -76,6 +76,7 @@ spec:
                     - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAqkeDwM1SWrSy7w+tR0oyVzLIcAU5yz5doTgI8u/eaw
                     - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKRG6pXx4rXDOY8X5xamGwrZCb/OLTXgv963EsqI0HJp
               package_update: true
+              package_upgrade: true
               packages:
                 - qemu-guest-agent
               runcmd:
