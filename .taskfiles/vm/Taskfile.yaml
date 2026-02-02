@@ -1,0 +1,72 @@
+---
+version: '3'
+
+tasks:
+
+  redeploy:
+    desc: Delete and recreate a KubeVirt VM [name=required] [namespace=kubevirt]
+    prompt: This will delete VM '{{.name}}' and its disk, then recreate it... continue?
+    vars:
+      namespace: '{{.namespace | default "kubevirt"}}'
+    cmds:
+      - kubectl delete vm {{.name}} -n {{.namespace}} --ignore-not-found
+      - kubectl delete dv {{.name}}-pvc -n {{.namespace}} --ignore-not-found
+      - flux reconcile ks {{.name}} -n {{.namespace}}
+    requires:
+      vars: [name]
+    preconditions:
+      - test -f {{.KUBECONFIG}}
+      - which kubectl flux
+
+  stop:
+    desc: Stop a KubeVirt VM [name=required] [namespace=kubevirt]
+    vars:
+      namespace: '{{.namespace | default "kubevirt"}}'
+    cmd: kubectl patch vm {{.name}} -n {{.namespace}} --type merge -p '{"spec":{"running":false}}'
+    requires:
+      vars: [name]
+    preconditions:
+      - test -f {{.KUBECONFIG}}
+      - which kubectl
+
+  start:
+    desc: Start a KubeVirt VM [name=required] [namespace=kubevirt]
+    vars:
+      namespace: '{{.namespace | default "kubevirt"}}'
+    cmd: kubectl patch vm {{.name}} -n {{.namespace}} --type merge -p '{"spec":{"running":true}}'
+    requires:
+      vars: [name]
+    preconditions:
+      - test -f {{.KUBECONFIG}}
+      - which kubectl
+
+  restart:
+    desc: Restart a KubeVirt VM [name=required] [namespace=kubevirt]
+    vars:
+      namespace: '{{.namespace | default "kubevirt"}}'
+    cmd: kubectl delete vmi {{.name}} -n {{.namespace}}
+    requires:
+      vars: [name]
+    preconditions:
+      - test -f {{.KUBECONFIG}}
+      - which kubectl
+
+  console:
+    desc: Open console to a KubeVirt VM [name=required] [namespace=kubevirt]
+    vars:
+      namespace: '{{.namespace | default "kubevirt"}}'
+    cmd: kubectl virt console {{.name}} -n {{.namespace}}
+    requires:
+      vars: [name]
+    preconditions:
+      - test -f {{.KUBECONFIG}}
+      - which kubectl
+
+  list:
+    desc: List all KubeVirt VMs [namespace=all]
+    vars:
+      namespace: '{{.namespace | default ""}}'
+    cmd: kubectl get vm,vmi,dv {{if .namespace}}-n {{.namespace}}{{else}}-A{{end}}
+    preconditions:
+      - test -f {{.KUBECONFIG}}
+      - which kubectl
