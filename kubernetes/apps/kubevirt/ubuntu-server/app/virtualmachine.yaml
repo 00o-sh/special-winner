@@ -64,18 +64,18 @@ spec:
               hostname: ubuntu-server
               manage_etc_hosts: true
               no_ssh_fingerprints: true
-              users:
-                - default
-                - name: admin
+              system_info:
+                default_user:
+                  name: admin
+                  lock_passwd: true
                   gecos: Admin User
                   groups: [adm, sudo]
+                  sudo: ["ALL=(ALL) NOPASSWD:ALL"]
                   shell: /bin/bash
-                  sudo: ALL=(ALL) NOPASSWD:ALL
-                  lock_passwd: true
-                  ssh_authorized_keys:
-                    - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKTGSd9Ukp/CKEWssokvlEop1wrACYVS75fdKy5gNo37
-                    - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAqkeDwM1SWrSy7w+tR0oyVzLIcAU5yz5doTgI8u/eaw
-                    - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKRG6pXx4rXDOY8X5xamGwrZCb/OLTXgv963EsqI0HJp
+              ssh_authorized_keys:
+                - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKTGSd9Ukp/CKEWssokvlEop1wrACYVS75fdKy5gNo37
+                - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAqkeDwM1SWrSy7w+tR0oyVzLIcAU5yz5doTgI8u/eaw
+                - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKRG6pXx4rXDOY8X5xamGwrZCb/OLTXgv963EsqI0HJp
               package_update: true
               packages:
                 - qemu-guest-agent
