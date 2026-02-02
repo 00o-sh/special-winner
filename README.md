@@ -60,6 +60,11 @@ A Kubernetes cluster deployed with [Talos Linux](https://github.com/siderolabs/t
 - [Kromgo](https://github.com/kashalls/kromgo) - Custom metrics publishing
 - [Silence Operator](https://github.com/kbudde/silence-operator) - Alert silencing automation
 
+**Virtualization:**
+- [KubeVirt](https://kubevirt.io/) - Virtual machine management on Kubernetes
+- [CDI](https://github.com/kubevirt/containerized-data-importer) - Containerized Data Importer for VM disk images
+- [Macvtap CNI](https://github.com/kubevirt/macvtap-cni) - Direct network connectivity for VMs
+
 **System Management:**
 - [Reloader](https://github.com/stakater/Reloader) - Automatic pod restarts on config changes
 - [Metrics Server](https://github.com/kubernetes-sigs/metrics-server) - Resource metrics
@@ -479,6 +484,7 @@ This cluster already includes several advanced features beyond the base template
 - **✅ GitHub Actions Infrastructure** - Self-hosted runners with cluster access for CI/CD
 - **✅ SMTP Relay** - Centralized email relay for cluster applications
 - **✅ Advanced Automation** - KEDA autoscaling, NFS-aware scaling, Discord alerts, automated image pre-pulling
+- **✅ KubeVirt Virtualization** - VM management with CDI and Macvtap CNI for direct network access
 
 ### Additional Enhancements to Consider
 
@@ -519,8 +525,8 @@ Community member [@whazor](https://github.com/whazor) created [Kubesearch](https
 - [x] Dragonfly operator for Redis-compatible instances
 
 **VM Infrastructure**
-- [ ] Install KubeVirt + CDI for VM management
-- [ ] Configure Multus NetworkAttachmentDefinitions for VM networking
+- [x] Install KubeVirt + CDI for VM management
+- [x] Configure Multus NetworkAttachmentDefinitions for VM networking
 - [ ] Export VMs from Proxmox nodes
 - [ ] Import and test VMs in KubeVirt (single node, local/NFS storage)
 
@@ -621,10 +627,10 @@ If this repo is too hot to handle or too cold to hold check out these following 
 
 ## 📊 Repository Stats
 
-**Deployed Components:** 55+ applications across 14 namespaces
+**Deployed Components:** 55+ applications across 15 namespaces
 **Template Source:** [onedr0p/cluster-template](https://github.com/onedr0p/cluster-template)
 **Infrastructure:** GitOps with Flux CD + Talos Linux
-**Last Updated:** 2026-01-31
+**Last Updated:** 2026-02-02
 
 ---
 
