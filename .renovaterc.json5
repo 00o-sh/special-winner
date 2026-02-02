@@ -172,5 +172,21 @@
       ],
       datasourceTemplate: "docker",
     },
+    {
+      customType: "regex",
+      description: "Kustomize resources: KubeVirt & CDI release-asset URLs",
+      managerFilePatterns: [
+        "/(^|/)kustomization\\.ya?ml(?:\\.j2)?$/",
+      ],
+      matchStrings: [
+        // CDI
+        "https://github\\.com/(?<depName>kubevirt/containerized-data-importer)/releases/download/(?<currentValue>v\\d+\\.\\d+\\.\\d+)/(?:cdi-operator|cdi-cr)\\.yaml",
+  
+        // KubeVirt
+        "https://github\\.com/(?<depName>kubevirt/kubevirt)/releases/download/(?<currentValue>v\\d+\\.\\d+\\.\\d+)/kubevirt-operator\\.yaml",
+      ],
+      datasourceTemplate: "github-releases",
+      versioningTemplate: "semver",
+    },
   ],
 }
