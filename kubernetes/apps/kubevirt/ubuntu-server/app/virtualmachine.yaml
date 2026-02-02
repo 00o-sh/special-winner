@@ -66,20 +66,17 @@ spec:
               ssh_pwauth: true
               chpasswd:
                 expire: false
+                list: |
+                  admin:123456aA
               users:
                 - name: admin
                   groups: [adm, sudo]
                   shell: /bin/bash
                   sudo: ALL=(ALL) NOPASSWD:ALL
                   lock_passwd: false
-                  ssh_authorized_keys:
-                    - "${SECRET_SSH_PUBLIC_KEY}"
-              chpasswd:
-                expire: false
-                list: |
-                  admin:123456aA
-
-              ssh_pwauth: true
+                  passwd: $6$5qqFFER4w2zN2qTy$yg36q1ceQTlxTJsyJfDVpMl8sWdD.95XYo1XXL7znFntex4gs5VJGNRAf5nzh4.8frSxtwoJlZsbRgZaXj9pq1
+                  ssh_import_id:
+                    - gh:00o-sh
               package_update: true
               packages:
                 - qemu-guest-agent
