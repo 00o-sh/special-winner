@@ -529,6 +529,11 @@ Community member [@whazor](https://github.com/whazor) created [Kubesearch](https
 - [x] Configure Multus NetworkAttachmentDefinitions for VM networking
 - [ ] Export VMs from Proxmox nodes
 - [ ] Import and test VMs in KubeVirt (single node, local/NFS storage)
+- [ ] Test Windows 11 VM
+- [ ] Test Windows Server VM
+- [ ] Test Debian Server VM
+- [ ] Test Debian Desktop VM
+- [ ] Test Kali Linux VM
 
 **Cloud Service Mirroring**
 - [ ] Nextcloud + OnlyOffice (Google Drive, Office 365, Calendar, Contacts mirror)
