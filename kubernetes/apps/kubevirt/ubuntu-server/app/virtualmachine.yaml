@@ -68,6 +68,7 @@ spec:
                   groups: [adm, sudo]
                   shell: /bin/bash
                   sudo: ALL=(ALL) NOPASSWD:ALL
+                  lock_passwd: true
                   ssh_authorized_keys:
                     - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKTGSd9Ukp/CKEWssokvlEop1wrACYVS75fdKy5gNo37
                     - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAqkeDwM1SWrSy7w+tR0oyVzLIcAU5yz5doTgI8u/eaw
@@ -76,7 +77,7 @@ spec:
               packages:
                 - qemu-guest-agent
               runcmd:
-                - systemctl enable --now qemu-guest-agent
+                - systemctl start qemu-guest-agent || true
   dataVolumeTemplates:
     - metadata:
         name: ubuntu-server-pvc
