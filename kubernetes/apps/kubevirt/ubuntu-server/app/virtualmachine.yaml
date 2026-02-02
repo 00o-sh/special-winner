@@ -94,4 +94,5 @@ spec:
           storageClassName: nfs-fast
         source:
           http:
-            url: "https://cloud-images.ubuntu.com/releases/noble/release-20251213/ubuntu-24.04-server-cloudimg-amd64.img"
+            # renovate: datasource=github-releases depName=canonical/ubuntu-cloud-images
+            url: "https://cloud-images.ubuntu.com/releases/noble/release-20251123/ubuntu-24.04-server-cloudimg-amd64.img"
