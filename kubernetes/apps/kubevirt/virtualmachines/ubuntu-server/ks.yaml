@@ -11,7 +11,7 @@ spec:
     - name: macvtap-cni
       namespace: network
   interval: 1h
-  path: ./kubernetes/apps/kubevirt/ubuntu-server/app
+  path: ./kubernetes/apps/kubevirt/virtualmachines/ubuntu-server/app
   postBuild:
     substituteFrom:
       - name: cluster-secrets
