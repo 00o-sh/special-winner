@@ -20,38 +20,14 @@ spec:
     spec:
       evictionStrategy: LiveMigrate
       domain:
-        clock:
-          utc: {}
-          timer:
-            hpet:
-              present: false
-            pit:
-              tickPolicy: delay
-            rtc:
-              tickPolicy: catchup
-            hyperv: {}
         cpu:
           cores: 2
         resources:
           requests:
-            memory: 4G
+            memory: 2G
         features:
           acpi: {}
           apic: {}
-          hyperv:
-            relaxed: {}
-            vapic: {}
-            spinlocks:
-              spinlocks: 8191
-            vpindex: {}
-            runtime: {}
-            synic: {}
-            stimer: {}
-            reset: {}
-            frequencies: {}
-            reenlightenment: {}
-            tlbflush: {}
-            ipi: {}
         firmware:
           bootloader:
             efi:
@@ -60,7 +36,7 @@ spec:
           disks:
             - name: rootdisk
               disk:
-                bus: virtio
+                bus: sata
           interfaces:
             - name: lan
               binding:
@@ -76,7 +52,6 @@ spec:
   dataVolumeTemplates:
     - metadata:
         name: windows-server-pvc
-        # renovate: datasource=docker depName=quay.io/containerdisks/windows-server-2022
         annotations:
           cdi.kubevirt.io/storage.usePopulator: "false"
       spec:
