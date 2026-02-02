@@ -64,10 +64,6 @@ spec:
               hostname: ubuntu-server
               manage_etc_hosts: true
               ssh_pwauth: true
-              chpasswd:
-                expire: false
-                list: |
-                  admin:123456aA
               users:
                 - name: admin
                   groups: [adm, sudo]
