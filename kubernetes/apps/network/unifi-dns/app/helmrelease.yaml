@@ -41,7 +41,11 @@ spec:
           timeoutSeconds: 5
     triggerLoopOnEvent: true
     policy: sync
+    extraArgs:
+      - --crd-source-apiversion=externaldns.k8s.io/v1alpha1
+      - --crd-source-kind=DNSEndpoint
     sources:
+      - crd
       - gateway-httproute
       - service
       - ingress
