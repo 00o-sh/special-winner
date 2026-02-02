@@ -65,13 +65,12 @@ spec:
               manage_etc_hosts: true
               no_ssh_fingerprints: true
               users:
-                - name: admin
-                  gecos: Admin User
+                - name: user
+                  gecos: User
                   groups: [adm, sudo]
                   shell: /bin/bash
                   sudo: ALL=(ALL) NOPASSWD:ALL
                   lock_passwd: true
-                  no_user_group: true
                   ssh_authorized_keys:
                     - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKTGSd9Ukp/CKEWssokvlEop1wrACYVS75fdKy5gNo37
                     - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAqkeDwM1SWrSy7w+tR0oyVzLIcAU5yz5doTgI8u/eaw
