@@ -11,7 +11,7 @@ tasks:
     cmds:
       - kubectl delete vm {{.name}} -n {{.namespace}} --ignore-not-found
       - kubectl delete dv {{.name}}-pvc -n {{.namespace}} --ignore-not-found
-      - flux reconcile ks {{.name}} -n flux-system
+      - flux reconcile ks {{.name}} -n {{.namespace}}
     requires:
       vars: [name]
     preconditions:
