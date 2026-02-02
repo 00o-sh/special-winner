@@ -3,7 +3,7 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: ubuntu-server
+  name: windows-server
 spec:
   dependsOn:
     - name: kubevirt
@@ -11,7 +11,7 @@ spec:
     - name: macvtap-cni
       namespace: network
   interval: 1h
-  path: ./kubernetes/apps/kubevirt/virtualmachines/ubuntu-server/app
+  path: ./kubernetes/apps/kubevirt/virtualmachines/windows-server/app
   postBuild:
     substituteFrom:
       - name: cluster-secrets

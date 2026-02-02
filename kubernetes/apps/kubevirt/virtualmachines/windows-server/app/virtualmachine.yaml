@@ -1,0 +1,94 @@
+---
+apiVersion: kubevirt.io/v1
+kind: VirtualMachine
+metadata:
+  name: windows-server
+spec:
+  running: true
+  template:
+    metadata:
+      labels:
+        kubevirt.io/vm: windows-server
+      annotations:
+        kubevirt.io/allow-pod-bridge-network-live-migration: "true"
+        k8s.v1.cni.cncf.io/networks: |-
+          [{
+            "name": "vm-macvtap",
+            "namespace": "network",
+            "mac": "52:54:00:57:00:20"
+          }]
+    spec:
+      evictionStrategy: LiveMigrate
+      domain:
+        clock:
+          utc: {}
+          timer:
+            hpet:
+              present: false
+            pit:
+              tickPolicy: delay
+            rtc:
+              tickPolicy: catchup
+            hyperv: {}
+        cpu:
+          cores: 2
+        resources:
+          requests:
+            memory: 4G
+        features:
+          acpi: {}
+          apic: {}
+          hyperv:
+            relaxed: {}
+            vapic: {}
+            spinlocks:
+              spinlocks: 8191
+            vpindex: {}
+            runtime: {}
+            synic: {}
+            stimer:
+              direct: {}
+            reset: {}
+            frequencies: {}
+            reenlightenment: {}
+            tlbflush: {}
+            ipi: {}
+        firmware:
+          bootloader:
+            efi:
+              secureBoot: false
+        devices:
+          disks:
+            - name: rootdisk
+              disk:
+                bus: virtio
+          interfaces:
+            - name: lan
+              binding:
+                name: macvtap
+      networks:
+        - name: lan
+          multus:
+            networkName: network/vm-macvtap
+      volumes:
+        - name: rootdisk
+          dataVolume:
+            name: windows-server-pvc
+  dataVolumeTemplates:
+    - metadata:
+        name: windows-server-pvc
+        # renovate: datasource=docker depName=quay.io/containerdisks/windows-server-2022
+        annotations:
+          cdi.kubevirt.io/storage.usePopulator: "false"
+      spec:
+        storage:
+          resources:
+            requests:
+              storage: 60Gi
+          accessModes:
+            - ReadWriteMany
+          storageClassName: nfs-fast
+        source:
+          registry:
+            # renovate: datasource=docker
+            url: "docker://quay.io/containerdisks/windows-server-2022:ltsc2022"
