@@ -46,8 +46,7 @@ spec:
             vpindex: {}
             runtime: {}
             synic: {}
-            stimer:
-              direct: {}
+            stimer: {}
             reset: {}
             frequencies: {}
             reenlightenment: {}
