@@ -163,12 +163,15 @@
     },
     {
       customType: "regex",
-      description: "Process OCI dependencies",
+      description: "Process OCI and Docker registry dependencies",
       managerFilePatterns: [
         "/\\.yaml(?:\\.j2)?$/",
       ],
       matchStrings: [
+        // oci://ghcr.io/bjw-s/helm/app-template:3.0.0
         "oci://(?<depName>[^:]+):(?<currentValue>\\S+)",
+        // docker://quay.io/containerdisks/ubuntu:24.04
+        "docker://(?<depName>[^:]+):(?<currentValue>[^\"\\s]+)",
       ],
       datasourceTemplate: "docker",
     },
