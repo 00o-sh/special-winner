@@ -63,6 +63,7 @@ spec:
               #cloud-config
               hostname: ubuntu-server
               manage_etc_hosts: true
+              no_ssh_fingerprints: true
               users:
                 - default
                 - name: admin
