@@ -1,0 +1,12 @@
+# Kubelet configuration for VM nodes (Proxmox VE)
+# Add label and taint to prevent KubeVirt VMs from scheduling here
+# (nested virtualization not supported on VM nodes)
+machine:
+  kubelet:
+    extraArgs:
+      rotate-server-certificates: "true"
+    nodeLabels:
+      node.kubernetes.io/instance-type: "proxmox-vm"
+      kubevirt.io/schedulable: "false"
+    nodeTaints:
+      kubevirt.io/no-schedule: "NoSchedule"
