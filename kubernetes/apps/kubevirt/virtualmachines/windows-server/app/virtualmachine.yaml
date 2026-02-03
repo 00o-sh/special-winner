@@ -4,7 +4,7 @@ kind: VirtualMachine
 metadata:
   name: windows-server
 spec:
-  running: true
+  running: false
   template:
     metadata:
       labels:
@@ -35,7 +35,18 @@ spec:
         devices:
           disks:
             - name: rootdisk
+              bootOrder: 2
               disk:
+                bus: sata
+            - name: installiso
+              bootOrder: 1
+              cdrom:
+                bus: sata
+            - name: virtio-drivers
+              cdrom:
+                bus: sata
+            - name: sysprep
+              cdrom:
                 bus: sata
           interfaces:
             - name: lan
@@ -49,11 +60,19 @@ spec:
         - name: rootdisk
           dataVolume:
             name: windows-server-pvc
+        - name: installiso
+          dataVolume:
+            name: windows-server-iso
+        - name: virtio-drivers
+          containerDisk:
+            image: quay.io/kubevirt/virtio-container-disk:v1.3.1
+        - name: sysprep
+          sysprep:
+            configMap:
+              name: windows-server-sysprep
   dataVolumeTemplates:
     - metadata:
         name: windows-server-pvc
-        annotations:
-          cdi.kubevirt.io/storage.usePopulator: "false"
       spec:
         storage:
           resources:
@@ -63,6 +82,18 @@ spec:
             - ReadWriteMany
           storageClassName: nfs-fast
         source:
-          registry:
-            # renovate: datasource=docker
-            url: "docker://quay.io/containerdisks/windows-server-2022:ltsc2022"
+          blank: {}
+    - metadata:
+        name: windows-server-iso
+      spec:
+        storage:
+          resources:
+            requests:
+              storage: 6Gi
+          accessModes:
+            - ReadWriteMany
+          storageClassName: nfs-fast
+        source:
+          http:
+            # Microsoft Evaluation Center - may require manual download if redirect fails
+            url: "https://go.microsoft.com/fwlink/p/?LinkID=2195280&clcid=0x409&culture=en-us&country=US"
