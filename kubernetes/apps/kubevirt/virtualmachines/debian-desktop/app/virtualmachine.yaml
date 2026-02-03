@@ -21,10 +21,10 @@ spec:
       evictionStrategy: LiveMigrate
       domain:
         cpu:
-          cores: 2
+          cores: 1
         resources:
           requests:
-            memory: 4G
+            memory: 1G
         devices:
           disks:
             - name: rootdisk
