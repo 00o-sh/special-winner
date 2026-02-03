@@ -61,8 +61,10 @@ spec:
           dataVolume:
             name: windows-server-pvc
         - name: installiso
-          dataVolume:
-            name: windows-server-iso
+          containerDisk:
+            # Build: docker build -t ghcr.io/00o-sh/windows-server-2022-iso:ltsc2022 .
+            # Dockerfile: FROM scratch \n ADD windows-server-2022.iso /disk/
+            image: ghcr.io/00o-sh/windows-server-2022-iso:ltsc2022
         - name: virtio-drivers
           containerDisk:
             image: quay.io/kubevirt/virtio-container-disk:v1.3.1
@@ -83,17 +85,3 @@ spec:
           storageClassName: nfs-fast
         source:
           blank: {}
-    - metadata:
-        name: windows-server-iso
-      spec:
-        storage:
-          resources:
-            requests:
-              storage: 6Gi
-          accessModes:
-            - ReadWriteMany
-          storageClassName: nfs-fast
-        source:
-          http:
-            # Microsoft Evaluation Center - may require manual download if redirect fails
-            url: "https://go.microsoft.com/fwlink/p/?LinkID=2195280&clcid=0x409&culture=en-us&country=US"
