@@ -1,4 +1,4 @@
-# Kubelet configuration for worker nodes (Proxmox VE VMs)
+# Kubelet configuration for VM nodes (Proxmox VE)
 # Add label and taint to prevent KubeVirt VMs from scheduling here
 # (nested virtualization not supported on VM nodes)
 machine:

@@ -41,14 +41,14 @@ nodes:
         vip:
           ip: 10.0.6.10
 
-  # Worker nodes running as Proxmox VE VMs
+  # Control plane nodes running as Proxmox VE VMs
   - hostname: "node-01-pve"
     ipAddress: "10.0.6.212"
     installDisk: "/dev/vda"
     machineSpec:
       secureboot: false
     talosImageURL: factory.talos.dev/installer/1f27123b6d8a11ff4f1b5f09f839f3662244f6bb11124faebe050c632291947b
-    controlPlane: false
+    controlPlane: true
     networkInterfaces:
       - interface: bond0
         bond:
@@ -61,6 +61,10 @@ nodes:
         routes:
           - network: 0.0.0.0/0
             gateway: 10.0.6.1
+        vip:
+          ip: 10.0.6.10
+    patches:
+      - "@./patches/vm-node/machine-kubelet.yaml"
 
   - hostname: "node-02-pve"
     ipAddress: "10.0.6.213"
@@ -68,7 +72,7 @@ nodes:
     machineSpec:
       secureboot: false
     talosImageURL: factory.talos.dev/installer/1f27123b6d8a11ff4f1b5f09f839f3662244f6bb11124faebe050c632291947b
-    controlPlane: false
+    controlPlane: true
     networkInterfaces:
       - interface: bond0
         bond:
@@ -81,6 +85,10 @@ nodes:
         routes:
           - network: 0.0.0.0/0
             gateway: 10.0.6.1
+        vip:
+          ip: 10.0.6.10
+    patches:
+      - "@./patches/vm-node/machine-kubelet.yaml"
 
 
 # Global patches
@@ -99,8 +107,3 @@ patches:
 controlPlane:
   patches:
     - "@./patches/controller/cluster.yaml"
-
-# Worker patches
-worker:
-  patches:
-    - "@./patches/worker/machine-kubelet.yaml"
