@@ -44,7 +44,7 @@ nodes:
   # Control plane nodes running as Proxmox VE VMs
   - hostname: "node-01-pve"
     ipAddress: "10.0.6.212"
-    installDisk: "/dev/vda"
+    installDisk: "/dev/sda"
     machineSpec:
       secureboot: true
     talosImageURL: factory.talos.dev/installer-secureboot/10f9392d7091b30abf573524649756e5bc894f653af525836e9ab0297f301fc2
@@ -68,7 +68,7 @@ nodes:
 
   - hostname: "node-02-pve"
     ipAddress: "10.0.6.213"
-    installDisk: "/dev/vda"
+    installDisk: "/dev/sda"
     machineSpec:
       secureboot: true
     talosImageURL: factory.talos.dev/installer-secureboot/10f9392d7091b30abf573524649756e5bc894f653af525836e9ab0297f301fc2

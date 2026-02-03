@@ -1,2 +1,4 @@
 kubernetes-singlenodemaster.yaml
 talosconfig
+kubernetes-node-01-pve.yaml
+kubernetes-node-02-pve.yaml
