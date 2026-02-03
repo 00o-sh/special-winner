@@ -1,0 +1,98 @@
+---
+apiVersion: kubevirt.io/v1
+kind: VirtualMachine
+metadata:
+  name: debian-server
+spec:
+  running: true
+  template:
+    metadata:
+      labels:
+        kubevirt.io/vm: debian-server
+      annotations:
+        kubevirt.io/allow-pod-bridge-network-live-migration: "true"
+        k8s.v1.cni.cncf.io/networks: |-
+          [{
+            "name": "vm-macvtap",
+            "namespace": "network",
+            "mac": "52:54:00:57:00:11"
+          }]
+    spec:
+      evictionStrategy: LiveMigrate
+      domain:
+        cpu:
+          cores: 1
+        resources:
+          requests:
+            memory: 1G
+        devices:
+          disks:
+            - name: rootdisk
+              disk:
+                bus: virtio
+            - name: cloudinitdisk
+              disk:
+                bus: virtio
+          interfaces:
+            - name: lan
+              binding:
+                name: macvtap
+      networks:
+        - name: lan
+          multus:
+            networkName: network/vm-macvtap
+      volumes:
+        - name: rootdisk
+          dataVolume:
+            name: debian-server-pvc
+        - name: cloudinitdisk
+          cloudInitNoCloud:
+            networkData: |
+              network:
+                version: 1
+                config:
+                  - type: physical
+                    name: enp1s0
+                    subnets:
+                      - type: static
+                        address: 192.168.57.11/24
+                        gateway: 192.168.57.1
+                        dns_nameservers:
+                          - 10.0.6.1
+            userData: |
+              #cloud-config
+              hostname: debian-server
+              manage_etc_hosts: true
+              no_ssh_fingerprints: true
+              users:
+                - name: user
+                  gecos: User
+                  groups: [adm, sudo]
+                  shell: /bin/bash
+                  sudo: ALL=(ALL) NOPASSWD:ALL
+                  lock_passwd: true
+                  ssh_authorized_keys:
+                    - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKTGSd9Ukp/CKEWssokvlEop1wrACYVS75fdKy5gNo37
+                    - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAqkeDwM1SWrSy7w+tR0oyVzLIcAU5yz5doTgI8u/eaw
+                    - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKRG6pXx4rXDOY8X5xamGwrZCb/OLTXgv963EsqI0HJp
+              package_update: true
+              package_upgrade: true
+              packages:
+                - qemu-guest-agent
+              runcmd:
+                - systemctl enable --now qemu-guest-agent || true
+  dataVolumeTemplates:
+    - metadata:
+        name: debian-server-pvc
+      spec:
+        storage:
+          resources:
+            requests:
+              storage: 30Gi
+          accessModes:
+            - ReadWriteMany
+          storageClassName: nfs-fast
+        source:
+          registry:
+            # renovate: datasource=docker depName=quay.io/containerdisks/debian
+            url: "docker://quay.io/containerdisks/debian:13@sha256:caf1eab4dd2eec67dee402e8a827f26ad0dfb38b92d573bb0d4a47e9f06506a6"

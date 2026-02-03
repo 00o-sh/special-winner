@@ -1,0 +1,12 @@
+---
+apiVersion: externaldns.k8s.io/v1alpha1
+kind: DNSEndpoint
+metadata:
+  name: debian-desktop
+spec:
+  endpoints:
+    - dnsName: debian-desktop.00o.sh
+      recordTTL: 300
+      recordType: A
+      targets:
+        - 192.168.57.12
