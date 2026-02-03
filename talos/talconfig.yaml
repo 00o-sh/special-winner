@@ -55,6 +55,7 @@ nodes:
     controlPlane: false
     patches:
       - "@./patches/node-01-pve/machine-network.yaml"
+      - "@./patches/node-01-pve/machine-kubelet.yaml"
 
 
 # Global patches
