@@ -95,4 +95,5 @@ spec:
           storageClassName: nfs-fast
         source:
           http:
-            url: "https://YOUR_SERVER/windows-server-2022.iso"
+            # Microsoft Evaluation Center - may require manual download if redirect fails
+            url: "https://go.microsoft.com/fwlink/p/?LinkID=2195280&clcid=0x409&culture=en-us&country=US"
