@@ -35,7 +35,18 @@ spec:
         devices:
           disks:
             - name: rootdisk
+              bootOrder: 2
               disk:
+                bus: sata
+            - name: installiso
+              bootOrder: 1
+              cdrom:
+                bus: sata
+            - name: virtio-drivers
+              cdrom:
+                bus: sata
+            - name: sysprep
+              cdrom:
                 bus: sata
           interfaces:
             - name: lan
@@ -49,11 +60,19 @@ spec:
         - name: rootdisk
           dataVolume:
             name: windows-server-pvc
+        - name: installiso
+          dataVolume:
+            name: windows-server-iso
+        - name: virtio-drivers
+          containerDisk:
+            image: quay.io/kubevirt/virtio-container-disk:v1.3.1
+        - name: sysprep
+          sysprep:
+            configMap:
+              name: windows-server-sysprep
   dataVolumeTemplates:
     - metadata:
         name: windows-server-pvc
-        annotations:
-          cdi.kubevirt.io/storage.usePopulator: "false"
       spec:
         storage:
           resources:
@@ -64,3 +83,16 @@ spec:
           storageClassName: nfs-fast
         source:
           blank: {}
+    - metadata:
+        name: windows-server-iso
+      spec:
+        storage:
+          resources:
+            requests:
+              storage: 6Gi
+          accessModes:
+            - ReadWriteMany
+          storageClassName: nfs-fast
+        source:
+          http:
+            url: "https://YOUR_SERVER/windows-server-2022.iso"
