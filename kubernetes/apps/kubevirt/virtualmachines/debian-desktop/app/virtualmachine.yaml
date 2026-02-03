@@ -102,4 +102,4 @@ spec:
         source:
           registry:
             # renovate: datasource=docker depName=quay.io/containerdisks/debian
-            url: "docker://quay.io/containerdisks/debian:13"
+            url: "docker://quay.io/containerdisks/debian:13@sha256:caf1eab4dd2eec67dee402e8a827f26ad0dfb38b92d573bb0d4a47e9f06506a6"
