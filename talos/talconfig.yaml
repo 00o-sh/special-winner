@@ -49,9 +49,18 @@ nodes:
       secureboot: false
     talosImageURL: factory.talos.dev/installer/1f27123b6d8a11ff4f1b5f09f839f3662244f6bb11124faebe050c632291947b
     controlPlane: false
-    patches:
-      - "@./patches/node-01-pve/machine-network.yaml"
-      - "@./patches/node-01-pve/machine-kubelet.yaml"
+    networkInterfaces:
+      - interface: bond0
+        bond:
+          mode: active-backup
+          deviceSelectors: [{ hardwareAddr: "bc:24:11:*" }]
+        mtu: 1500
+        dhcp: false
+        addresses:
+          - 10.0.6.212/24
+        routes:
+          - network: 0.0.0.0/0
+            gateway: 10.0.6.1
 
   - hostname: "node-02-pve"
     ipAddress: "10.0.6.213"
@@ -60,9 +69,18 @@ nodes:
       secureboot: false
     talosImageURL: factory.talos.dev/installer/1f27123b6d8a11ff4f1b5f09f839f3662244f6bb11124faebe050c632291947b
     controlPlane: false
-    patches:
-      - "@./patches/node-02-pve/machine-network.yaml"
-      - "@./patches/node-02-pve/machine-kubelet.yaml"
+    networkInterfaces:
+      - interface: bond0
+        bond:
+          mode: active-backup
+          deviceSelectors: [{ hardwareAddr: "bc:24:11:*" }]
+        mtu: 1500
+        dhcp: false
+        addresses:
+          - 10.0.6.213/24
+        routes:
+          - network: 0.0.0.0/0
+            gateway: 10.0.6.1
 
 
 # Global patches
@@ -81,3 +99,8 @@ patches:
 controlPlane:
   patches:
     - "@./patches/controller/cluster.yaml"
+
+# Worker patches
+worker:
+  patches:
+    - "@./patches/worker/machine-kubelet.yaml"
