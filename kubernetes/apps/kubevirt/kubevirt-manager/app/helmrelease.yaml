@@ -10,6 +10,15 @@ spec:
     name: kubevirt-manager
   interval: 1h
   values:
+    defaultPodOptions:
+      annotations:
+        k8s.v1.cni.cncf.io/networks: |-
+          [{
+            "name": "vm",
+            "namespace": "network",
+            "ips": ["192.168.57.2/24"],
+            "mac": "52:54:00:57:00:02"
+          }]
     controllers:
       kubevirt-manager:
         strategy: RollingUpdate
@@ -55,17 +64,6 @@ spec:
         ports:
           http:
             port: *port
-    route:
-      app:
-        hostnames:
-          - kubevirt.${SECRET_DOMAIN}
-        parentRefs:
-          - name: envoy-internal
-            namespace: network
-        rules:
-          - backendRefs:
-              - identifier: app
-                port: *port
     persistence:
       cache:
         type: emptyDir
