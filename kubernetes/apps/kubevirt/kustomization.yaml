@@ -13,5 +13,7 @@ resources:
   - ./kubevirt/ks.yaml
   - ./cdi/ks.yaml
   - ./kubevirt-manager/ks.yaml
+  - ./virtualmachines/debian-desktop/ks.yaml
+  - ./virtualmachines/debian-server/ks.yaml
   - ./virtualmachines/ubuntu-server/ks.yaml
   - ./virtualmachines/windows-server/ks.yaml

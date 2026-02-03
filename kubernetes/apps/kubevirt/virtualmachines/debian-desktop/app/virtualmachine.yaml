@@ -1,0 +1,104 @@
+---
+apiVersion: kubevirt.io/v1
+kind: VirtualMachine
+metadata:
+  name: debian-desktop
+spec:
+  running: true
+  template:
+    metadata:
+      labels:
+        kubevirt.io/vm: debian-desktop
+      annotations:
+        kubevirt.io/allow-pod-bridge-network-live-migration: "true"
+        k8s.v1.cni.cncf.io/networks: |-
+          [{
+            "name": "vm-macvtap",
+            "namespace": "network",
+            "mac": "52:54:00:57:00:12"
+          }]
+    spec:
+      evictionStrategy: LiveMigrate
+      domain:
+        cpu:
+          cores: 2
+        resources:
+          requests:
+            memory: 4G
+        devices:
+          disks:
+            - name: rootdisk
+              disk:
+                bus: virtio
+            - name: cloudinitdisk
+              disk:
+                bus: virtio
+          interfaces:
+            - name: lan
+              binding:
+                name: macvtap
+      networks:
+        - name: lan
+          multus:
+            networkName: network/vm-macvtap
+      volumes:
+        - name: rootdisk
+          dataVolume:
+            name: debian-desktop-pvc
+        - name: cloudinitdisk
+          cloudInitNoCloud:
+            networkData: |
+              network:
+                version: 1
+                config:
+                  - type: physical
+                    name: enp1s0
+                    subnets:
+                      - type: static
+                        address: 192.168.57.12/24
+                        gateway: 192.168.57.1
+                        dns_nameservers:
+                          - 10.0.6.1
+            userData: |
+              #cloud-config
+              hostname: debian-desktop
+              manage_etc_hosts: true
+              no_ssh_fingerprints: true
+              users:
+                - name: user
+                  gecos: User
+                  groups: [adm, sudo]
+                  shell: /bin/bash
+                  sudo: ALL=(ALL) NOPASSWD:ALL
+                  lock_passwd: true
+                  ssh_authorized_keys:
+                    - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKTGSd9Ukp/CKEWssokvlEop1wrACYVS75fdKy5gNo37
+                    - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAqkeDwM1SWrSy7w+tR0oyVzLIcAU5yz5doTgI8u/eaw
+                    - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKRG6pXx4rXDOY8X5xamGwrZCb/OLTXgv963EsqI0HJp
+              package_update: true
+              package_upgrade: true
+              packages:
+                - qemu-guest-agent
+                - xfce4
+                - xfce4-goodies
+                - lightdm
+                - firefox-esr
+                - dbus-x11
+              runcmd:
+                - systemctl enable --now qemu-guest-agent || true
+                - systemctl set-default graphical.target
+                - systemctl enable lightdm
+  dataVolumeTemplates:
+    - metadata:
+        name: debian-desktop-pvc
+      spec:
+        storage:
+          resources:
+            requests:
+              storage: 50Gi
+          accessModes:
+            - ReadWriteMany
+          storageClassName: nfs-fast
+        source:
+          registry:
+            url: "docker://quay.io/containerdisks/debian:12"
