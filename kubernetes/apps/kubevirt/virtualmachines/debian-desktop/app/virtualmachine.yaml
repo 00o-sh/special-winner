@@ -101,4 +101,5 @@ spec:
           storageClassName: nfs-fast
         source:
           registry:
-            url: "docker://quay.io/containerdisks/debian:12"
+            # renovate: datasource=docker depName=quay.io/containerdisks/debian
+            url: "docker://quay.io/containerdisks/debian:13"
