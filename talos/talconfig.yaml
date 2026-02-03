@@ -53,7 +53,7 @@ nodes:
       - interface: bond0
         bond:
           mode: active-backup
-          deviceSelectors: [{ hardwareAddr: "bc:24:11:*" }]
+          deviceSelectors: [{ hardwareAddr: "bc:24:11:d7:17:*" }]
         mtu: 1500
         dhcp: false
         addresses:
@@ -77,7 +77,7 @@ nodes:
       - interface: bond0
         bond:
           mode: active-backup
-          deviceSelectors: [{ hardwareAddr: "bc:24:11:*" }]
+          deviceSelectors: [{ hardwareAddr: "bc:24:11:80:3e:*" }]
         mtu: 1500
         dhcp: false
         addresses:
