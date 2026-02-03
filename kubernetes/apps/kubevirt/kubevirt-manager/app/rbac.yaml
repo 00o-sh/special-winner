@@ -13,11 +13,20 @@ rules:
       - persistentvolumes
       - pods
       - pods/exec
+      - pods/log
       - services
       - secrets
       - configmaps
       - events
     verbs: ["*"]
+  # RBAC resources
+  - apiGroups: ["rbac.authorization.k8s.io"]
+    resources:
+      - roles
+      - clusterroles
+      - rolebindings
+      - clusterrolebindings
+    verbs: ["get", "list", "watch", "update", "patch"]
   # Apps resources
   - apiGroups: ["apps"]
     resources:
