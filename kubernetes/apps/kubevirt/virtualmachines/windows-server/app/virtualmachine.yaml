@@ -62,9 +62,7 @@ spec:
             name: windows-server-pvc
         - name: installiso
           containerDisk:
-            # Build: docker build -t ghcr.io/00o-sh/windows-server-2022-iso:ltsc2022 .
-            # Dockerfile: FROM scratch \n ADD windows-server-2022.iso /disk/
-            image: ghcr.io/00o-sh/windows-server-2022-iso:ltsc2022
+            image: ghcr.io/00o-sh/windows-server-2022-eval-iso:ltsc2022-eval
         - name: virtio-drivers
           containerDisk:
             image: quay.io/kubevirt/virtio-container-disk:v1.3.1
