@@ -43,14 +43,10 @@ nodes:
 
   # Worker node running as Proxmox VE VM
   - hostname: "node-01-pve"
-    # TODO: Update with actual VM IP address
     ipAddress: "10.0.6.212"
-    # Virtio disk for PVE VM
     installDisk: "/dev/vda"
     machineSpec:
       secureboot: false
-    # TODO: Update schematic_id from Talos Image Factory (https://factory.talos.dev)
-    # Use the same schematic as other nodes, or customize with VM-specific extensions
     talosImageURL: factory.talos.dev/installer/1f27123b6d8a11ff4f1b5f09f839f3662244f6bb11124faebe050c632291947b
     controlPlane: false
     patches:
