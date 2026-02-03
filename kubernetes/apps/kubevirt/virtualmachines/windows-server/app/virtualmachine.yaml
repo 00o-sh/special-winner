@@ -4,7 +4,7 @@ kind: VirtualMachine
 metadata:
   name: windows-server
 spec:
-  running: true
+  running: false
   template:
     metadata:
       labels:
@@ -63,6 +63,4 @@ spec:
             - ReadWriteMany
           storageClassName: nfs-fast
         source:
-          registry:
-            # renovate: datasource=docker
-            url: "docker://quay.io/containerdisks/windows-server-2022:ltsc2022"
+          blank: {}
