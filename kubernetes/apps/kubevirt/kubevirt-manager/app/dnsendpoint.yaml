@@ -5,7 +5,7 @@ metadata:
   name: kubevirt-manager
 spec:
   endpoints:
-    - dnsName: kubevirt.00o.sh
+    - dnsName: kubevirt-novnc.00o.sh
       recordTTL: 300
       recordType: A
       targets:
