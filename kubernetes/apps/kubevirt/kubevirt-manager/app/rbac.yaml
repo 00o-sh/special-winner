@@ -1,0 +1,128 @@
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: kubevirt-manager
+rules:
+  # Core resources
+  - apiGroups: [""]
+    resources:
+      - nodes
+      - namespaces
+      - persistentvolumeclaims
+      - persistentvolumes
+      - pods
+      - pods/exec
+      - services
+      - secrets
+      - configmaps
+      - events
+    verbs: ["*"]
+  # Apps resources
+  - apiGroups: ["apps"]
+    resources:
+      - deployments
+      - replicasets
+    verbs: ["*"]
+  # Storage resources
+  - apiGroups: ["storage.k8s.io"]
+    resources:
+      - storageclasses
+    verbs: ["get", "list", "watch"]
+  # Networking
+  - apiGroups: ["networking.k8s.io"]
+    resources:
+      - networkpolicies
+    verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+  - apiGroups: ["k8s.cni.cncf.io"]
+    resources:
+      - network-attachment-definitions
+    verbs: ["get", "list", "watch"]
+  # KubeVirt resources
+  - apiGroups: ["kubevirt.io"]
+    resources:
+      - virtualmachines
+      - virtualmachines/start
+      - virtualmachines/stop
+      - virtualmachines/restart
+      - virtualmachineinstances
+      - virtualmachineinstances/console
+      - virtualmachineinstances/vnc
+      - virtualmachineinstances/portforward
+      - virtualmachineinstances/freeze
+      - virtualmachineinstances/unfreeze
+      - virtualmachineinstances/softreboot
+      - virtualmachineinstancemigrations
+      - virtualmachineinstancepresets
+      - virtualmachineinstancereplicasets
+      - virtualmachineclones
+    verbs: ["*"]
+  - apiGroups: ["kubevirt.io"]
+    resources:
+      - kubevirts
+    verbs: ["get", "list", "watch"]
+  # Instance types
+  - apiGroups: ["instancetype.kubevirt.io"]
+    resources:
+      - virtualmachineinstancetypes
+      - virtualmachineclusterinstancetypes
+      - virtualmachinepreferences
+      - virtualmachineclusterpreferences
+    verbs: ["*"]
+  # Pool resources
+  - apiGroups: ["pool.kubevirt.io"]
+    resources:
+      - virtualmachinepools
+    verbs: ["*"]
+  # CDI resources
+  - apiGroups: ["cdi.kubevirt.io"]
+    resources:
+      - datavolumes
+      - cdiconfigs
+      - datasources
+      - dataimportcrons
+    verbs: ["*"]
+  - apiGroups: ["upload.cdi.kubevirt.io"]
+    resources:
+      - uploadtokenrequests
+    verbs: ["*"]
+  # Snapshot resources
+  - apiGroups: ["snapshot.kubevirt.io"]
+    resources:
+      - virtualmachinesnapshots
+      - virtualmachinesnapshotcontents
+      - virtualmachinerestores
+    verbs: ["*"]
+  # Export resources
+  - apiGroups: ["export.kubevirt.io"]
+    resources:
+      - virtualmachineexports
+    verbs: ["*"]
+  # Migrations
+  - apiGroups: ["migrations.kubevirt.io"]
+    resources:
+      - migrationpolicies
+    verbs: ["*"]
+  # Clone resources
+  - apiGroups: ["clone.kubevirt.io"]
+    resources:
+      - virtualmachineclones
+    verbs: ["*"]
+  # kubevirt-manager CRD
+  - apiGroups: ["kubevirt-manager.io"]
+    resources:
+      - images
+    verbs: ["*"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: kubevirt-manager
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: kubevirt-manager
+subjects:
+  - kind: ServiceAccount
+    name: kubevirt-manager
+    namespace: kubevirt
