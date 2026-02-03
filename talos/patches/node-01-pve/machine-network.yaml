@@ -1,0 +1,16 @@
+# Network configuration for node-01-pve (Proxmox VE VM)
+# VM uses virtio-net - no bonding required
+machine:
+  network:
+    interfaces:
+      - deviceSelector:
+          # TODO: Update with actual VM MAC address
+          hardwareAddr: "bc:24:11:*"
+        dhcp: false
+        addresses:
+          # TODO: Update with actual IP address
+          - 10.0.6.212/24
+        routes:
+          - network: 0.0.0.0/0
+            gateway: 10.0.6.1
+        mtu: 1500
