@@ -26,7 +26,7 @@ spec:
           app:
             image:
               repository: penpotapp/backend
-              tag: 2.12.1
+              tag: 2.13.0
             env:
               PENPOT_PUBLIC_URI: https://penpot.00o.sh
               PENPOT_FLAGS: enable-registration enable-login-with-password disable-email-verification
