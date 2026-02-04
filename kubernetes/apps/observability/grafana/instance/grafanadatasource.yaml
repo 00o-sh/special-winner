@@ -43,7 +43,7 @@ spec:
       grafana.internal/instance: grafana
   plugins:
       - name: victoriametrics-logs-datasource
-        version: 0.23.0
+        version: 0.24.0
   datasource:
     type: victoriametrics-logs-datasource
     name: victoria-logs
