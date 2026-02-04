@@ -2,13 +2,13 @@
 apiVersion: kubevirt.io/v1
 kind: VirtualMachine
 metadata:
-  name: ubuntu-server
+  name: &name ubuntu-server
 spec:
   running: true
   template:
     metadata:
       labels:
-        kubevirt.io/vm: ubuntu-server
+        kubevirt.io/vm: *name
       annotations:
         kubevirt.io/allow-pod-bridge-network-live-migration: "true"
         k8s.v1.cni.cncf.io/networks: |-
@@ -44,7 +44,7 @@ spec:
       volumes:
         - name: rootdisk
           dataVolume:
-            name: ubuntu-server-pvc
+            name: "{{ .Release.Name }}-pvc"
         - name: cloudinitdisk
           cloudInitNoCloud:
             networkData: |
@@ -61,7 +61,7 @@ spec:
                           - 10.0.6.1
             userData: |
               #cloud-config
-              hostname: ubuntu-server
+              hostname: *app
               manage_etc_hosts: true
               no_ssh_fingerprints: true
               users:
@@ -83,7 +83,7 @@ spec:
                 - systemctl start qemu-guest-agent || true
   dataVolumeTemplates:
     - metadata:
-        name: ubuntu-server-pvc
+        name: "{{ .Release.Name }}-pvc"
       spec:
         storage:
           resources:

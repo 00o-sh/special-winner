@@ -2,13 +2,13 @@
 apiVersion: kubevirt.io/v1
 kind: VirtualMachine
 metadata:
-  name: debian-desktop
+  name: &name debian-desktop
 spec:
   running: true
   template:
     metadata:
       labels:
-        kubevirt.io/vm: debian-desktop
+        kubevirt.io/vm: *name
       annotations:
         kubevirt.io/allow-pod-bridge-network-live-migration: "true"
         k8s.v1.cni.cncf.io/networks: |-
@@ -44,7 +44,7 @@ spec:
       volumes:
         - name: rootdisk
           dataVolume:
-            name: debian-desktop-pvc
+            name: "{{ .Release.Name }}-pvc"
         - name: cloudinitdisk
           cloudInitNoCloud:
             networkData: |
@@ -61,7 +61,7 @@ spec:
                           - 10.0.6.1
             userData: |
               #cloud-config
-              hostname: debian-desktop
+              hostname: *name
               manage_etc_hosts: true
               no_ssh_fingerprints: true
               users:
@@ -90,7 +90,7 @@ spec:
                 - systemctl enable lightdm
   dataVolumeTemplates:
     - metadata:
-        name: debian-desktop-pvc
+        name: "{{ .Release.Name }}-pvc"
       spec:
         storage:
           resources:

@@ -2,13 +2,13 @@
 apiVersion: kubevirt.io/v1
 kind: VirtualMachine
 metadata:
-  name: windows-server
+  name: &name windows-server
 spec:
   running: true
   template:
     metadata:
       labels:
-        kubevirt.io/vm: windows-server
+        kubevirt.io/vm: *name
       annotations:
         kubevirt.io/allow-pod-bridge-network-live-migration: "true"
         k8s.v1.cni.cncf.io/networks: |-
@@ -56,7 +56,7 @@ spec:
       volumes:
         - name: rootdisk
           dataVolume:
-            name: windows-server-pvc
+            name: "{{ .Release.Name }}-pvc"
         - name: installiso
           containerDisk:
             # renovate: datasource=docker depName=ghcr.io/00o-sh/windows-server
@@ -67,7 +67,7 @@ spec:
             image: ghcr.io/00o-sh/windows-drivers:server@sha256:60baa212536bf8767b7cbc0047ada2300eb0ab300c0a6d1f2173bd61544f9aed
   dataVolumeTemplates:
     - metadata:
-        name: windows-server-pvc
+        name: "{{ .Release.Name }}-pvc"
       spec:
         storage:
           resources:

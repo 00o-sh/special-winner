@@ -5,9 +5,9 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: windows-server
+  name: &name windows-server
   annotations:
-    external-dns.alpha.kubernetes.io/hostname: windows-server.00o.sh
+    external-dns.alpha.kubernetes.io/hostname: "{{ .Release.Name }}.00o.sh"
 spec:
   clusterIP: None
   ports:
@@ -17,9 +17,9 @@ spec:
 apiVersion: discovery.k8s.io/v1
 kind: EndpointSlice
 metadata:
-  name: windows-server
+  name: *name
   labels:
-    kubernetes.io/service-name: windows-server
+    kubernetes.io/service-name: *name
 addressType: IPv4
 ports:
   - name: placeholder
