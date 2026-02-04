@@ -20,6 +20,7 @@ This document provides comprehensive guidance for AI assistants working with thi
 - **Certificates**: cert-manager with Cloudflare integration
 - **Package Management**: Helm 4.1.0 (Helm v4 for chart management)
 - **Database**: CloudNative-PG (PostgreSQL 17.7) + Dragonfly (Redis-compatible)
+- **Virtualization**: KubeVirt 1.7.0 (virtual machine management)
 
 ## Directory Structure
 
@@ -628,6 +629,13 @@ talosctl logs --nodes <ip> --insecure
 - metrics-server
 - reloader (automatic pod restarts)
 - snapshot-controller (volume snapshots)
+- spegel (peer-to-peer container image sharing)
+
+**kubevirt**: Virtual machine infrastructure
+- cdi (Containerized Data Importer for VM disk management)
+- kubevirt (KubeVirt operator)
+- kubevirt-manager (web UI for VM management)
+- virtualmachines (VM instances: debian-desktop, debian-server, ubuntu-server, windows-server)
 
 **media**: Media applications
 - autobrr (automation for torrent trackers)
@@ -688,6 +696,7 @@ talosctl logs --nodes <ip> --insecure
   - [Cilium](https://cilium.io/)
   - [SOPS](https://github.com/getsops/sops)
   - [Helm](https://helm.sh/) (Note: Using v4)
+  - [KubeVirt](https://kubevirt.io/)
 
 ## Version Information
 
@@ -697,13 +706,20 @@ This documentation applies to:
 - Flux CD: 2.7.5
 - Cilium: 1.19.0
 - Helm: 4.1.0
-- Python: 3.14.2
+- Python: 3.14.3
 - CloudNative-PG: PostgreSQL 17.7
+- KubeVirt: 1.7.0
 
 Check `.mise.toml` for exact versions of all tools.
 
 ## Recent Notable Changes
 
+- **2026-02-04**: Added KubeVirt virtualization namespace with VMs (debian-desktop, debian-server, ubuntu-server, windows-server)
+- **2026-02-04**: Added Spegel for peer-to-peer container image sharing in kube-system
+- **2026-02-04**: Added kubevirt-manager web UI for VM management
+- **2026-02-04**: Added Grafana dashboards for Kubernetes infrastructure monitoring
+- **2026-02-04**: Python updated from 3.14.2 to 3.14.3
+- **2026-02-04**: VictoriaLogs datasource plugin updated to 0.24.0
 - **2026-01-31**: Added database namespace with CloudNative-PG (PostgreSQL 17.7 HA cluster) and Dragonfly operator
 - **2026-01-31**: Added Penpot design platform to utils namespace (backend, frontend, exporter, valkey)
 - **2026-01-31**: Talos Linux updated from 1.12.1 to 1.12.2
@@ -722,6 +738,73 @@ Check `.mise.toml` for exact versions of all tools.
 - **2026-01-08**: NFS-scaler component added using KEDA for smart scaling
 
 ## Component Deep Dives
+
+### KubeVirt Virtualization Platform
+
+Located in `kubernetes/apps/kubevirt/`, this namespace provides virtual machine capabilities within the Kubernetes cluster.
+
+**Components**:
+- **kubevirt**: KubeVirt operator for VM lifecycle management
+- **cdi**: Containerized Data Importer for VM disk provisioning
+- **kubevirt-manager**: Web UI for VM management (exposed at `kubevirt.00o.sh`)
+- **virtualmachines**: Pre-configured VM templates and instances
+
+**Features Enabled**:
+- LiveMigration (move VMs between nodes without downtime)
+- Macvtap (direct network attachment for VMs)
+- HotplugVolumes (attach/detach volumes without restart)
+- HostDevices and GPU passthrough support
+- NetworkBindingPlugins for advanced networking
+
+**Current VMs**:
+- **debian-desktop**: Debian 13 with XFCE4 desktop environment (1 CPU, 1G RAM, 50Gi NFS storage)
+- **debian-server**: Debian 13 headless server (1 CPU, 1G RAM, 50Gi NFS storage)
+- **ubuntu-server**: Ubuntu server instance
+- **windows-server**: Windows Server 2022 with virtio drivers (2 CPU, 2G RAM, 60Gi NFS storage)
+
+**Storage**:
+- Uses NFS (nfs-fast storageClass) for VM disks with ReadWriteMany access
+- Enables live migration between nodes
+- CDI uses openebs-hostpath for scratch space during imports
+
+**Networking**:
+- VMs use Multus with macvtap for direct network access
+- Each VM has a dedicated MAC address
+- DNS endpoints configured via external-dns
+
+**CLI Tool**: Use `virtctl` from mise for VM management:
+```bash
+virtctl console <vm-name>      # Access VM console
+virtctl ssh <vm-name>          # SSH into VM (if supported)
+virtctl start/stop <vm-name>   # Start/stop VM
+virtctl migrate <vm-name>      # Live migrate VM
+```
+
+### Spegel (Peer-to-Peer Image Sharing)
+
+Located in `kubernetes/apps/kube-system/spegel/`, this component enables peer-to-peer container image sharing between cluster nodes.
+
+**How it works**:
+- Nodes share container images directly with each other
+- Reduces external registry pulls and bandwidth usage
+- Provides resilience when external registries are unavailable
+- Uses containerd's registry mirroring capabilities
+
+**Configuration**:
+- Registry host port: 29999
+- Mirror resolve timeout: 5s (increased from default 20ms for reliability)
+- Mirror resolve retries: 3
+- Containerd socket: /run/containerd/containerd.sock
+- Registry config path: /etc/cri/conf.d/hosts
+
+**Monitoring**:
+- Grafana dashboard enabled (via GrafanaOperator)
+- ServiceMonitor for Prometheus metrics
+
+**Benefits**:
+- Faster image pulls for frequently used images
+- Reduced egress costs and external network dependency
+- Automatic image distribution across nodes
 
 ### GitHub Actions Self-Hosted Runner System
 
@@ -877,5 +960,5 @@ Located in `kubernetes/apps/utils/penpot/`, Penpot is an open-source design and 
 
 ---
 
-**Last Updated**: 2026-01-31
+**Last Updated**: 2026-02-04
 **Template Source**: [onedr0p/cluster-template](https://github.com/onedr0p/cluster-template)
