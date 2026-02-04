@@ -42,7 +42,8 @@ spec:
     matchLabels:
       grafana.internal/instance: grafana
   plugins:
-      name: victoriametrics-logs-datasource
+      - name: victoriametrics-logs-datasource
+        version: 0.23.0
   datasource:
     type: victoriametrics-logs-datasource
     name: victoria-logs
