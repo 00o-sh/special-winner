@@ -63,6 +63,7 @@ A Kubernetes cluster deployed with [Talos Linux](https://github.com/siderolabs/t
 **Virtualization:**
 - [KubeVirt](https://kubevirt.io/) - Virtual machine management on Kubernetes
 - [CDI](https://github.com/kubevirt/containerized-data-importer) - Containerized Data Importer for VM disk images
+- [KubeVirt Manager](https://kubevirt-manager.io/) - Web UI for VM management
 - [Macvtap CNI](https://github.com/kubevirt/macvtap-cni) - Direct network connectivity for VMs
 
 **System Management:**
@@ -635,7 +636,7 @@ If this repo is too hot to handle or too cold to hold check out these following 
 **Deployed Components:** 55+ applications across 15 namespaces
 **Template Source:** [onedr0p/cluster-template](https://github.com/onedr0p/cluster-template)
 **Infrastructure:** GitOps with Flux CD + Talos Linux
-**Last Updated:** 2026-02-02
+**Last Updated:** 2026-02-04
 
 ---
 
