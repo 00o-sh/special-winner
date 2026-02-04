@@ -63,6 +63,7 @@ spec:
         - name: installiso
           containerDisk:
             image: ghcr.io/00o-sh/windows-server-2022-eval-iso:ltsc2022-eval
+            imagePullPolicy: Always
         - name: virtio-drivers
           containerDisk:
             image: quay.io/kubevirt/virtio-container-disk:v1.3.1
