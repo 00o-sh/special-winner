@@ -35,11 +35,11 @@ spec:
         devices:
           disks:
             - name: rootdisk
-              bootOrder: 2
+              bootOrder: 1
               disk:
                 bus: sata
             - name: installiso
-              bootOrder: 1
+              bootOrder: 69
               cdrom:
                 bus: sata
             - name: virtio-drivers
