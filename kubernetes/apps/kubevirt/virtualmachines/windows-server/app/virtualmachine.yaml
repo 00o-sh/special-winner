@@ -59,12 +59,10 @@ spec:
             name: windows-server-pvc
         - name: installiso
           containerDisk:
-            image: ghcr.io/00o-sh/windows-server:ltsc2022-eval
-            imagePullPolicy: Always
+            image: ghcr.io/00o-sh/windows-server@sha256:157478dbf143fab09f5f3131c2eb6be8e0652edeed351b4d87b0b467e8c27065
         - name: virtio-drivers
           containerDisk:
-            image: ghcr.io/00o-sh/windows-drivers:ltsc2022-eval
-            imagePullPolicy: Always
+            image: ghcr.io/00o-sh/windows-drivers@sha256:26ebafe33944fb5ae3350ff4b812d2907d1cb5264571e11cc2bb90e0d4ca41ae
   dataVolumeTemplates:
     - metadata:
         name: windows-server-pvc
