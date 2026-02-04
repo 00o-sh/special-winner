@@ -35,15 +35,8 @@ spec:
         devices:
           disks:
             - name: rootdisk
-              bootOrder: 2
-              disk:
-                bus: sata
-            - name: installiso
               bootOrder: 1
-              cdrom:
-                bus: sata
-            - name: virtio-drivers
-              cdrom:
+              disk:
                 bus: sata
           interfaces:
             - name: lan
@@ -57,14 +50,6 @@ spec:
         - name: rootdisk
           dataVolume:
             name: windows-server-pvc
-        - name: installiso
-          containerDisk:
-            # renovate: datasource=docker depName=ghcr.io/00o-sh/windows-server
-            image: ghcr.io/00o-sh/windows-server:ltsc2022-eval-np@sha256:190364def1b3c58bbce8073e5fcd1de0affaf8d94ba379e5e64dca3a2f6c1b19
-        - name: virtio-drivers
-          containerDisk:
-            # renovate: datasource=docker depName=ghcr.io/00o-sh/windows-drivers
-            image: ghcr.io/00o-sh/windows-drivers:ltsc2022-eval@sha256:b120988d578533232f623724db876621434100be5065089f93a9219b0038b543
   dataVolumeTemplates:
     - metadata:
         name: windows-server-pvc
