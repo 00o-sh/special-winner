@@ -45,9 +45,6 @@ spec:
             - name: virtio-drivers
               cdrom:
                 bus: sata
-            - name: sysprep
-              cdrom:
-                bus: sata
           interfaces:
             - name: lan
               binding:
@@ -66,11 +63,8 @@ spec:
             imagePullPolicy: Always
         - name: virtio-drivers
           containerDisk:
-            image: quay.io/kubevirt/virtio-container-disk:v1.3.1
-        - name: sysprep
-          sysprep:
-            configMap:
-              name: windows-server-sysprep
+            image: ghcr.io/00o-sh/windows-virtio-drivers:ltsc2022-eval
+            imagePullPolicy: Always
   dataVolumeTemplates:
     - metadata:
         name: windows-server-pvc
