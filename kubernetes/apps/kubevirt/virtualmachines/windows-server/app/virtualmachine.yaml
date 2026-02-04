@@ -64,7 +64,7 @@ spec:
         - name: virtio-drivers
           containerDisk:
             # renovate: datasource=docker depName=ghcr.io/00o-sh/windows-drivers
-            image: ghcr.io/00o-sh/windows-drivers:ltsc2022-eval@sha256:b120988d578533232f623724db876621434100be5065089f93a9219b0038b543
+            image: ghcr.io/00o-sh/windows-drivers:server@sha256:d150762d587aefc4a755e28972ed674160a539284f9698870792bef5c16a3a89
   dataVolumeTemplates:
     - metadata:
         name: windows-server-pvc
