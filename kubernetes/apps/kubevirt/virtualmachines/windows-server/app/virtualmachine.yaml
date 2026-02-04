@@ -60,7 +60,7 @@ spec:
         - name: installiso
           containerDisk:
             # renovate: datasource=docker depName=ghcr.io/00o-sh/windows-server
-            image: ghcr.io/00o-sh/windows-server:ltsc2022-eval@sha256:68468f81fd3eaa52466c55a2d975c1e33d20badad97459ebafcb0ca7471af8ae
+            image: ghcr.io/00o-sh/windows-server:ltsc2022-eval-np@sha256:190364def1b3c58bbce8073e5fcd1de0affaf8d94ba379e5e64dca3a2f6c1b19
         - name: virtio-drivers
           containerDisk:
             # renovate: datasource=docker depName=ghcr.io/00o-sh/windows-drivers
