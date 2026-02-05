@@ -1,14 +1,12 @@
 ---
-# DNSEndpoint for VM DNS registration.
-# VM uses macvtap for direct L2 network access with its own IP.
 apiVersion: externaldns.k8s.io/v1alpha1
 kind: DNSEndpoint
 metadata:
-  name: ubuntu-server
+  name: ${VM_NAME}
 spec:
   endpoints:
-    - dnsName: "{{ .Release.Name }}.00o.sh"
+    - dnsName: ${VM_NAME}.00o.sh
       recordTTL: 300
       recordType: A
       targets:
-        - 192.168.57.10
+        - ${VM_IP}

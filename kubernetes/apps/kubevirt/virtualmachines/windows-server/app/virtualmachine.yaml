@@ -2,29 +2,29 @@
 apiVersion: kubevirt.io/v1
 kind: VirtualMachine
 metadata:
-  name: &name windows-server
+  name: ${VM_NAME}
 spec:
   running: true
   template:
     metadata:
       labels:
-        kubevirt.io/vm: *name
+        kubevirt.io/vm: ${VM_NAME}
       annotations:
         kubevirt.io/allow-pod-bridge-network-live-migration: "true"
         k8s.v1.cni.cncf.io/networks: |-
           [{
             "name": "vm-macvtap",
             "namespace": "network",
-            "mac": "52:54:00:57:00:20"
+            "mac": "${VM_MAC}"
           }]
     spec:
       evictionStrategy: LiveMigrate
       domain:
         cpu:
-          cores: 2
+          cores: ${VM_CPU}
         resources:
           requests:
-            memory: 2G
+            memory: ${VM_MEMORY}
         features:
           acpi: {}
           apic: {}
@@ -52,27 +52,25 @@ spec:
       networks:
         - name: lan
           multus:
-            networkName: network/vm-macvtap
+            networkName: ${VM_NETWORK}
       volumes:
         - name: rootdisk
           dataVolume:
-            name: "{{ .Release.Name }}-pvc"
+            name: ${VM_NAME}-pvc
         - name: installiso
           containerDisk:
-            # renovate: datasource=docker depName=ghcr.io/00o-sh/windows-server
-            image: ghcr.io/00o-sh/windows-server:2022-np@sha256:a58fc901489c01315da03d76c16138ebc7e8dc09704b89d75f515d8e3d74e5aa
+            image: ${VM_IMAGE}
         - name: virtio-drivers
           containerDisk:
-            # renovate: datasource=docker depName=ghcr.io/00o-sh/windows-drivers
-            image: ghcr.io/00o-sh/windows-drivers:server@sha256:60baa212536bf8767b7cbc0047ada2300eb0ab300c0a6d1f2173bd61544f9aed
+            image: ${VM_DRIVERS_IMAGE}
   dataVolumeTemplates:
     - metadata:
-        name: "{{ .Release.Name }}-pvc"
+        name: ${VM_NAME}-pvc
       spec:
         storage:
           resources:
             requests:
-              storage: 60Gi
+              storage: ${VM_STORAGE}
           accessModes:
             - ReadWriteMany
           storageClassName: nfs-fast

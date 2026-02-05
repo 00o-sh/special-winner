@@ -2,29 +2,29 @@
 apiVersion: kubevirt.io/v1
 kind: VirtualMachine
 metadata:
-  name: &name debian-desktop
+  name: ${VM_NAME}
 spec:
   running: true
   template:
     metadata:
       labels:
-        kubevirt.io/vm: *name
+        kubevirt.io/vm: ${VM_NAME}
       annotations:
         kubevirt.io/allow-pod-bridge-network-live-migration: "true"
         k8s.v1.cni.cncf.io/networks: |-
           [{
             "name": "vm-macvtap",
             "namespace": "network",
-            "mac": "52:54:00:57:00:12"
+            "mac": "${VM_MAC}"
           }]
     spec:
       evictionStrategy: LiveMigrate
       domain:
         cpu:
-          cores: 1
+          cores: ${VM_CPU}
         resources:
           requests:
-            memory: 1G
+            memory: ${VM_MEMORY}
         devices:
           disks:
             - name: rootdisk
@@ -40,11 +40,11 @@ spec:
       networks:
         - name: lan
           multus:
-            networkName: network/vm-macvtap
+            networkName: ${VM_NETWORK}
       volumes:
         - name: rootdisk
           dataVolume:
-            name: "{{ .Release.Name }}-pvc"
+            name: ${VM_NAME}-pvc
         - name: cloudinitdisk
           cloudInitNoCloud:
             networkData: |
@@ -55,13 +55,13 @@ spec:
                     name: enp1s0
                     subnets:
                       - type: static
-                        address: 192.168.57.12/24
-                        gateway: 192.168.57.1
+                        address: ${VM_IP}/24
+                        gateway: ${VM_GATEWAY}
                         dns_nameservers:
-                          - 10.0.6.1
+                          - ${VM_DNS}
             userData: |
               #cloud-config
-              hostname: *name
+              hostname: ${VM_NAME}
               manage_etc_hosts: true
               no_ssh_fingerprints: true
               users:
@@ -90,15 +90,15 @@ spec:
                 - systemctl enable lightdm
   dataVolumeTemplates:
     - metadata:
-        name: "{{ .Release.Name }}-pvc"
+        name: ${VM_NAME}-pvc
       spec:
         storage:
           resources:
             requests:
-              storage: 50Gi
+              storage: ${VM_STORAGE}
           accessModes:
             - ReadWriteMany
           storageClassName: nfs-fast
         source:
           registry:
-            url: "docker://quay.io/containerdisks/debian:13"
+            url: "${VM_IMAGE}"
