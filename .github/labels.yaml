@@ -112,6 +112,9 @@
 - name: component/kubevirt-vms
   color: "5319e7"
   description: "KubeVirt virtual machines"
+- name: component/spegel
+  color: "5319e7"
+  description: "Spegel peer-to-peer image sharing"
 
 # Type Labels - Development
 - name: type/bug

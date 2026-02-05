@@ -197,7 +197,12 @@ component/kubevirt:
 component/kubevirt-vms:
   - changed-files:
       - any-glob-to-any-file:
-          - kubernetes/apps/kubevirt/ubuntu-server/**/*
+          - kubernetes/apps/kubevirt/virtualmachines/**/*
+
+component/spegel:
+  - changed-files:
+      - any-glob-to-any-file:
+          - kubernetes/apps/kube-system/spegel/**/*
 
 # Type Labels - Based on file patterns and commit messages
 type/ci:
