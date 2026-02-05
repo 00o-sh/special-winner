@@ -21,10 +21,10 @@ spec:
       evictionStrategy: LiveMigrate
       domain:
         cpu:
-          cores: 2
+          cores: ${VM_CPU}
         resources:
           requests:
-            memory: 2G
+            memory: ${VM_MEMORY}
         features:
           acpi: {}
           apic: {}
@@ -52,7 +52,7 @@ spec:
       networks:
         - name: lan
           multus:
-            networkName: network/vm-macvtap
+            networkName: ${VM_NETWORK}
       volumes:
         - name: rootdisk
           dataVolume:

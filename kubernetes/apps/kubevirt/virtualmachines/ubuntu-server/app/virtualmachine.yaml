@@ -21,10 +21,10 @@ spec:
       evictionStrategy: LiveMigrate
       domain:
         cpu:
-          cores: 1
+          cores: ${VM_CPU}
         resources:
           requests:
-            memory: 1G
+            memory: ${VM_MEMORY}
         devices:
           disks:
             - name: rootdisk
@@ -40,7 +40,7 @@ spec:
       networks:
         - name: lan
           multus:
-            networkName: network/vm-macvtap
+            networkName: ${VM_NETWORK}
       volumes:
         - name: rootdisk
           dataVolume:
@@ -56,9 +56,9 @@ spec:
                     subnets:
                       - type: static
                         address: ${VM_IP}/24
-                        gateway: 192.168.57.1
+                        gateway: ${VM_GATEWAY}
                         dns_nameservers:
-                          - 10.0.6.1
+                          - ${VM_DNS}
             userData: |
               #cloud-config
               hostname: ${VM_NAME}

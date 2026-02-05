@@ -7,5 +7,10 @@ data:
   VM_NAME: debian-server
   VM_IP: 192.168.57.11
   VM_MAC: "52:54:00:57:00:11"
+  VM_CPU: "1"
+  VM_MEMORY: 1G
   VM_STORAGE: 30Gi
+  VM_GATEWAY: 192.168.57.1
+  VM_DNS: 192.168.57.1
+  VM_NETWORK: network/vm-macvtap
   VM_IMAGE: "docker://quay.io/containerdisks/debian:13"
