@@ -1,5 +1,9 @@
 ---
-# Area Labels - General
+# Auto-generated labels - DO NOT EDIT MANUALLY
+# Run: ./scripts/generate-labels.sh to regenerate
+# Manual labels are preserved in the static sections below
+
+# Area Labels - General (static)
 - name: area/bootstrap
   color: "0e8a16"
   description: "Changes to bootstrap configuration"
@@ -31,51 +35,227 @@
   color: "0e8a16"
   description: "Task automation definitions"
 
-# Area Labels - Kubernetes Namespaces
+# Area Labels - Kubernetes Namespaces (auto-generated)
 - name: area/actions-runner-system
   color: "1d76db"
-  description: "GitHub Actions self-hosted runners"
+  description: "actions-runner-system namespace"
 - name: area/cert-manager
   color: "1d76db"
-  description: "Certificate management"
+  description: "cert-manager namespace"
 - name: area/database
   color: "1d76db"
-  description: "Database infrastructure"
+  description: "database namespace"
 - name: area/default
   color: "1d76db"
-  description: "Default namespace applications"
+  description: "default namespace"
 - name: area/external-secrets
   color: "1d76db"
-  description: "External secrets integration"
+  description: "external-secrets namespace"
 - name: area/flux-system
   color: "1d76db"
-  description: "Flux GitOps system"
+  description: "flux-system namespace"
 - name: area/kube-system
   color: "1d76db"
-  description: "Core Kubernetes system components"
+  description: "kube-system namespace"
 - name: area/kubevirt
   color: "1d76db"
-  description: "KubeVirt virtualization"
+  description: "kubevirt namespace"
 - name: area/media
   color: "1d76db"
-  description: "Media applications"
+  description: "media namespace"
 - name: area/network
   color: "1d76db"
-  description: "Network configuration and tools"
+  description: "network namespace"
 - name: area/observability
   color: "1d76db"
-  description: "Monitoring and observability stack"
-- name: area/storage
+  description: "observability namespace"
+- name: area/openebs-system
   color: "1d76db"
-  description: "Storage and backup systems"
+  description: "openebs-system namespace"
 - name: area/system-upgrade
   color: "1d76db"
-  description: "System upgrade automation"
+  description: "system-upgrade namespace"
 - name: area/utils
   color: "1d76db"
-  description: "Utility services"
+  description: "utils namespace"
+- name: area/volsync-system
+  color: "1d76db"
+  description: "volsync-system namespace"
 
-# Component Labels
+# Area Labels - Kubernetes Apps (auto-generated)
+- name: app/actions-runner-controller
+  color: "6f42c1"
+  description: "actions-runner-controller in actions-runner-system"
+- name: app/cert-manager
+  color: "6f42c1"
+  description: "cert-manager in cert-manager"
+- name: app/cloudnative-pg
+  color: "6f42c1"
+  description: "cloudnative-pg in database"
+- name: app/dragonfly
+  color: "6f42c1"
+  description: "dragonfly in database"
+- name: app/echo
+  color: "6f42c1"
+  description: "echo in default"
+- name: app/discord-webhook
+  color: "6f42c1"
+  description: "discord-webhook in external-secrets"
+- name: app/external-secrets
+  color: "6f42c1"
+  description: "external-secrets in external-secrets"
+- name: app/onepassword
+  color: "6f42c1"
+  description: "onepassword in external-secrets"
+- name: app/flux-instance
+  color: "6f42c1"
+  description: "flux-instance in flux-system"
+- name: app/flux-operator
+  color: "6f42c1"
+  description: "flux-operator in flux-system"
+- name: app/cilium
+  color: "6f42c1"
+  description: "cilium in kube-system"
+- name: app/coredns
+  color: "6f42c1"
+  description: "coredns in kube-system"
+- name: app/csi-driver-nfs
+  color: "6f42c1"
+  description: "csi-driver-nfs in kube-system"
+- name: app/metrics-server
+  color: "6f42c1"
+  description: "metrics-server in kube-system"
+- name: app/reloader
+  color: "6f42c1"
+  description: "reloader in kube-system"
+- name: app/snapshot-controller
+  color: "6f42c1"
+  description: "snapshot-controller in kube-system"
+- name: app/spegel
+  color: "6f42c1"
+  description: "spegel in kube-system"
+- name: app/cdi
+  color: "6f42c1"
+  description: "cdi in kubevirt"
+- name: app/kubevirt-manager
+  color: "6f42c1"
+  description: "kubevirt-manager in kubevirt"
+- name: app/kubevirt
+  color: "6f42c1"
+  description: "kubevirt in kubevirt"
+- name: app/virtualmachines
+  color: "6f42c1"
+  description: "virtualmachines in kubevirt"
+- name: app/autobrr
+  color: "6f42c1"
+  description: "autobrr in media"
+- name: app/bazarr
+  color: "6f42c1"
+  description: "bazarr in media"
+- name: app/flaresolverr
+  color: "6f42c1"
+  description: "flaresolverr in media"
+- name: app/plex
+  color: "6f42c1"
+  description: "plex in media"
+- name: app/prowlarr
+  color: "6f42c1"
+  description: "prowlarr in media"
+- name: app/qbittorrent
+  color: "6f42c1"
+  description: "qbittorrent in media"
+- name: app/qui
+  color: "6f42c1"
+  description: "qui in media"
+- name: app/radarr
+  color: "6f42c1"
+  description: "radarr in media"
+- name: app/recyclarr
+  color: "6f42c1"
+  description: "recyclarr in media"
+- name: app/seerr
+  color: "6f42c1"
+  description: "seerr in media"
+- name: app/sonarr
+  color: "6f42c1"
+  description: "sonarr in media"
+- name: app/tautulli
+  color: "6f42c1"
+  description: "tautulli in media"
+- name: app/thelounge
+  color: "6f42c1"
+  description: "thelounge in media"
+- name: app/cloudflare-dns
+  color: "6f42c1"
+  description: "cloudflare-dns in network"
+- name: app/cloudflare-tunnel
+  color: "6f42c1"
+  description: "cloudflare-tunnel in network"
+- name: app/envoy-gateway
+  color: "6f42c1"
+  description: "envoy-gateway in network"
+- name: app/k8s-gateway
+  color: "6f42c1"
+  description: "k8s-gateway in network"
+- name: app/macvtap-cni
+  color: "6f42c1"
+  description: "macvtap-cni in network"
+- name: app/multus
+  color: "6f42c1"
+  description: "multus in network"
+- name: app/unifi-dns
+  color: "6f42c1"
+  description: "unifi-dns in network"
+- name: app/blackbox-exporter
+  color: "6f42c1"
+  description: "blackbox-exporter in observability"
+- name: app/fluent-bit
+  color: "6f42c1"
+  description: "fluent-bit in observability"
+- name: app/gatus
+  color: "6f42c1"
+  description: "gatus in observability"
+- name: app/grafana
+  color: "6f42c1"
+  description: "grafana in observability"
+- name: app/keda
+  color: "6f42c1"
+  description: "keda in observability"
+- name: app/kromgo
+  color: "6f42c1"
+  description: "kromgo in observability"
+- name: app/kube-prometheus-stack
+  color: "6f42c1"
+  description: "kube-prometheus-stack in observability"
+- name: app/silence-operator
+  color: "6f42c1"
+  description: "silence-operator in observability"
+- name: app/victoria-logs
+  color: "6f42c1"
+  description: "victoria-logs in observability"
+- name: app/openebs
+  color: "6f42c1"
+  description: "openebs in openebs-system"
+- name: app/tuppr
+  color: "6f42c1"
+  description: "tuppr in system-upgrade"
+- name: app/penpot
+  color: "6f42c1"
+  description: "penpot in utils"
+- name: app/smtp-relay
+  color: "6f42c1"
+  description: "smtp-relay in utils"
+- name: app/garage
+  color: "6f42c1"
+  description: "garage in volsync-system"
+- name: app/kopia
+  color: "6f42c1"
+  description: "kopia in volsync-system"
+- name: app/volsync
+  color: "6f42c1"
+  description: "volsync in volsync-system"
+
+# Component Labels (static)
 - name: component/cilium
   color: "5319e7"
   description: "Cilium CNI networking"
@@ -116,7 +296,7 @@
   color: "5319e7"
   description: "Spegel peer-to-peer image sharing"
 
-# Type Labels - Development
+# Type Labels - Development (static)
 - name: type/bug
   color: "d73a4a"
   description: "Bug fix"
@@ -145,7 +325,7 @@
   color: "0075ca"
   description: "Documentation only"
 
-# Type Labels - Renovate Semantic
+# Type Labels - Renovate Semantic (static)
 - name: type/digest
   color: "ffeC19"
   description: "Digest update"
@@ -159,7 +339,7 @@
   color: "f6412d"
   description: "Major version update"
 
-# Renovate Source Types
+# Renovate Source Types (static)
 - name: renovate/container
   color: "027fa0"
   description: "Container image update"
@@ -176,7 +356,7 @@
   color: "027fa0"
   description: "Helm chart update"
 
-# Priority Labels
+# Priority Labels (static)
 - name: priority/critical
   color: "b60205"
   description: "Critical priority"
@@ -190,7 +370,7 @@
   color: "0e8a16"
   description: "Low priority"
 
-# Status Labels
+# Status Labels (static)
 - name: status/needs-review
   color: "d4c5f9"
   description: "Needs code review"
@@ -207,7 +387,7 @@
   color: "0e8a16"
   description: "Ready to merge"
 
-# Size Labels
+# Size Labels (static)
 - name: size/xs
   color: "c2e0c6"
   description: "Extra small change (1-9 lines)"
@@ -224,7 +404,7 @@
   color: "3f8c4f"
   description: "Extra large change (500+ lines)"
 
-# Special Labels
+# Special Labels (static)
 - name: community
   color: "370fb2"
   description: "Community contribution"

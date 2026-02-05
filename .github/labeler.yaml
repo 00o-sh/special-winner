@@ -1,4 +1,7 @@
 ---
+# Auto-generated labeler rules - DO NOT EDIT MANUALLY
+# Run: ./scripts/generate-labels.sh to regenerate
+
 # Area Labels - General
 area/bootstrap:
   - changed-files:
@@ -55,7 +58,7 @@ area/templates:
           - templates/**/*
           - makejinja.toml
 
-# Area Labels - Kubernetes Namespaces
+# Area Labels - Kubernetes Namespaces (auto-generated)
 area/actions-runner-system:
   - changed-files:
       - any-glob-to-any-file:
@@ -85,7 +88,6 @@ area/flux-system:
   - changed-files:
       - any-glob-to-any-file:
           - kubernetes/apps/flux-system/**/*
-          - kubernetes/flux/**/*
 
 area/kube-system:
   - changed-files:
@@ -112,12 +114,10 @@ area/observability:
       - any-glob-to-any-file:
           - kubernetes/apps/observability/**/*
 
-area/storage:
+area/openebs-system:
   - changed-files:
       - any-glob-to-any-file:
-          - kubernetes/apps/volsync-system/**/*
           - kubernetes/apps/openebs-system/**/*
-          - kubernetes/components/volsync/**/*
 
 area/system-upgrade:
   - changed-files:
@@ -129,7 +129,298 @@ area/utils:
       - any-glob-to-any-file:
           - kubernetes/apps/utils/**/*
 
-# Component Labels
+area/volsync-system:
+  - changed-files:
+      - any-glob-to-any-file:
+          - kubernetes/apps/volsync-system/**/*
+
+# App Labels - Kubernetes Apps (auto-generated)
+app/actions-runner-controller:
+  - changed-files:
+      - any-glob-to-any-file:
+          - kubernetes/apps/actions-runner-system/actions-runner-controller/**/*
+
+app/cert-manager:
+  - changed-files:
+      - any-glob-to-any-file:
+          - kubernetes/apps/cert-manager/cert-manager/**/*
+
+app/cloudnative-pg:
+  - changed-files:
+      - any-glob-to-any-file:
+          - kubernetes/apps/database/cloudnative-pg/**/*
+
+app/dragonfly:
+  - changed-files:
+      - any-glob-to-any-file:
+          - kubernetes/apps/database/dragonfly/**/*
+
+app/echo:
+  - changed-files:
+      - any-glob-to-any-file:
+          - kubernetes/apps/default/echo/**/*
+
+app/discord-webhook:
+  - changed-files:
+      - any-glob-to-any-file:
+          - kubernetes/apps/external-secrets/discord-webhook/**/*
+
+app/external-secrets:
+  - changed-files:
+      - any-glob-to-any-file:
+          - kubernetes/apps/external-secrets/external-secrets/**/*
+
+app/onepassword:
+  - changed-files:
+      - any-glob-to-any-file:
+          - kubernetes/apps/external-secrets/onepassword/**/*
+
+app/flux-instance:
+  - changed-files:
+      - any-glob-to-any-file:
+          - kubernetes/apps/flux-system/flux-instance/**/*
+
+app/flux-operator:
+  - changed-files:
+      - any-glob-to-any-file:
+          - kubernetes/apps/flux-system/flux-operator/**/*
+
+app/cilium:
+  - changed-files:
+      - any-glob-to-any-file:
+          - kubernetes/apps/kube-system/cilium/**/*
+
+app/coredns:
+  - changed-files:
+      - any-glob-to-any-file:
+          - kubernetes/apps/kube-system/coredns/**/*
+
+app/csi-driver-nfs:
+  - changed-files:
+      - any-glob-to-any-file:
+          - kubernetes/apps/kube-system/csi-driver-nfs/**/*
+
+app/metrics-server:
+  - changed-files:
+      - any-glob-to-any-file:
+          - kubernetes/apps/kube-system/metrics-server/**/*
+
+app/reloader:
+  - changed-files:
+      - any-glob-to-any-file:
+          - kubernetes/apps/kube-system/reloader/**/*
+
+app/snapshot-controller:
+  - changed-files:
+      - any-glob-to-any-file:
+          - kubernetes/apps/kube-system/snapshot-controller/**/*
+
+app/spegel:
+  - changed-files:
+      - any-glob-to-any-file:
+          - kubernetes/apps/kube-system/spegel/**/*
+
+app/cdi:
+  - changed-files:
+      - any-glob-to-any-file:
+          - kubernetes/apps/kubevirt/cdi/**/*
+
+app/kubevirt-manager:
+  - changed-files:
+      - any-glob-to-any-file:
+          - kubernetes/apps/kubevirt/kubevirt-manager/**/*
+
+app/kubevirt:
+  - changed-files:
+      - any-glob-to-any-file:
+          - kubernetes/apps/kubevirt/kubevirt/**/*
+
+app/virtualmachines:
+  - changed-files:
+      - any-glob-to-any-file:
+          - kubernetes/apps/kubevirt/virtualmachines/**/*
+
+app/autobrr:
+  - changed-files:
+      - any-glob-to-any-file:
+          - kubernetes/apps/media/autobrr/**/*
+
+app/bazarr:
+  - changed-files:
+      - any-glob-to-any-file:
+          - kubernetes/apps/media/bazarr/**/*
+
+app/flaresolverr:
+  - changed-files:
+      - any-glob-to-any-file:
+          - kubernetes/apps/media/flaresolverr/**/*
+
+app/plex:
+  - changed-files:
+      - any-glob-to-any-file:
+          - kubernetes/apps/media/plex/**/*
+
+app/prowlarr:
+  - changed-files:
+      - any-glob-to-any-file:
+          - kubernetes/apps/media/prowlarr/**/*
+
+app/qbittorrent:
+  - changed-files:
+      - any-glob-to-any-file:
+          - kubernetes/apps/media/qbittorrent/**/*
+
+app/qui:
+  - changed-files:
+      - any-glob-to-any-file:
+          - kubernetes/apps/media/qui/**/*
+
+app/radarr:
+  - changed-files:
+      - any-glob-to-any-file:
+          - kubernetes/apps/media/radarr/**/*
+
+app/recyclarr:
+  - changed-files:
+      - any-glob-to-any-file:
+          - kubernetes/apps/media/recyclarr/**/*
+
+app/seerr:
+  - changed-files:
+      - any-glob-to-any-file:
+          - kubernetes/apps/media/seerr/**/*
+
+app/sonarr:
+  - changed-files:
+      - any-glob-to-any-file:
+          - kubernetes/apps/media/sonarr/**/*
+
+app/tautulli:
+  - changed-files:
+      - any-glob-to-any-file:
+          - kubernetes/apps/media/tautulli/**/*
+
+app/thelounge:
+  - changed-files:
+      - any-glob-to-any-file:
+          - kubernetes/apps/media/thelounge/**/*
+
+app/cloudflare-dns:
+  - changed-files:
+      - any-glob-to-any-file:
+          - kubernetes/apps/network/cloudflare-dns/**/*
+
+app/cloudflare-tunnel:
+  - changed-files:
+      - any-glob-to-any-file:
+          - kubernetes/apps/network/cloudflare-tunnel/**/*
+
+app/envoy-gateway:
+  - changed-files:
+      - any-glob-to-any-file:
+          - kubernetes/apps/network/envoy-gateway/**/*
+
+app/k8s-gateway:
+  - changed-files:
+      - any-glob-to-any-file:
+          - kubernetes/apps/network/k8s-gateway/**/*
+
+app/macvtap-cni:
+  - changed-files:
+      - any-glob-to-any-file:
+          - kubernetes/apps/network/macvtap-cni/**/*
+
+app/multus:
+  - changed-files:
+      - any-glob-to-any-file:
+          - kubernetes/apps/network/multus/**/*
+
+app/unifi-dns:
+  - changed-files:
+      - any-glob-to-any-file:
+          - kubernetes/apps/network/unifi-dns/**/*
+
+app/blackbox-exporter:
+  - changed-files:
+      - any-glob-to-any-file:
+          - kubernetes/apps/observability/blackbox-exporter/**/*
+
+app/fluent-bit:
+  - changed-files:
+      - any-glob-to-any-file:
+          - kubernetes/apps/observability/fluent-bit/**/*
+
+app/gatus:
+  - changed-files:
+      - any-glob-to-any-file:
+          - kubernetes/apps/observability/gatus/**/*
+
+app/grafana:
+  - changed-files:
+      - any-glob-to-any-file:
+          - kubernetes/apps/observability/grafana/**/*
+
+app/keda:
+  - changed-files:
+      - any-glob-to-any-file:
+          - kubernetes/apps/observability/keda/**/*
+
+app/kromgo:
+  - changed-files:
+      - any-glob-to-any-file:
+          - kubernetes/apps/observability/kromgo/**/*
+
+app/kube-prometheus-stack:
+  - changed-files:
+      - any-glob-to-any-file:
+          - kubernetes/apps/observability/kube-prometheus-stack/**/*
+
+app/silence-operator:
+  - changed-files:
+      - any-glob-to-any-file:
+          - kubernetes/apps/observability/silence-operator/**/*
+
+app/victoria-logs:
+  - changed-files:
+      - any-glob-to-any-file:
+          - kubernetes/apps/observability/victoria-logs/**/*
+
+app/openebs:
+  - changed-files:
+      - any-glob-to-any-file:
+          - kubernetes/apps/openebs-system/openebs/**/*
+
+app/tuppr:
+  - changed-files:
+      - any-glob-to-any-file:
+          - kubernetes/apps/system-upgrade/tuppr/**/*
+
+app/penpot:
+  - changed-files:
+      - any-glob-to-any-file:
+          - kubernetes/apps/utils/penpot/**/*
+
+app/smtp-relay:
+  - changed-files:
+      - any-glob-to-any-file:
+          - kubernetes/apps/utils/smtp-relay/**/*
+
+app/garage:
+  - changed-files:
+      - any-glob-to-any-file:
+          - kubernetes/apps/volsync-system/garage/**/*
+
+app/kopia:
+  - changed-files:
+      - any-glob-to-any-file:
+          - kubernetes/apps/volsync-system/kopia/**/*
+
+app/volsync:
+  - changed-files:
+      - any-glob-to-any-file:
+          - kubernetes/apps/volsync-system/volsync/**/*
+
+# Component Labels (static)
 component/cilium:
   - changed-files:
       - any-glob-to-any-file:
@@ -204,7 +495,7 @@ component/spegel:
       - any-glob-to-any-file:
           - kubernetes/apps/kube-system/spegel/**/*
 
-# Type Labels - Based on file patterns and commit messages
+# Type Labels - Based on file patterns
 type/ci:
   - changed-files:
       - any-glob-to-any-file:
