@@ -10,6 +10,10 @@ components:
 
 resources:
   - ./namespace.yaml
+  - ./virtualmachines/debian-desktop/app/configmap.yaml
+  - ./virtualmachines/debian-server/app/configmap.yaml
+  - ./virtualmachines/ubuntu-server/app/configmap.yaml
+  - ./virtualmachines/windows-server/app/configmap.yaml
   - ./kubevirt/ks.yaml
   - ./cdi/ks.yaml
   - ./kubevirt-manager/ks.yaml
