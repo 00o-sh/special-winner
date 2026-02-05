@@ -44,7 +44,7 @@ spec:
       volumes:
         - name: rootdisk
           dataVolume:
-            name: "{{ .Release.Name }}-pvc"
+            name: debian-server-pvc
         - name: cloudinitdisk
           cloudInitNoCloud:
             networkData: |
@@ -83,7 +83,7 @@ spec:
                 - systemctl enable --now qemu-guest-agent || true
   dataVolumeTemplates:
     - metadata:
-        name: "{{ .Release.Name }}-pvc"
+        name: debian-server-pvc
       spec:
         storage:
           resources:

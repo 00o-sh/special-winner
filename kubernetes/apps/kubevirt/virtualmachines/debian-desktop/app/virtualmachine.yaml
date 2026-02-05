@@ -44,7 +44,7 @@ spec:
       volumes:
         - name: rootdisk
           dataVolume:
-            name: "{{ .Release.Name }}-pvc"
+            name: debian-desktop-pvc
         - name: cloudinitdisk
           cloudInitNoCloud:
             networkData: |
@@ -90,7 +90,7 @@ spec:
                 - systemctl enable lightdm
   dataVolumeTemplates:
     - metadata:
-        name: "{{ .Release.Name }}-pvc"
+        name: debian-desktop-pvc
       spec:
         storage:
           resources:

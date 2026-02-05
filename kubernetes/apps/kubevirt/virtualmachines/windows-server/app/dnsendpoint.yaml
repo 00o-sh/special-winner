@@ -5,7 +5,7 @@ metadata:
   name: windows-server
 spec:
   endpoints:
-    - dnsName: "{{ .Release.Name }}.00o.sh"
+    - dnsName: windows-server.00o.sh
       recordTTL: 300
       recordType: A
       targets:

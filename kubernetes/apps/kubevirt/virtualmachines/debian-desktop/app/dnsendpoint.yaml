@@ -5,7 +5,7 @@ metadata:
   name: debian-desktop
 spec:
   endpoints:
-    - dnsName: "{{ .Release.Name }}.00o.sh"
+    - dnsName: debian-desktop.00o.sh
       recordTTL: 300
       recordType: A
       targets:

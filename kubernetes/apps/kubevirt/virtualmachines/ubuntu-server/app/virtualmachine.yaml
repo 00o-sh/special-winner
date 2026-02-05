@@ -44,7 +44,7 @@ spec:
       volumes:
         - name: rootdisk
           dataVolume:
-            name: "{{ .Release.Name }}-pvc"
+            name: ubuntu-server-pvc
         - name: cloudinitdisk
           cloudInitNoCloud:
             networkData: |
@@ -61,7 +61,7 @@ spec:
                           - 10.0.6.1
             userData: |
               #cloud-config
-              hostname: *app
+              hostname: *name
               manage_etc_hosts: true
               no_ssh_fingerprints: true
               users:
@@ -83,7 +83,7 @@ spec:
                 - systemctl start qemu-guest-agent || true
   dataVolumeTemplates:
     - metadata:
-        name: "{{ .Release.Name }}-pvc"
+        name: ubuntu-server-pvc
       spec:
         storage:
           resources:

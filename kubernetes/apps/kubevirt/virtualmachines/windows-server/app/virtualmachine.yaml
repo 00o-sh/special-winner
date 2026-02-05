@@ -56,7 +56,7 @@ spec:
       volumes:
         - name: rootdisk
           dataVolume:
-            name: "{{ .Release.Name }}-pvc"
+            name: windows-server-pvc
         - name: installiso
           containerDisk:
             # renovate: datasource=docker depName=ghcr.io/00o-sh/windows-server
@@ -67,7 +67,7 @@ spec:
             image: ghcr.io/00o-sh/windows-drivers:server@sha256:60baa212536bf8767b7cbc0047ada2300eb0ab300c0a6d1f2173bd61544f9aed
   dataVolumeTemplates:
     - metadata:
-        name: "{{ .Release.Name }}-pvc"
+        name: windows-server-pvc
       spec:
         storage:
           resources:
