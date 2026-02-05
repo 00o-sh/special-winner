@@ -548,6 +548,7 @@ Community member [@whazor](https://github.com/whazor) created [Kubesearch](https
 - [ ] Network policies for namespace isolation
 - [ ] Grafana Tempo for distributed tracing
 - [ ] Falco or Trivy Operator for runtime security
+- [ ] [kguardian](https://github.com/kguardian-dev/kguardian) - eBPF-based security toolkit for auto-generating NetworkPolicy/CiliumNetworkPolicy and seccomp profiles from observed runtime behavior
 
 **Additional Services**
 - [ ] Forgejo (self-hosted Git platform)
