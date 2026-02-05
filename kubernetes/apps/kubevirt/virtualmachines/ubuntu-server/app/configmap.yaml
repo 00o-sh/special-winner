@@ -1,0 +1,11 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ubuntu-server-vars
+data:
+  VM_NAME: ubuntu-server
+  VM_IP: 192.168.57.10
+  VM_MAC: "52:54:00:57:00:10"
+  VM_STORAGE: 30Gi
+  VM_IMAGE: "docker://quay.io/containerdisks/ubuntu:24.04"

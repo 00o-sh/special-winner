@@ -16,6 +16,8 @@ spec:
     substituteFrom:
       - name: cluster-secrets
         kind: Secret
+      - name: ubuntu-server-vars
+        kind: ConfigMap
   prune: true
   sourceRef:
     kind: GitRepository

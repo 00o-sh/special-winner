@@ -2,20 +2,20 @@
 apiVersion: kubevirt.io/v1
 kind: VirtualMachine
 metadata:
-  name: &name ubuntu-server
+  name: ${VM_NAME}
 spec:
   running: true
   template:
     metadata:
       labels:
-        kubevirt.io/vm: *name
+        kubevirt.io/vm: ${VM_NAME}
       annotations:
         kubevirt.io/allow-pod-bridge-network-live-migration: "true"
         k8s.v1.cni.cncf.io/networks: |-
           [{
             "name": "vm-macvtap",
             "namespace": "network",
-            "mac": "52:54:00:57:00:10"
+            "mac": "${VM_MAC}"
           }]
     spec:
       evictionStrategy: LiveMigrate
@@ -44,7 +44,7 @@ spec:
       volumes:
         - name: rootdisk
           dataVolume:
-            name: ubuntu-server-pvc
+            name: ${VM_NAME}-pvc
         - name: cloudinitdisk
           cloudInitNoCloud:
             networkData: |
@@ -55,13 +55,13 @@ spec:
                     name: enp1s0
                     subnets:
                       - type: static
-                        address: 192.168.57.10/24
+                        address: ${VM_IP}/24
                         gateway: 192.168.57.1
                         dns_nameservers:
                           - 10.0.6.1
             userData: |
               #cloud-config
-              hostname: *name
+              hostname: ${VM_NAME}
               manage_etc_hosts: true
               no_ssh_fingerprints: true
               users:
@@ -83,15 +83,15 @@ spec:
                 - systemctl start qemu-guest-agent || true
   dataVolumeTemplates:
     - metadata:
-        name: ubuntu-server-pvc
+        name: ${VM_NAME}-pvc
       spec:
         storage:
           resources:
             requests:
-              storage: 30Gi
+              storage: ${VM_STORAGE}
           accessModes:
             - ReadWriteMany
           storageClassName: nfs-fast
         source:
           registry:
-            url: "docker://quay.io/containerdisks/ubuntu:24.04"
+            url: "${VM_IMAGE}"

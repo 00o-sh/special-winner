@@ -2,11 +2,11 @@
 apiVersion: externaldns.k8s.io/v1alpha1
 kind: DNSEndpoint
 metadata:
-  name: debian-server
+  name: ${VM_NAME}
 spec:
   endpoints:
-    - dnsName: debian-server.00o.sh
+    - dnsName: ${VM_NAME}.00o.sh
       recordTTL: 300
       recordType: A
       targets:
-        - 192.168.57.11
+        - ${VM_IP}

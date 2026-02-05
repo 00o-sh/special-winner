@@ -16,6 +16,8 @@ spec:
     substituteFrom:
       - name: cluster-secrets
         kind: Secret
+      - name: debian-desktop-vars
+        kind: ConfigMap
   prune: true
   sourceRef:
     kind: GitRepository

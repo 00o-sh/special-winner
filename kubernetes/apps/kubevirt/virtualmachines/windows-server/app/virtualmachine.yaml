@@ -2,20 +2,20 @@
 apiVersion: kubevirt.io/v1
 kind: VirtualMachine
 metadata:
-  name: &name windows-server
+  name: ${VM_NAME}
 spec:
   running: true
   template:
     metadata:
       labels:
-        kubevirt.io/vm: *name
+        kubevirt.io/vm: ${VM_NAME}
       annotations:
         kubevirt.io/allow-pod-bridge-network-live-migration: "true"
         k8s.v1.cni.cncf.io/networks: |-
           [{
             "name": "vm-macvtap",
             "namespace": "network",
-            "mac": "52:54:00:57:00:20"
+            "mac": "${VM_MAC}"
           }]
     spec:
       evictionStrategy: LiveMigrate
@@ -56,7 +56,7 @@ spec:
       volumes:
         - name: rootdisk
           dataVolume:
-            name: windows-server-pvc
+            name: ${VM_NAME}-pvc
         - name: installiso
           containerDisk:
             # renovate: datasource=docker depName=ghcr.io/00o-sh/windows-server
@@ -67,12 +67,12 @@ spec:
             image: ghcr.io/00o-sh/windows-drivers:server@sha256:60baa212536bf8767b7cbc0047ada2300eb0ab300c0a6d1f2173bd61544f9aed
   dataVolumeTemplates:
     - metadata:
-        name: windows-server-pvc
+        name: ${VM_NAME}-pvc
       spec:
         storage:
           resources:
             requests:
-              storage: 60Gi
+              storage: ${VM_STORAGE}
           accessModes:
             - ReadWriteMany
           storageClassName: nfs-fast
