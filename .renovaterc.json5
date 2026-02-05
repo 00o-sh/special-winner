@@ -137,8 +137,27 @@
       matchDatasources: ["github-releases"],
       addLabels: ["renovate/github-release"],
     },
+    {
+      matchDatasources: ["grafana-dashboards"],
+      addLabels: ["renovate/grafana-dashboard"],
+    },
+    {
+      matchUpdateTypes: ["digest"],
+      labels: ["type/digest"],
+    },
   ],
   customManagers: [
+    {
+      description: "Process Grafana dashboard URLs",
+      customType: "regex",
+      managerFilePatterns: ["/(^|/)kubernetes/.+\\.ya?ml$/"],
+      matchStrings: [
+        // https://grafana.com/api/dashboards/16611/revisions/14/download
+        "https://grafana\\.com/api/dashboards/(?<packageName>\\d+)/revisions/(?<currentValue>\\d+)/download",
+      ],
+      datasourceTemplate: "grafana-dashboards",
+      versioningTemplate: "regex:^(?<major>\\d+)$",
+    },
     {
       description: "Process annotated dependencies",
       customType: "regex",
