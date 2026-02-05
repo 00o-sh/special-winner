@@ -59,12 +59,10 @@ spec:
             name: ${VM_NAME}-pvc
         - name: installiso
           containerDisk:
-            # renovate: datasource=docker depName=ghcr.io/00o-sh/windows-server
-            image: ghcr.io/00o-sh/windows-server:2022-np@sha256:a58fc901489c01315da03d76c16138ebc7e8dc09704b89d75f515d8e3d74e5aa
+            image: ${VM_IMAGE}
         - name: virtio-drivers
           containerDisk:
-            # renovate: datasource=docker depName=ghcr.io/00o-sh/windows-drivers
-            image: ghcr.io/00o-sh/windows-drivers:server@sha256:60baa212536bf8767b7cbc0047ada2300eb0ab300c0a6d1f2173bd61544f9aed
+            image: ${VM_DRIVERS_IMAGE}
   dataVolumeTemplates:
     - metadata:
         name: ${VM_NAME}-pvc

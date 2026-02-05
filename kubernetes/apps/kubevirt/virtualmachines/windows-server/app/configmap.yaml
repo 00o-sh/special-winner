@@ -8,3 +8,7 @@ data:
   VM_IP: 192.168.57.13
   VM_MAC: "52:54:00:57:00:20"
   VM_STORAGE: 60Gi
+  # renovate: datasource=docker depName=ghcr.io/00o-sh/windows-server
+  VM_IMAGE: ghcr.io/00o-sh/windows-server:2022-np@sha256:a58fc901489c01315da03d76c16138ebc7e8dc09704b89d75f515d8e3d74e5aa
+  # renovate: datasource=docker depName=ghcr.io/00o-sh/windows-drivers
+  VM_DRIVERS_IMAGE: ghcr.io/00o-sh/windows-drivers:server@sha256:60baa212536bf8767b7cbc0047ada2300eb0ab300c0a6d1f2173bd61544f9aed
