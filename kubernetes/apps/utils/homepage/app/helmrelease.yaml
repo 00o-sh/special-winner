@@ -18,7 +18,8 @@ spec:
         containers:
           app:
             image:
-              repository: ghcr.io/00o-sh/homepage@dev:sha256:8c198437ef848d278c39c5566df5688cb1526ce38b517d8fbe2453ec6866e63b
+              repository: ghcr.io/00o-sh/homepage
+              digest: sha256:8c198437ef848d278c39c5566df5688cb1526ce38b517d8fbe2453ec6866e63b
             env:
               HOMEPAGE_ALLOWED_HOSTS: homepage.00o.sh
               LOG_TARGETS: stdout
