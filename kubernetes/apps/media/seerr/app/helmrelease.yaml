@@ -66,6 +66,15 @@ spec:
         annotations:
           gatus.home-operations.com/endpoint: |-
             conditions: ["[STATUS] == 200"]
+          gethomepage.dev/enabled: "true"
+          gethomepage.dev/group: Media
+          gethomepage.dev/name: Seerr
+          gethomepage.dev/icon: overseerr.png
+          gethomepage.dev/description: Media Requests
+          gethomepage.dev/href: "https://seerr.00o.sh"
+          gethomepage.dev/widget.type: overseerr
+          gethomepage.dev/widget.url: "http://seerr.media.svc.cluster.local:80"
+          gethomepage.dev/widget.key: "{{`{{HOMEPAGE_VAR_SEERR_API_KEY}}`}}"
         hostnames:
           - "{{ .Release.Name }}.00o.sh"
           - requests.00o.sh

@@ -62,13 +62,6 @@ spec:
         fsGroupChangePolicy: OnRootMismatch
     service:
       app:
-        annotations:
-          gethomepage.dev/enabled: "true"
-          gethomepage.dev/group: Storage
-          gethomepage.dev/name: Kopia
-          gethomepage.dev/icon: kopia.png
-          gethomepage.dev/description: Backup Repository
-          gethomepage.dev/href: "https://kopia.00o.sh"
         ports:
           http:
             port: *port
@@ -77,6 +70,12 @@ spec:
         annotations:
           gatus.home-operations.com/endpoint: |-
             group: storage
+          gethomepage.dev/enabled: "true"
+          gethomepage.dev/group: Storage
+          gethomepage.dev/name: Kopia
+          gethomepage.dev/icon: kopia.png
+          gethomepage.dev/description: Backup Repository
+          gethomepage.dev/href: "https://kopia.00o.sh"
         hostnames:
           - "{{ .Release.Name }}.00o.sh"
         parentRefs:
