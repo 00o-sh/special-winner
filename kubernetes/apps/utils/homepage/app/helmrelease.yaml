@@ -23,6 +23,9 @@ spec:
             env:
               HOMEPAGE_ALLOWED_HOSTS: homepage.00o.sh
               LOG_TARGETS: stdout
+            envFrom:
+              - secretRef:
+                  name: homepage-secret
             probes:
               liveness: &probes
                 enabled: true
@@ -160,142 +163,7 @@ spec:
                   dateStyle: long
                   timeStyle: short
                   hourCycle: h23
-          services.yaml: |
-            - Media:
-                - Plex:
-                    icon: plex.png
-                    href: https://plex.00o.sh
-                    description: Media Server
-                    namespace: media
-                    app: plex
-                - Radarr:
-                    icon: radarr.png
-                    href: https://radarr.00o.sh
-                    description: Movie Management
-                    namespace: media
-                    app: radarr
-                - Sonarr:
-                    icon: sonarr.png
-                    href: https://sonarr.00o.sh
-                    description: TV Management
-                    namespace: media
-                    app: sonarr
-                - Bazarr:
-                    icon: bazarr.png
-                    href: https://bazarr.00o.sh
-                    description: Subtitle Management
-                    namespace: media
-                    app: bazarr
-                - Seerr:
-                    icon: overseerr.png
-                    href: https://seerr.00o.sh
-                    description: Media Requests
-                    namespace: media
-                    app: seerr
-                - Tautulli:
-                    icon: tautulli.png
-                    href: https://tautulli.00o.sh
-                    description: Plex Statistics
-                    namespace: media
-                    app: tautulli
-                - TheLounge:
-                    icon: thelounge.png
-                    href: https://thelounge.00o.sh
-                    description: IRC Client
-                    namespace: media
-                    app: thelounge
-            - Downloads:
-                - qBittorrent:
-                    icon: qbittorrent.png
-                    href: https://qui.00o.sh
-                    description: Torrent Client
-                    namespace: media
-                    app: qbittorrent
-                - Prowlarr:
-                    icon: prowlarr.png
-                    href: https://prowlarr.00o.sh
-                    description: Indexer Manager
-                    namespace: media
-                    app: prowlarr
-                - Autobrr:
-                    icon: autobrr.png
-                    href: https://autobrr.00o.sh
-                    description: Torrent Automation
-                    namespace: media
-                    app: autobrr
-            - Monitoring:
-                - Grafana:
-                    icon: grafana.png
-                    href: https://grafana.00o.sh
-                    description: Metrics & Dashboards
-                    namespace: observability
-                    app: grafana
-                - Gatus:
-                    icon: gatus.png
-                    href: https://gatus.00o.sh
-                    description: Status Page
-                    namespace: observability
-                    app: gatus
-                - Prometheus:
-                    icon: prometheus.png
-                    href: https://prometheus.00o.sh
-                    description: Metrics Collection
-                    namespace: observability
-                    app: kube-prometheus-stack
-                - Alert Manager:
-                    icon: alertmanager.png
-                    href: https://alertmanager.00o.sh
-                    description: Alert Routing
-                    namespace: observability
-                    app: alertmanager
-                - Victoria Logs:
-                    icon: mdi-math-log
-                    href: https://victoria-logs.00o.sh
-                    description: Log Aggregation
-                    namespace: observability
-                    app: victoria-logs
-            - Infrastructure:
-                - KubeVirt Manager:
-                    icon: mdi-monitor
-                    href: https://kubevirt.00o.sh
-                    description: Virtual Machines
-                    namespace: kubevirt
-                    app: kubevirt-manager
-                - Envoy Gateway:
-                    icon: mdi-gate
-                    description: Ingress Gateway
-                    namespace: network
-                    app: envoy-gateway
-                - Cloudflare Tunnel:
-                    icon: cloudflare.png
-                    description: External Access
-                    namespace: network
-                    app: cloudflare-tunnel
-            - Storage:
-                - Kopia:
-                    icon: kopia.png
-                    href: https://kopia.00o.sh
-                    description: Backup Repository
-                    namespace: volsync-system
-                    app: kopia
-                - Garage:
-                    icon: mdi-garage
-                    href: https://garage.00o.sh
-                    description: S3-Compatible Storage
-                    namespace: volsync-system
-                    app: garage
-            - Utilities:
-                - Penpot:
-                    icon: penpot.png
-                    href: https://penpot.00o.sh
-                    description: Design Platform
-                    namespace: utils
-                    app: penpot
-                - SMTP Relay:
-                    icon: mdi-email
-                    description: Outbound Email
-                    namespace: utils
-                    app: smtp-relay
+          services.yaml: ""
           bookmarks.yaml: |
             - Developer:
                 - GitHub:
