@@ -64,16 +64,6 @@ spec:
         fsGroupChangePolicy: OnRootMismatch
     service:
       app:
-        annotations:
-          gethomepage.dev/enabled: "true"
-          gethomepage.dev/group: Media
-          gethomepage.dev/name: Sonarr
-          gethomepage.dev/icon: sonarr.png
-          gethomepage.dev/description: TV Management
-          gethomepage.dev/href: "https://sonarr.00o.sh"
-          gethomepage.dev/widget.type: sonarr
-          gethomepage.dev/widget.url: "http://sonarr.media.svc.cluster.local:80"
-          gethomepage.dev/widget.key: "{{`{{HOMEPAGE_VAR_SONARR_API_KEY}}`}}"
         ports:
           http:
             port: *port

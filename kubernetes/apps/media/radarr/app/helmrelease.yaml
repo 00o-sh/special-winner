@@ -64,16 +64,6 @@ spec:
         fsGroupChangePolicy: OnRootMismatch
     service:
       app:
-        annotations:
-          gethomepage.dev/enabled: "true"
-          gethomepage.dev/group: Media
-          gethomepage.dev/name: Radarr
-          gethomepage.dev/icon: radarr.png
-          gethomepage.dev/description: Movie Management
-          gethomepage.dev/href: "https://radarr.00o.sh"
-          gethomepage.dev/widget.type: radarr
-          gethomepage.dev/widget.url: "http://radarr.media.svc.cluster.local:80"
-          gethomepage.dev/widget.key: "{{`{{HOMEPAGE_VAR_RADARR_API_KEY}}`}}"
         ports:
           http:
             port: *port

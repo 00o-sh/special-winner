@@ -58,16 +58,6 @@ spec:
         fsGroupChangePolicy: OnRootMismatch
     service:
       app:
-        annotations:
-          gethomepage.dev/enabled: "true"
-          gethomepage.dev/group: Media
-          gethomepage.dev/name: Tautulli
-          gethomepage.dev/icon: tautulli.png
-          gethomepage.dev/description: Plex Statistics
-          gethomepage.dev/href: "https://tautulli.00o.sh"
-          gethomepage.dev/widget.type: tautulli
-          gethomepage.dev/widget.url: "http://tautulli.media.svc.cluster.local:80"
-          gethomepage.dev/widget.key: "{{`{{HOMEPAGE_VAR_TAUTULLI_API_KEY}}`}}"
         ports:
           http:
             port: *port
