@@ -118,12 +118,20 @@ spec:
                 icon: mdi-play-circle
                 style: row
                 columns: 4
+              Downloads:
+                icon: mdi-download-circle
+                style: row
+                columns: 4
               Monitoring:
                 icon: mdi-chart-line
                 style: row
                 columns: 4
               Infrastructure:
                 icon: mdi-server
+                style: row
+                columns: 3
+              Storage:
+                icon: mdi-database
                 style: row
                 columns: 3
               Utilities:
@@ -172,12 +180,49 @@ spec:
                     description: TV Management
                     namespace: media
                     app: sonarr
+                - Bazarr:
+                    icon: bazarr.png
+                    href: https://bazarr.00o.sh
+                    description: Subtitle Management
+                    namespace: media
+                    app: bazarr
                 - Seerr:
                     icon: overseerr.png
                     href: https://seerr.00o.sh
                     description: Media Requests
                     namespace: media
                     app: seerr
+                - Tautulli:
+                    icon: tautulli.png
+                    href: https://tautulli.00o.sh
+                    description: Plex Statistics
+                    namespace: media
+                    app: tautulli
+                - TheLounge:
+                    icon: thelounge.png
+                    href: https://thelounge.00o.sh
+                    description: IRC Client
+                    namespace: media
+                    app: thelounge
+            - Downloads:
+                - qBittorrent:
+                    icon: qbittorrent.png
+                    href: https://qui.00o.sh
+                    description: Torrent Client
+                    namespace: media
+                    app: qbittorrent
+                - Prowlarr:
+                    icon: prowlarr.png
+                    href: https://prowlarr.00o.sh
+                    description: Indexer Manager
+                    namespace: media
+                    app: prowlarr
+                - Autobrr:
+                    icon: autobrr.png
+                    href: https://autobrr.00o.sh
+                    description: Torrent Automation
+                    namespace: media
+                    app: autobrr
             - Monitoring:
                 - Grafana:
                     icon: grafana.png
@@ -193,14 +238,22 @@ spec:
                     app: gatus
                 - Prometheus:
                     icon: prometheus.png
+                    href: https://prometheus.00o.sh
                     description: Metrics Collection
                     namespace: observability
                     app: kube-prometheus-stack
                 - Alert Manager:
                     icon: alertmanager.png
+                    href: https://alertmanager.00o.sh
                     description: Alert Routing
                     namespace: observability
                     app: alertmanager
+                - Victoria Logs:
+                    icon: mdi-math-log
+                    href: https://victoria-logs.00o.sh
+                    description: Log Aggregation
+                    namespace: observability
+                    app: victoria-logs
             - Infrastructure:
                 - KubeVirt Manager:
                     icon: mdi-monitor
@@ -218,6 +271,19 @@ spec:
                     description: External Access
                     namespace: network
                     app: cloudflare-tunnel
+            - Storage:
+                - Kopia:
+                    icon: kopia.png
+                    href: https://kopia.00o.sh
+                    description: Backup Repository
+                    namespace: volsync-system
+                    app: kopia
+                - Garage:
+                    icon: mdi-garage
+                    href: https://garage.00o.sh
+                    description: S3-Compatible Storage
+                    namespace: volsync-system
+                    app: garage
             - Utilities:
                 - Penpot:
                     icon: penpot.png
@@ -225,12 +291,6 @@ spec:
                     description: Design Platform
                     namespace: utils
                     app: penpot
-                - TheLounge:
-                    icon: thelounge.png
-                    href: https://thelounge.00o.sh
-                    description: IRC Client
-                    namespace: media
-                    app: thelounge
                 - SMTP Relay:
                     icon: mdi-email
                     description: Outbound Email
