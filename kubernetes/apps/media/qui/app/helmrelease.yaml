@@ -59,6 +59,13 @@ spec:
         fsGroupChangePolicy: OnRootMismatch
     service:
       app:
+        annotations:
+          gethomepage.dev/enabled: "true"
+          gethomepage.dev/group: Downloads
+          gethomepage.dev/name: Qui
+          gethomepage.dev/icon: qbittorrent.png
+          gethomepage.dev/description: qBittorrent Web UI
+          gethomepage.dev/href: "https://qui.00o.sh"
         ports:
           http:
             port: *port

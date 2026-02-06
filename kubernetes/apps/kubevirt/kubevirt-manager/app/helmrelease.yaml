@@ -52,6 +52,13 @@ spec:
     service:
       app:
         controller: kubevirt-manager
+        annotations:
+          gethomepage.dev/enabled: "true"
+          gethomepage.dev/group: Infrastructure
+          gethomepage.dev/name: KubeVirt Manager
+          gethomepage.dev/icon: mdi-monitor
+          gethomepage.dev/description: Virtual Machines
+          gethomepage.dev/href: "https://kubevirt.00o.sh"
         ports:
           http:
             port: *port

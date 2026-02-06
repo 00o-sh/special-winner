@@ -52,6 +52,11 @@ spec:
         annotations:
           external-dns.alpha.kubernetes.io/hostname: smtp-relay.00o.sh
           lbipam.cilium.io/ips: 10.0.6.15
+          gethomepage.dev/enabled: "true"
+          gethomepage.dev/group: Utilities
+          gethomepage.dev/name: SMTP Relay
+          gethomepage.dev/icon: mdi-email
+          gethomepage.dev/description: Outbound Email
         externalTrafficPolicy: Cluster
         ports:
           smtp:

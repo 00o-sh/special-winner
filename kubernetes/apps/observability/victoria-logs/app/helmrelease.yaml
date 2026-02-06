@@ -36,6 +36,14 @@ spec:
               - path:
                   type: Exact
                   value: /
+      service:
+        annotations:
+          gethomepage.dev/enabled: "true"
+          gethomepage.dev/group: Monitoring
+          gethomepage.dev/name: Victoria Logs
+          gethomepage.dev/icon: mdi-math-log
+          gethomepage.dev/description: Log Aggregation
+          gethomepage.dev/href: "https://victoria-logs.00o.sh"
       serviceMonitor:
         enabled: true
     dashboards:

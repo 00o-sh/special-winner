@@ -150,6 +150,13 @@ spec:
           http:
             port: 6060
       frontend:
+        annotations:
+          gethomepage.dev/enabled: "true"
+          gethomepage.dev/group: Utilities
+          gethomepage.dev/name: Penpot
+          gethomepage.dev/icon: penpot.png
+          gethomepage.dev/description: Design Platform
+          gethomepage.dev/href: "https://penpot.00o.sh"
         controller: frontend
         ports:
           http:
