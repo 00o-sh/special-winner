@@ -81,6 +81,8 @@ spec:
           gethomepage.dev/widget.url: "http://kopia.volsync-system.svc.cluster.local:80"
           gethomepage.dev/widget.username: "{{`{{HOMEPAGE_VAR_KOPIA_USERNAME}}`}}"
           gethomepage.dev/widget.password: "{{`{{HOMEPAGE_VAR_KOPIA_PASSWORD}}`}}"
+          gethomepage.dev/widget.snapshotHost: "volsync.volsync-system.svc.cluster.local"
+          gethomepage.dev/widget.snapshotPath: /data
         hostnames:
           - "{{ .Release.Name }}.00o.sh"
         parentRefs:
