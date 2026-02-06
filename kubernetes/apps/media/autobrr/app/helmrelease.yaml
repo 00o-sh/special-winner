@@ -90,6 +90,9 @@ spec:
           gethomepage.dev/icon: autobrr.png
           gethomepage.dev/description: Torrent Automation
           gethomepage.dev/href: "https://autobrr.00o.sh"
+          gethomepage.dev/widget.type: autobrr
+          gethomepage.dev/widget.url: "http://autobrr.media.svc.cluster.local:80"
+          gethomepage.dev/widget.key: "{{`{{HOMEPAGE_VAR_AUTOBRR_API_KEY}}`}}"
         hostnames:
           - "{{ .Release.Name }}.00o.sh"
         parentRefs:
