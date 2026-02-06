@@ -30,6 +30,9 @@ spec:
                   httpGet:
                     path: /api/healthcheck
                     port: &port 3000
+                    httpHeaders:
+                      - name: Host
+                        value: homepage.00o.sh
                   initialDelaySeconds: 0
                   periodSeconds: 10
                   timeoutSeconds: 1
@@ -254,3 +257,7 @@ spec:
             subPath: kubernetes.yaml
           - path: /app/config/docker.yaml
             subPath: docker.yaml
+      logs:
+        type: emptyDir
+        globalMounts:
+          - path: /app/config/logs
