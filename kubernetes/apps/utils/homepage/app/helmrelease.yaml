@@ -1,0 +1,256 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s-labs/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: homepage
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: homepage
+  interval: 1h
+  values:
+    controllers:
+      homepage:
+        strategy: RollingUpdate
+        annotations:
+          reloader.stakater.com/auto: "true"
+        containers:
+          app:
+            image:
+              repository: ghcr.io/gethomepage/homepage
+              tag: v1.10.1
+            env:
+              HOMEPAGE_ALLOWED_HOSTS: homepage.00o.sh
+            probes:
+              liveness: &probes
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /api/healthcheck
+                    port: &port 3000
+                  initialDelaySeconds: 0
+                  periodSeconds: 10
+                  timeoutSeconds: 1
+                  failureThreshold: 3
+              readiness: *probes
+            securityContext:
+              allowPrivilegeEscalation: false
+              capabilities: { drop: ["ALL"] }
+            resources:
+              requests:
+                cpu: 10m
+                memory: 64Mi
+              limits:
+                memory: 256Mi
+
+    defaultPodOptions:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65534
+        runAsGroup: 65534
+
+    serviceAccount:
+      homepage: {}
+
+    rbac:
+      roles:
+        homepage:
+          type: ClusterRole
+          rules:
+            - apiGroups: [""]
+              resources: [namespaces, pods, nodes]
+              verbs: [get, list]
+            - apiGroups: ["apps"]
+              resources: [deployments, statefulsets, daemonsets]
+              verbs: [get, list]
+            - apiGroups: ["batch"]
+              resources: [jobs, cronjobs]
+              verbs: [get, list]
+            - apiGroups: [gateway.networking.k8s.io]
+              resources: [httproutes]
+              verbs: [get, list]
+      bindings:
+        homepage:
+          type: ClusterRoleBinding
+          roleRef:
+            identifier: homepage
+          subjects:
+            - identifier: homepage
+
+    service:
+      app:
+        controller: homepage
+        ports:
+          http:
+            port: *port
+
+    route:
+      app:
+        hostnames:
+          - homepage.00o.sh
+        parentRefs:
+          - name: envoy-internal
+            namespace: network
+        rules:
+          - backendRefs:
+              - identifier: app
+                port: *port
+
+    configMaps:
+      config:
+        data:
+          kubernetes.yaml: |
+            mode: cluster
+          docker.yaml: ""
+          settings.yaml: |
+            title: Home Operations
+            favicon: https://kubernetes.io/images/favicon.png
+            headerStyle: clean
+            layout:
+              Media:
+                icon: mdi-play-circle
+                style: row
+                columns: 4
+              Monitoring:
+                icon: mdi-chart-line
+                style: row
+                columns: 4
+              Infrastructure:
+                icon: mdi-server
+                style: row
+                columns: 3
+              Utilities:
+                icon: mdi-tools
+                style: row
+                columns: 3
+          widgets.yaml: |
+            - kubernetes:
+                cluster:
+                  show: true
+                  cpu: true
+                  memory: true
+                  showLabel: true
+                  label: cluster
+                nodes:
+                  show: true
+                  cpu: true
+                  memory: true
+                  showLabel: true
+            - search:
+                provider: duckduckgo
+                target: _blank
+            - datetime:
+                text_size: xl
+                format:
+                  dateStyle: long
+                  timeStyle: short
+                  hourCycle: h23
+          services.yaml: |
+            - Media:
+                - Plex:
+                    icon: plex.png
+                    href: https://plex.00o.sh
+                    description: Media Server
+                    namespace: media
+                    app: plex
+                - Radarr:
+                    icon: radarr.png
+                    href: https://radarr.00o.sh
+                    description: Movie Management
+                    namespace: media
+                    app: radarr
+                - Sonarr:
+                    icon: sonarr.png
+                    href: https://sonarr.00o.sh
+                    description: TV Management
+                    namespace: media
+                    app: sonarr
+                - Seerr:
+                    icon: overseerr.png
+                    href: https://seerr.00o.sh
+                    description: Media Requests
+                    namespace: media
+                    app: seerr
+            - Monitoring:
+                - Grafana:
+                    icon: grafana.png
+                    href: https://grafana.00o.sh
+                    description: Metrics & Dashboards
+                    namespace: observability
+                    app: grafana
+                - Gatus:
+                    icon: gatus.png
+                    href: https://gatus.00o.sh
+                    description: Status Page
+                    namespace: observability
+                    app: gatus
+                - Prometheus:
+                    icon: prometheus.png
+                    description: Metrics Collection
+                    namespace: observability
+                    app: kube-prometheus-stack
+                - Alert Manager:
+                    icon: alertmanager.png
+                    description: Alert Routing
+                    namespace: observability
+                    app: alertmanager
+            - Infrastructure:
+                - KubeVirt Manager:
+                    icon: mdi-monitor
+                    href: https://kubevirt.00o.sh
+                    description: Virtual Machines
+                    namespace: kubevirt
+                    app: kubevirt-manager
+                - Envoy Gateway:
+                    icon: mdi-gate
+                    description: Ingress Gateway
+                    namespace: network
+                    app: envoy-gateway
+                - Cloudflare Tunnel:
+                    icon: cloudflare.png
+                    description: External Access
+                    namespace: network
+                    app: cloudflare-tunnel
+            - Utilities:
+                - Penpot:
+                    icon: penpot.png
+                    href: https://penpot.00o.sh
+                    description: Design Platform
+                    namespace: utils
+                    app: penpot
+                - TheLounge:
+                    icon: thelounge.png
+                    href: https://thelounge.00o.sh
+                    description: IRC Client
+                    namespace: media
+                    app: thelounge
+                - SMTP Relay:
+                    icon: mdi-email
+                    description: Outbound Email
+                    namespace: utils
+                    app: smtp-relay
+          bookmarks.yaml: |
+            - Developer:
+                - GitHub:
+                    - icon: github.png
+                      href: https://github.com/00o-sh/special-winner
+
+    persistence:
+      config:
+        type: configMap
+        identifier: config
+        globalMounts:
+          - path: /app/config/settings.yaml
+            subPath: settings.yaml
+          - path: /app/config/services.yaml
+            subPath: services.yaml
+          - path: /app/config/widgets.yaml
+            subPath: widgets.yaml
+          - path: /app/config/bookmarks.yaml
+            subPath: bookmarks.yaml
+          - path: /app/config/kubernetes.yaml
+            subPath: kubernetes.yaml
+          - path: /app/config/docker.yaml
+            subPath: docker.yaml
