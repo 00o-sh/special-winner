@@ -61,7 +61,7 @@ spec:
           type: ClusterRole
           rules:
             - apiGroups: [""]
-              resources: [namespaces, pods, nodes]
+              resources: [namespaces, pods, nodes, services]
               verbs: [get, list]
             - apiGroups: ["apps"]
               resources: [deployments, statefulsets, daemonsets]
@@ -111,6 +111,8 @@ spec:
           kubernetes.yaml: |
             mode: cluster
             gateway: true
+            ingress: false
+            traefik: false
           docker.yaml: ""
           settings.yaml: |
             title: Home Operations
@@ -171,6 +173,10 @@ spec:
                       href: https://github.com/00o-sh/special-winner
 
     persistence:
+      next-cache:
+        type: emptyDir
+        globalMounts:
+          - path: /app/.next/server/pages
       config:
         type: configMap
         identifier: config
