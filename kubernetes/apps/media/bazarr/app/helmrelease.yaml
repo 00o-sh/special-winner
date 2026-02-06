@@ -66,6 +66,9 @@ spec:
           gethomepage.dev/icon: bazarr.png
           gethomepage.dev/description: Subtitle Management
           gethomepage.dev/href: "https://bazarr.00o.sh"
+          gethomepage.dev/widget.type: bazarr
+          gethomepage.dev/widget.url: "http://bazarr.media.svc.cluster.local:80"
+          gethomepage.dev/widget.key: "{{`{{HOMEPAGE_VAR_BAZARR_API_KEY}}`}}"
         hostnames:
           - "{{ .Release.Name }}.00o.sh"
         parentRefs:
