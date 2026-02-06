@@ -76,10 +76,6 @@ spec:
           gethomepage.dev/icon: kopia.png
           gethomepage.dev/description: Backup Repository
           gethomepage.dev/href: "https://kopia.00o.sh"
-          gethomepage.dev/widget.type: kopia
-          gethomepage.dev/widget.url: "http://kopia.volsync-system.svc.cluster.local:80"
-          gethomepage.dev/widget.username: "{{`{{HOMEPAGE_VAR_KOPIA_USERNAME}}`}}"
-          gethomepage.dev/widget.password: "{{`{{HOMEPAGE_VAR_KOPIA_PASSWORD}}`}}"
         hostnames:
           - "{{ .Release.Name }}.00o.sh"
         parentRefs:
