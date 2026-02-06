@@ -176,7 +176,7 @@ spec:
       next-cache:
         type: emptyDir
         globalMounts:
-          - path: /app/.next/server/pages
+          - path: /app/.next/cache
       config:
         type: configMap
         identifier: config
