@@ -91,6 +91,8 @@ spec:
           gethomepage.dev/icon: gatus.png
           gethomepage.dev/description: Status Page
           gethomepage.dev/href: "https://gatus.00o.sh"
+          gethomepage.dev/widget.type: gatus
+          gethomepage.dev/widget.url: "http://gatus.observability.svc.cluster.local:80"
         hostnames:
           - "{{ .Release.Name }}.00o.sh"
           - status.00o.sh
