@@ -59,6 +59,11 @@ spec:
         fsGroupChangePolicy: OnRootMismatch
     service:
       app:
+        ports:
+          http:
+            port: *port
+    route:
+      app:
         annotations:
           gethomepage.dev/enabled: "true"
           gethomepage.dev/group: Downloads
@@ -66,11 +71,6 @@ spec:
           gethomepage.dev/icon: qbittorrent.png
           gethomepage.dev/description: qBittorrent Web UI
           gethomepage.dev/href: "https://qui.00o.sh"
-        ports:
-          http:
-            port: *port
-    route:
-      app:
         hostnames:
           - "{{ .Release.Name }}.00o.sh"
         parentRefs:

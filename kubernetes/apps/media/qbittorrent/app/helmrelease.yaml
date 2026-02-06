@@ -68,15 +68,6 @@ spec:
         fsGroupChangePolicy: OnRootMismatch
     service:
       app:
-        annotations:
-          gethomepage.dev/enabled: "true"
-          gethomepage.dev/group: Downloads
-          gethomepage.dev/name: qBittorrent
-          gethomepage.dev/icon: qbittorrent.png
-          gethomepage.dev/description: Torrent Client
-          gethomepage.dev/href: "https://qbittorrent.00o.sh"
-          gethomepage.dev/widget.type: qbittorrent
-          gethomepage.dev/widget.url: "http://qbittorrent.media.svc.cluster.local:80"
         ports:
           http:
             port: *port
@@ -86,6 +77,14 @@ spec:
           gatus.home-operations.com/endpoint: |-
             name: "qBittorrent - Torrent Management"
             group: media
+          gethomepage.dev/enabled: "true"
+          gethomepage.dev/group: Downloads
+          gethomepage.dev/name: qBittorrent
+          gethomepage.dev/icon: qbittorrent.png
+          gethomepage.dev/description: Torrent Client
+          gethomepage.dev/href: "https://qbittorrent.00o.sh"
+          gethomepage.dev/widget.type: qbittorrent
+          gethomepage.dev/widget.url: "http://qbittorrent.media.svc.cluster.local:80"
         hostnames:
           - "{{ .Release.Name }}.00o.sh"
         parentRefs:

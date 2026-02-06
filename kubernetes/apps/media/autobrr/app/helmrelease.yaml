@@ -72,13 +72,6 @@ spec:
         fsGroupChangePolicy: OnRootMismatch
     service:
       app:
-        annotations:
-          gethomepage.dev/enabled: "true"
-          gethomepage.dev/group: Downloads
-          gethomepage.dev/name: Autobrr
-          gethomepage.dev/icon: autobrr.png
-          gethomepage.dev/description: Torrent Automation
-          gethomepage.dev/href: "https://autobrr.00o.sh"
         ports:
           http:
             port: *port
@@ -90,6 +83,13 @@ spec:
           - port: metrics
     route:
       app:
+        annotations:
+          gethomepage.dev/enabled: "true"
+          gethomepage.dev/group: Downloads
+          gethomepage.dev/name: Autobrr
+          gethomepage.dev/icon: autobrr.png
+          gethomepage.dev/description: Torrent Automation
+          gethomepage.dev/href: "https://autobrr.00o.sh"
         hostnames:
           - "{{ .Release.Name }}.00o.sh"
         parentRefs:

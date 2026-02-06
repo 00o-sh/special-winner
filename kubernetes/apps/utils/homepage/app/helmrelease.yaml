@@ -165,49 +165,7 @@ spec:
                   dateStyle: long
                   timeStyle: short
                   hourCycle: h23
-          services.yaml: |
-            - Media:
-                - Radarr:
-                    icon: radarr.png
-                    href: https://radarr.00o.sh
-                    description: Movie Management
-                    widget:
-                      type: radarr
-                      url: http://radarr.media.svc.cluster.local:80
-                      key: '{{ "{{" }}HOMEPAGE_VAR_RADARR_API_KEY{{ "}}" }}'
-                - Sonarr:
-                    icon: sonarr.png
-                    href: https://sonarr.00o.sh
-                    description: TV Management
-                    widget:
-                      type: sonarr
-                      url: http://sonarr.media.svc.cluster.local:80
-                      key: '{{ "{{" }}HOMEPAGE_VAR_SONARR_API_KEY{{ "}}" }}'
-                - Seerr:
-                    icon: overseerr.png
-                    href: https://seerr.00o.sh
-                    description: Media Requests
-                    widget:
-                      type: overseerr
-                      url: http://seerr.media.svc.cluster.local:80
-                      key: '{{ "{{" }}HOMEPAGE_VAR_SEERR_API_KEY{{ "}}" }}'
-                - Tautulli:
-                    icon: tautulli.png
-                    href: https://tautulli.00o.sh
-                    description: Plex Statistics
-                    widget:
-                      type: tautulli
-                      url: http://tautulli.media.svc.cluster.local:80
-                      key: '{{ "{{" }}HOMEPAGE_VAR_TAUTULLI_API_KEY{{ "}}" }}'
-            - Downloads:
-                - Prowlarr:
-                    icon: prowlarr.png
-                    href: https://prowlarr.00o.sh
-                    description: Indexer Manager
-                    widget:
-                      type: prowlarr
-                      url: http://prowlarr.media.svc.cluster.local:80
-                      key: '{{ "{{" }}HOMEPAGE_VAR_PROWLARR_API_KEY{{ "}}" }}'
+          services.yaml: ""
           bookmarks.yaml: |
             - Developer:
                 - GitHub:

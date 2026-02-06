@@ -44,6 +44,11 @@ spec:
         fsGroupChangePolicy: OnRootMismatch
     service:
       app:
+        ports:
+          http:
+            port: 9000
+    route:
+      app:
         annotations:
           gethomepage.dev/enabled: "true"
           gethomepage.dev/group: Utilities
@@ -51,11 +56,6 @@ spec:
           gethomepage.dev/icon: thelounge.png
           gethomepage.dev/description: IRC Client
           gethomepage.dev/href: "https://thelounge.00o.sh"
-        ports:
-          http:
-            port: 9000
-    route:
-      app:
         hostnames:
           - "{{ .Release.Name }}.00o.sh"
         parentRefs:
