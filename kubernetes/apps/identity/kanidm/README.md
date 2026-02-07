@@ -15,30 +15,34 @@ identity/kanidm/
 
 ## Post-Deploy Bootstrap
 
-These steps are required once after initial deployment. The server image (`kanidm/server`)
-does not include the CLI -- use the `kanidm/tools` image via a one-off pod:
+Account recovery uses `kanidmd` (the server binary, available in the server pod).
+Day-to-day management uses the `kanidm` CLI (available via the `kanidm/tools` image).
+
+```bash
+# 1. Recover admin account (runs kanidmd inside the server pod)
+kubectl -n identity exec -it sts/kanidm -- kanidmd recover-account admin
+
+# 2. Recover idm_admin account (for day-to-day identity management)
+kubectl -n identity exec -it sts/kanidm -- kanidmd recover-account idm_admin
+```
+
+For CLI operations after bootstrap, use a one-off tools pod:
 
 ```bash
 # Helper alias for running kanidm CLI commands against the server
 alias kanidm-cli='kubectl -n identity run kanidm-cli --rm -it --restart=Never \
   --image=docker.io/kanidm/tools:1.8.5 \
   --env=KANIDM_URL=https://kanidm.identity.svc.cluster.local \
-  --env=KANIDM_INSECURE=true \
+  --env=KANIDM_ACCEPT_INVALID_CERTS=true \
   --'
 
-# 1. Recover admin account (save the generated password)
-kanidm-cli kanidm recover-account admin
-
-# 2. Recover idm_admin account (for day-to-day identity management)
-kanidm-cli kanidm recover-account idm_admin
-
-# 3. Verify server is running
+# Verify server is running
 kanidm-cli kanidm self whoami
 ```
 
-> **Note**: `KANIDM_INSECURE=true` is needed because the tools pod doesn't have
-> the Let's Encrypt CA in its trust store when connecting to the in-cluster service.
-> This only affects the CLI pod, not the server itself.
+> **Note**: `KANIDM_ACCEPT_INVALID_CERTS=true` is needed because the tools pod
+> doesn't have the Let's Encrypt CA in its trust store when connecting to the
+> in-cluster service. This only affects the CLI pod, not the server itself.
 
 ## Managing Users, Groups & OAuth2 Clients
 
