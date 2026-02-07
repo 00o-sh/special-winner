@@ -13,4 +13,4 @@ data:
   VM_GATEWAY: 192.168.57.1
   VM_DNS: 192.168.57.1
   VM_NETWORK: network/vm-macvtap
-  VM_IMAGE: "docker://quay.io/containerdisks/ubuntu:24.04"
+  VM_IMAGE: "docker://quay.io/containerdisks/ubuntu:25.04"
