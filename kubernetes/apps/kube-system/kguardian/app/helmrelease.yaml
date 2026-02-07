@@ -13,9 +13,6 @@ spec:
     # Controller: eBPF-based runtime observer (DaemonSet)
     # Runs in observe-only / audit mode - collects data but does NOT
     # auto-apply any NetworkPolicies or seccomp profiles.
-    # Use `kubectl kguardian gen netpol` (dry-run default) to preview policies.
-    # Use `kubectl kguardian gen seccomp --default-action SCMP_ACT_LOG` to
-    # generate log-only seccomp profiles for auditing.
     controller:
       excludedNamespaces:
         - kube-system
@@ -32,14 +29,40 @@ spec:
       ingress:
         enabled: false
 
-    # Database: internal PostgreSQL for storing observations
+    # Disable internal database - using existing CloudNative-PG postgres cluster
     database:
-      persistence:
-        enabled: true
-        size: 5Gi
+      replicas: 0
 
     # Optional AI features - disabled for audit-only deployment
     llmBridge:
       enabled: false
     mcpServer:
       enabled: false
+  patches:
+    - target:
+        kind: Deployment
+        name: kguardian-broker
+      patch: |
+        - op: replace
+          path: /spec/template/spec/containers/0/env
+          value:
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: kguardian-secret
+                  key: DATABASE_URL
+        - op: add
+          path: /spec/template/spec/initContainers
+          value:
+            - name: init-db
+              image: ghcr.io/home-operations/postgres-init:18@sha256:3c54d39f19fdb82ed5b3f286450e4071133cc6025bd0e25856bc2c522f8fc030
+              envFrom:
+                - secretRef:
+                    name: kguardian-secret
+    - target:
+        kind: Deployment
+        name: kguardian-database
+      patch: |
+        - op: replace
+          path: /spec/replicas
+          value: 0

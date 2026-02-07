@@ -5,8 +5,15 @@ kind: Kustomization
 metadata:
   name: kguardian
 spec:
+  dependsOn:
+    - name: postgres-cluster
+      namespace: database
   interval: 1h
   path: ./kubernetes/apps/kube-system/kguardian/app
+  postBuild:
+    substituteFrom:
+      - name: cluster-secrets
+        kind: Secret
   prune: true
   sourceRef:
     kind: GitRepository
