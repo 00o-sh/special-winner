@@ -130,9 +130,9 @@ spec:
           kanidm:
             app:
               - path: /var/run
-      tools-home:
+      tools-cache:
         type: emptyDir
         advancedMounts:
           kanidm:
             tools:
-              - path: /home/kanidm
+              - path: /.cache
