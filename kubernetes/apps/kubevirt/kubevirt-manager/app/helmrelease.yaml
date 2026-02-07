@@ -17,7 +17,7 @@ spec:
           app:
             image:
               repository: kubevirtmanager/kubevirt-manager
-              tag: 1.5.3
+              tag: 1.5.4
             probes:
               liveness: &probes
                 enabled: true
