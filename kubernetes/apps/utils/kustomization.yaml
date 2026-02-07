@@ -9,6 +9,7 @@ components:
 
 resources:
   - ./namespace.yaml
+  - ./forgejo/ks.yaml
   - ./homepage/ks.yaml
   - ./penpot/ks.yaml
   - ./smtp-relay/ks.yaml

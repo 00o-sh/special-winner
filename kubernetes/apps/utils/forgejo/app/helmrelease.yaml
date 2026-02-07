@@ -1,0 +1,105 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s-labs/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: forgejo
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: forgejo
+  interval: 1h
+  values:
+    controllers:
+      forgejo:
+        annotations:
+          reloader.stakater.com/auto: "true"
+        initContainers:
+          init-db:
+            image:
+              repository: ghcr.io/home-operations/postgres-init
+              tag: 18@sha256:3c54d39f19fdb82ed5b3f286450e4071133cc6025bd0e25856bc2c522f8fc030
+            envFrom:
+              - secretRef:
+                  name: forgejo-secret
+        containers:
+          app:
+            image:
+              repository: codeberg.org/forgejo/forgejo
+              tag: 10.0.1
+            env:
+              FORGEJO__database__DB_TYPE: postgres
+              FORGEJO__server__DOMAIN: forgejo.00o.sh
+              FORGEJO__server__ROOT_URL: https://forgejo.00o.sh
+              FORGEJO__server__HTTP_PORT: &port 3000
+              FORGEJO__server__SSH_DOMAIN: forgejo.00o.sh
+              FORGEJO__server__SSH_PORT: &sshPort 22
+              FORGEJO__server__SSH_LISTEN_PORT: *sshPort
+              FORGEJO__server__LFS_START_SERVER: "true"
+              FORGEJO__service__DISABLE_REGISTRATION: "false"
+              FORGEJO__service__REQUIRE_SIGNIN_VIEW: "false"
+            envFrom:
+              - secretRef:
+                  name: forgejo-secret
+            probes:
+              liveness: &probes
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /api/healthz
+                    port: *port
+                  initialDelaySeconds: 15
+                  periodSeconds: 10
+                  timeoutSeconds: 1
+                  failureThreshold: 3
+              readiness: *probes
+            resources:
+              requests:
+                cpu: 50m
+                memory: 256Mi
+              limits:
+                memory: 1Gi
+    defaultPodOptions:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        fsGroupChangePolicy: OnRootMismatch
+    service:
+      app:
+        controller: forgejo
+        ports:
+          http:
+            port: *port
+      ssh:
+        type: LoadBalancer
+        controller: forgejo
+        annotations:
+          external-dns.alpha.kubernetes.io/hostname: forgejo.00o.sh
+          lbipam.cilium.io/ips: 10.0.6.20
+        externalTrafficPolicy: Cluster
+        ports:
+          ssh:
+            port: *sshPort
+    route:
+      app:
+        hostnames:
+          - forgejo.00o.sh
+        parentRefs:
+          - name: envoy-internal
+            namespace: network
+        rules:
+          - backendRefs:
+              - identifier: app
+                port: *port
+    persistence:
+      data:
+        existingClaim: forgejo
+        globalMounts:
+          - path: /data
+      tmp:
+        type: emptyDir
+        globalMounts:
+          - path: /tmp
