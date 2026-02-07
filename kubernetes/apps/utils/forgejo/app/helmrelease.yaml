@@ -29,10 +29,10 @@ spec:
               tag: 10.0.1
             env:
               FORGEJO__database__DB_TYPE: postgres
-              FORGEJO__server__DOMAIN: forgejo.00o.sh
-              FORGEJO__server__ROOT_URL: https://forgejo.00o.sh
+              FORGEJO__server__DOMAIN: git.00o.sh
+              FORGEJO__server__ROOT_URL: https://git.00o.sh
               FORGEJO__server__HTTP_PORT: &port 3000
-              FORGEJO__server__SSH_DOMAIN: forgejo.00o.sh
+              FORGEJO__server__SSH_DOMAIN: git.00o.sh
               FORGEJO__server__SSH_PORT: &sshPort 22
               FORGEJO__server__SSH_LISTEN_PORT: *sshPort
               FORGEJO__server__LFS_START_SERVER: "true"
@@ -77,7 +77,7 @@ spec:
         type: LoadBalancer
         controller: forgejo
         annotations:
-          external-dns.alpha.kubernetes.io/hostname: forgejo.00o.sh
+          external-dns.alpha.kubernetes.io/hostname: git.00o.sh
           lbipam.cilium.io/ips: 10.0.6.20
         externalTrafficPolicy: Cluster
         ports:
@@ -86,7 +86,7 @@ spec:
     route:
       app:
         hostnames:
-          - forgejo.00o.sh
+          - git.00o.sh
         parentRefs:
           - name: envoy-internal
             namespace: network
