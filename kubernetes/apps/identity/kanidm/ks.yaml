@@ -25,6 +25,11 @@ spec:
     - name: kaniop
     - name: cert-manager
       namespace: cert-manager
+  healthChecks:
+    - apiVersion: cert-manager.io/v1
+      kind: Certificate
+      name: kanidm-tls
+      namespace: identity
   interval: 1h
   path: ./kubernetes/apps/identity/kanidm/instance
   postBuild:
