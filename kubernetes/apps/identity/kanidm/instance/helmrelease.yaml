@@ -49,6 +49,24 @@ spec:
               allowPrivilegeEscalation: false
               readOnlyRootFilesystem: true
               capabilities: { drop: ["ALL"] }
+          tools:
+            image:
+              repository: docker.io/kanidm/tools
+              tag: 1.8.5
+            command: ["sleep", "infinity"]
+            env:
+              KANIDM_URL: https://localhost:8443
+              KANIDM_ACCEPT_INVALID_CERTS: "true"
+            resources:
+              requests:
+                cpu: 1m
+                memory: 16Mi
+              limits:
+                memory: 64Mi
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities: { drop: ["ALL"] }
 
     service:
       app:
@@ -103,9 +121,18 @@ spec:
           kanidm:
             app:
               - path: /certs
+            tools:
+              - path: /certs
+                readOnly: true
       run:
         type: emptyDir
         advancedMounts:
           kanidm:
             app:
               - path: /var/run
+      tools-home:
+        type: emptyDir
+        advancedMounts:
+          kanidm:
+            tools:
+              - path: /home/kanidm
