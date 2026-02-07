@@ -94,6 +94,17 @@ spec:
           - backendRefs:
               - identifier: app
                 port: *port
+      git:
+        hostnames:
+          - git.00o.sh
+        parentRefs:
+          - name: envoy-external
+            namespace: network
+            sectionName: https
+        rules:
+          - backendRefs:
+              - identifier: app
+                port: *port
     persistence:
       data:
         existingClaim: forgejo
