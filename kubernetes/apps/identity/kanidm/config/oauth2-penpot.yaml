@@ -1,0 +1,17 @@
+---
+apiVersion: kaniop.rs/v1beta1
+kind: KanidmOAuth2Client
+metadata:
+  name: penpot
+spec:
+  kanidmRef:
+    name: kanidm
+  displayname: Penpot
+  origin: "https://penpot.00o.sh"
+  redirectUrl: "https://penpot.00o.sh/api/auth/oauth/kanidm/callback"
+  scopeMaps:
+    - group: penpot-users
+      scopes:
+        - openid
+        - email
+        - profile

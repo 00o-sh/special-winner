@@ -21,10 +21,14 @@ kind: Kustomization
 metadata:
   name: kanidm
 spec:
+  components:
+    - ../../../../components/volsync
   dependsOn:
     - name: kaniop
     - name: cert-manager
       namespace: cert-manager
+    - name: volsync
+      namespace: volsync-system
   healthChecks:
     - apiVersion: cert-manager.io/v1
       kind: Certificate
@@ -33,9 +37,32 @@ spec:
   interval: 1h
   path: ./kubernetes/apps/identity/kanidm/instance
   postBuild:
+    substitute:
+      APP: kanidm
+      VOLSYNC_CAPACITY: 10Gi
+      VOLSYNC_PUID: "999"
+      VOLSYNC_PGID: "999"
     substituteFrom:
       - name: cluster-secrets
         kind: Secret
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+    namespace: flux-system
+  targetNamespace: identity
+  wait: false
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/kustomize.toolkit.fluxcd.io/kustomization_v1.json
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: kanidm-config
+spec:
+  dependsOn:
+    - name: kanidm
+  interval: 1h
+  path: ./kubernetes/apps/identity/kanidm/config
   prune: true
   sourceRef:
     kind: GitRepository

@@ -97,10 +97,7 @@ spec:
 
     persistence:
       data:
-        type: persistentVolumeClaim
-        accessMode: ReadWriteOnce
-        size: 10Gi
-        storageClass: openebs-hostpath
+        existingClaim: kanidm
         advancedMounts:
           kanidm:
             app:

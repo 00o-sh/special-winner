@@ -29,7 +29,20 @@ spec:
               tag: 2.13.0
             env:
               PENPOT_PUBLIC_URI: https://penpot.00o.sh
-              PENPOT_FLAGS: enable-registration enable-login-with-password disable-email-verification
+              PENPOT_FLAGS: enable-registration enable-login-with-password enable-login-with-oidc disable-email-verification
+              PENPOT_OIDC_CLIENT_ID: penpot
+              PENPOT_OIDC_CLIENT_SECRET:
+                valueFrom:
+                  secretKeyRef:
+                    name: penpot-secret
+                    key: PENPOT_OIDC_CLIENT_SECRET
+              PENPOT_OIDC_BASE_URI: https://auth.00o.sh/oauth2/openid/penpot
+              PENPOT_OIDC_AUTH_URI: https://auth.00o.sh/ui/oauth2
+              PENPOT_OIDC_TOKEN_URI: https://auth.00o.sh/oauth2/token
+              PENPOT_OIDC_USER_URI: https://auth.00o.sh/oauth2/openid/penpot/userinfo
+              PENPOT_OIDC_SCOPES: "openid email profile"
+              PENPOT_OIDC_NAME_ATTR: name
+              PENPOT_OIDC_EMAIL_ATTR: email
               PENPOT_DATABASE_URI:
                 valueFrom:
                   secretKeyRef:
@@ -87,7 +100,7 @@ spec:
               repository: penpotapp/frontend
               tag: 2.13.0
             env:
-              PENPOT_FLAGS: enable-registration enable-login-with-password disable-email-verification
+              PENPOT_FLAGS: enable-registration enable-login-with-password enable-login-with-oidc disable-email-verification
               PENPOT_BACKEND_URI: http://penpot-backend:6060
               PENPOT_EXPORTER_URI: http://penpot-exporter:6061
             probes:
