@@ -26,23 +26,24 @@ kubectl -n identity exec -it sts/kanidm -- kanidmd recover-account admin
 kubectl -n identity exec -it sts/kanidm -- kanidmd recover-account idm_admin
 ```
 
-For CLI operations after bootstrap, use a one-off tools pod:
+A persistent `tools` sidecar container runs alongside the server with the `kanidm` CLI
+pre-configured to connect via localhost. Session tokens persist across commands.
 
 ```bash
-# Helper alias for running kanidm CLI commands against the server
-alias kanidm-cli='kubectl -n identity run kanidm-cli --rm -it --restart=Never \
-  --image=docker.io/kanidm/tools:1.8.5 \
-  --env=KANIDM_URL=https://kanidm.identity.svc.cluster.local \
-  --env=KANIDM_ACCEPT_INVALID_CERTS=true \
-  --'
+# Open a shell in the tools container
+kubectl -n identity exec -it sts/kanidm -c tools -- sh
 
-# Verify server is running
-kanidm-cli kanidm self whoami
+# Then inside the shell:
+kanidm login -D admin
+kanidm self whoami
+kanidm person list
 ```
 
-> **Note**: `KANIDM_ACCEPT_INVALID_CERTS=true` is needed because the tools pod
-> doesn't have the Let's Encrypt CA in its trust store when connecting to the
-> in-cluster service. This only affects the CLI pod, not the server itself.
+Or run one-off commands directly:
+
+```bash
+kubectl -n identity exec -it sts/kanidm -c tools -- kanidm self whoami
+```
 
 ## Managing Users, Groups & OAuth2 Clients
 
