@@ -16,4 +16,4 @@ spec:
     grafanaDashboard:
       enabled: true
     webhook:
-      replicaCount: 1
+      replicaCount: 2
