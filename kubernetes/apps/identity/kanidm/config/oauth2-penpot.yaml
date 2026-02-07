@@ -8,8 +8,9 @@ spec:
     name: kanidm
   displayname: Penpot
   origin: "https://penpot.00o.sh"
-  redirectUrl: "https://penpot.00o.sh/api/auth/oauth/kanidm/callback"
-  scopeMaps:
+  redirectUrl:
+    - "https://penpot.00o.sh/api/auth/oauth/kanidm/callback"
+  scopeMap:
     - group: penpot-users
       scopes:
         - openid
