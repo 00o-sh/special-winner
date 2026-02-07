@@ -1,0 +1,46 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/helm.toolkit.fluxcd.io/helmrelease_v2.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: kguardian
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: kguardian
+  interval: 1h
+  values:
+    # Controller: eBPF-based runtime observer (DaemonSet)
+    # Runs in observe-only / audit mode - collects data but does NOT
+    # auto-apply any NetworkPolicies or seccomp profiles.
+    # Use `kubectl kguardian gen netpol` (dry-run default) to preview policies.
+    # Use `kubectl kguardian gen seccomp --default-action SCMP_ACT_LOG` to
+    # generate log-only seccomp profiles for auditing.
+    controller:
+      excludedNamespaces:
+        - kguardian
+        - kube-system
+        - flux-system
+      ignoreDaemonSet: true
+
+    # Broker: intermediary service for controller data
+    broker:
+      replicas: 1
+
+    # Frontend: web UI for visualizing observed traffic and generated policies
+    frontend:
+      replicas: 1
+      ingress:
+        enabled: false
+
+    # Database: internal PostgreSQL for storing observations
+    database:
+      persistence:
+        enabled: true
+        size: 5Gi
+
+    # Optional AI features - disabled for audit-only deployment
+    llmBridge:
+      enabled: false
+    mcpServer:
+      enabled: false
