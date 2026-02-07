@@ -1,0 +1,12 @@
+---
+apiVersion: kaniop.rs/v1beta1
+kind: KanidmPersonAccount
+metadata:
+  name: ebrody
+spec:
+  kanidmRef:
+    name: kanidm
+  personAttributes:
+    displayname: E Brody
+    mail:
+      - ebrody@bbb.consulting
