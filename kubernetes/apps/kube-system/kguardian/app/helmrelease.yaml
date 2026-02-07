@@ -18,7 +18,6 @@ spec:
     # generate log-only seccomp profiles for auditing.
     controller:
       excludedNamespaces:
-        - kguardian
         - kube-system
         - flux-system
       ignoreDaemonSet: true
