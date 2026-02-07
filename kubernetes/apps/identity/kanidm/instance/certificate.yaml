@@ -5,7 +5,7 @@ metadata:
   name: kanidm-tls
 spec:
   dnsNames:
-    - "idm.${SECRET_DOMAIN}"
+    - "auth.${SECRET_DOMAIN}"
   duration: 160h
   issuerRef:
     name: letsencrypt-production

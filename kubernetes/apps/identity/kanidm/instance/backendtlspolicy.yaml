@@ -10,4 +10,4 @@ spec:
       group: ""
   validation:
     wellKnownCACertificates: System
-    hostname: idm.${SECRET_DOMAIN}
+    hostname: auth.${SECRET_DOMAIN}

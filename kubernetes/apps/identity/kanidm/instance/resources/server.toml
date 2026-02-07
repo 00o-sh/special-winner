@@ -4,8 +4,8 @@ trust_x_forward_for = true
 db_path = "/data/kanidm.db"
 tls_chain = "/certs/tls.crt"
 tls_key = "/certs/tls.key"
-domain = "idm.${SECRET_DOMAIN}"
-origin = "https://idm.${SECRET_DOMAIN}"
+domain = "auth.${SECRET_DOMAIN}"
+origin = "https://auth.${SECRET_DOMAIN}"
 
 [online_backup]
 path = "/data/backups/"
