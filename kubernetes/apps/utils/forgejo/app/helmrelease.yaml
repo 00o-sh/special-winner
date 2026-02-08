@@ -22,6 +22,16 @@ spec:
             envFrom:
               - secretRef:
                   name: forgejo-secret
+          init-config:
+            dependsOn: init-db
+            image:
+              repository: codeberg.org/forgejo/forgejo
+              tag: 14.0.2-rootless
+            command: ["/bin/sh", "-c"]
+            args:
+              - |
+                mkdir -p /data/gitea/conf
+                cp /etc/forgejo/app.ini /data/gitea/conf/app.ini
         containers:
           app:
             image:
@@ -29,19 +39,6 @@ spec:
               tag: 14.0.2-rootless
             env:
               FORGEJO__database__DB_TYPE: postgres
-              FORGEJO__server__DOMAIN: git.00o.sh
-              FORGEJO__server__ROOT_URL: https://git.00o.sh
-              FORGEJO__server__HTTP_PORT: &port 3000
-              FORGEJO__server__SSH_DOMAIN: git.00o.sh
-              FORGEJO__server__SSH_PORT: &sshPort 22
-              FORGEJO__server__SSH_LISTEN_PORT: &sshContainerPort 2222
-              FORGEJO__server__LFS_START_SERVER: "true"
-              FORGEJO__service__DISABLE_REGISTRATION: "false"
-              FORGEJO__service__REQUIRE_SIGNIN_VIEW: "false"
-              FORGEJO__openid__ENABLE_OPENID_SIGNIN: "true"
-              FORGEJO__oauth2_client__ENABLE_AUTO_REGISTRATION: "true"
-              FORGEJO__oauth2_client__OPENID_CONNECT_SCOPES: "openid email profile"
-              FORGEJO__oauth2_client__USERNAME: preferred_username
             envFrom:
               - secretRef:
                   name: forgejo-secret
@@ -52,7 +49,7 @@ spec:
                 spec:
                   httpGet:
                     path: /api/healthz
-                    port: *port
+                    port: &port 3000
                   initialDelaySeconds: 15
                   periodSeconds: 10
                   timeoutSeconds: 1
@@ -86,8 +83,8 @@ spec:
         externalTrafficPolicy: Cluster
         ports:
           ssh:
-            port: *sshPort
-            targetPort: *sshContainerPort
+            port: &sshPort 22
+            targetPort: 2222
     route:
       app:
         hostnames:
@@ -110,6 +107,38 @@ spec:
           - backendRefs:
               - identifier: app
                 port: *port
+    configMaps:
+      config:
+        data:
+          app.ini: |-
+            [server]
+            DOMAIN = git.00o.sh
+            ROOT_URL = https://git.00o.sh
+            HTTP_PORT = 3000
+            SSH_DOMAIN = git.00o.sh
+            SSH_PORT = 22
+            SSH_LISTEN_PORT = 2222
+            LFS_START_SERVER = true
+            INSTALL_LOCK = true
+
+            [service]
+            DISABLE_REGISTRATION = false
+            REQUIRE_SIGNIN_VIEW = false
+
+            [openid]
+            ENABLE_OPENID_SIGNIN = true
+
+            [oauth2_client]
+            ENABLE_AUTO_REGISTRATION = true
+            OPENID_CONNECT_SCOPES = openid email profile
+            USERNAME = preferred_username
+
+            [mailer]
+            ENABLED = true
+            PROTOCOL = smtp
+            SMTP_ADDR = smtp-relay.utils.svc.cluster.local
+            SMTP_PORT = 25
+            FROM = forgejo@00o.sh
     persistence:
       data:
         existingClaim: forgejo
@@ -119,3 +148,12 @@ spec:
         type: emptyDir
         globalMounts:
           - path: /tmp
+      config-file:
+        type: configMap
+        identifier: config
+        advancedMounts:
+          forgejo:
+            init-config:
+              - path: /etc/forgejo/app.ini
+                subPath: app.ini
+                readOnly: true
