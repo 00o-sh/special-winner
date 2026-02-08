@@ -19,6 +19,8 @@ spec:
       namespace: database
     - name: onepassword
       namespace: external-secrets
+    - name: kanidm-config
+      namespace: identity
   interval: 1h
   path: ./kubernetes/apps/utils/forgejo/app
   postBuild:

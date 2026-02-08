@@ -38,6 +38,10 @@ spec:
               FORGEJO__server__LFS_START_SERVER: "true"
               FORGEJO__service__DISABLE_REGISTRATION: "false"
               FORGEJO__service__REQUIRE_SIGNIN_VIEW: "false"
+              FORGEJO__openid__ENABLE_OPENID_SIGNIN: "true"
+              FORGEJO__oauth2_client__ENABLE_AUTO_REGISTRATION: "true"
+              FORGEJO__oauth2_client__OPENID_CONNECT_SCOPES: "openid email profile"
+              FORGEJO__oauth2_client__USERNAME: preferred_username
             envFrom:
               - secretRef:
                   name: forgejo-secret
