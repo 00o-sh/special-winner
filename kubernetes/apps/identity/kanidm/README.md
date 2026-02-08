@@ -16,10 +16,16 @@ identity/kanidm/
 
 **Flux dependency chain:** `kaniop` (operator) -> `kanidm` (instance + TLS cert) -> `kanidm-config` (persons, groups, OAuth2 clients)
 
-The Kanidm instance runs as a StatefulSet with three containers:
+The Kanidm instance runs as a StatefulSet with a single container:
 - **kanidm**: The Kanidm server (port 8443 HTTPS, 3636 LDAPS)
-- **tools**: Persistent sidecar with the `kanidm` CLI, pre-configured to connect via localhost
-- **backup-sync**: Hourly S3 sync of Kanidm's built-in online backups to Garage
+
+A separate CronJob (`kanidm-backup-sync`) runs hourly to sync online backups to Garage S3.
+
+> **Why a single container?** Kaniop's pod exec uses `AttachParams::default()` which
+> does not specify a container name. Kubernetes returns HTTP 400 on exec requests to
+> multi-container pods without a container parameter, causing the
+> `UpgradeConnection(ProtocolSwitch(400))` error. Keeping the pod single-container
+> avoids this upstream limitation.
 
 ## Post-Deploy Bootstrap
 
@@ -35,24 +41,22 @@ kubectl -n identity exec -it sts/kanidm-default -c kanidm -- kanidmd recover-acc
 kubectl -n identity exec -it sts/kanidm-default -c kanidm -- kanidmd recover-account idm_admin
 ```
 
-> **Note:** Kaniop normally automates admin password recovery by exec'ing into the pod,
-> but this currently fails with `UpgradeConnection(ProtocolSwitch(400))` — likely a
-> Cilium/API server websocket issue. Admin passwords are stored in 1Password and injected
-> via ExternalSecret as a workaround, but manual recovery is still needed on first deploy.
+> **Note:** Kaniop automates admin password recovery by exec'ing into the pod.
+> This requires the pod to have a single container (see Architecture section above).
+> Admin passwords are also stored in 1Password and injected via ExternalSecret.
 
-### 2. Use the tools sidecar for CLI operations
+### 2. Use the kanidm CLI via kubectl exec
 
-The `tools` container has the `kanidm` CLI pre-configured (`KANIDM_URL=https://localhost:8443`).
-Session tokens persist across commands. **Always use `-it` flags** — the CLI requires a TTY for
-interactive login prompts.
+The `kanidm` CLI is available inside the server container. **Always use `-it` flags** —
+the CLI requires a TTY for interactive login prompts.
 
 ```bash
-# Open a shell in the tools container
-kubectl -n identity exec -it sts/kanidm-default -c tools -- sh
+# Open a shell in the kanidm container
+kubectl -n identity exec -it sts/kanidm-default -- sh
 
 # Or run one-off commands directly
-kubectl -n identity exec -it sts/kanidm-default -c tools -- kanidm login -D admin
-kubectl -n identity exec -it sts/kanidm-default -c tools -- kanidm person list
+kubectl -n identity exec -it sts/kanidm-default -- kanidm login -D admin
+kubectl -n identity exec -it sts/kanidm-default -- kanidm person list
 ```
 
 ### 3. Set up user credentials
@@ -62,10 +66,10 @@ New person accounts created via Kaniop CRDs have **no credentials**. Users canno
 
 ```bash
 # Login as idm_admin first (requires -it for TTY)
-kubectl -n identity exec -it sts/kanidm-default -c tools -- kanidm login --name idm_admin
+kubectl -n identity exec -it sts/kanidm-default -- kanidm login --name idm_admin
 
 # Generate a credential reset link for the user
-kubectl -n identity exec -it sts/kanidm-default -c tools -- kanidm person credential create-reset-token <username> --name idm_admin
+kubectl -n identity exec -it sts/kanidm-default -- kanidm person credential create-reset-token <username> --name idm_admin
 ```
 
 Open the returned URL in a browser to set up the user's password and passkeys.
@@ -289,7 +293,9 @@ and group-based access control at the proxy layer.
 ## Backups
 
 Kanidm's built-in online backup runs daily at 02:00 UTC, keeping 7 versions in `/data/backups/`.
-The `backup-sync` sidecar syncs these to Garage S3 (`s3://kanidm/backups/`) hourly via `aws s3 sync`.
+The `kanidm-backup-sync` CronJob syncs these to Garage S3 (`s3://kanidm/backups/`) hourly via `aws s3 sync`.
+The CronJob uses podAffinity to schedule on the same node as the kanidm StatefulSet,
+allowing it to mount the RWO PVC concurrently.
 
 S3 credentials are stored in 1Password and injected via `config/externalsecret-s3.yaml`.
 
@@ -330,9 +336,10 @@ Check the ExternalSecret template — do not use lowercase `admin`/`idm_admin` a
 
 ### `UpgradeConnection(ProtocolSwitch(400))` in Kaniop logs
 
-Known issue — Kaniop can't exec into the pod (websocket upgrade fails, likely
-Cilium/API server). Doesn't block OIDC or identity management. Admin password
-recovery must be done manually via `kubectl exec`.
+Caused by kaniop using `AttachParams::default()` for pod exec, which omits the
+container name. Kubernetes returns HTTP 400 when exec targets a multi-container
+pod without specifying a container. Fix: ensure the Kanidm CR has no extra
+`containers` (sidecars) so the pod remains single-container.
 
 ### OIDC login button not showing
 
@@ -358,16 +365,16 @@ kubectl -n <namespace> get externalsecret <name> -o yaml
 ## Useful Commands
 
 ```bash
-# Open a shell in the tools container
-kubectl -n identity exec -it sts/kanidm-default -c tools -- sh
+# Open a shell in the kanidm container
+kubectl -n identity exec -it sts/kanidm-default -- sh
 
 # Login as admin
-kubectl -n identity exec -it sts/kanidm-default -c tools -- kanidm login -D admin
+kubectl -n identity exec -it sts/kanidm-default -- kanidm login -D admin
 
 # List persons / groups / OAuth2 clients
-kubectl -n identity exec -it sts/kanidm-default -c tools -- kanidm person list
-kubectl -n identity exec -it sts/kanidm-default -c tools -- kanidm group list
-kubectl -n identity exec -it sts/kanidm-default -c tools -- kanidm system oauth2 list
+kubectl -n identity exec -it sts/kanidm-default -- kanidm person list
+kubectl -n identity exec -it sts/kanidm-default -- kanidm group list
+kubectl -n identity exec -it sts/kanidm-default -- kanidm system oauth2 list
 
 # Check server status
 curl -sk https://auth.00o.sh/status
@@ -384,5 +391,5 @@ kubectl -n identity logs deploy/kaniop -f
 
 ## Known Issues
 
-- **Kaniop exec fails** (`UpgradeConnection(ProtocolSwitch(400))`): Prevents automatic admin account recovery. Must run `kanidmd recover-account` manually. Likely requires Cilium or kube-apiserver websocket fix.
+- **Kaniop exec fails with multi-container pods** (`UpgradeConnection(ProtocolSwitch(400))`): Kaniop uses `AttachParams::default()` without specifying a container name. Do not add sidecar containers to the Kanidm CR — use CronJobs or separate deployments instead.
 - **PushSecret not supported**: 1Password Connect provider doesn't support PushSecret for pushing Kaniop-managed secrets to 1Password. Future migration to 1Password SDK provider would enable this.
