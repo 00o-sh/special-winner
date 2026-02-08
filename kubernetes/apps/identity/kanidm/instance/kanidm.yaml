@@ -23,9 +23,6 @@ spec:
       value: "true"
   storage:
     emptyDir: {}
-  volumeMounts:
-    - name: data
-      mountPath: /data
   securityContext:
     runAsUser: 999
     runAsGroup: 999
