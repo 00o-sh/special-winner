@@ -22,6 +22,30 @@ spec:
             envFrom:
               - secretRef:
                   name: forgejo-secret
+          init-oauth:
+            dependsOn: init-db
+            image:
+              repository: codeberg.org/forgejo/forgejo
+              tag: 10.0.1
+            env:
+              FORGEJO__database__DB_TYPE: postgres
+            envFrom:
+              - secretRef:
+                  name: forgejo-secret
+            command: ["/bin/sh", "-c"]
+            args:
+              - |
+                forgejo environment-to-ini
+                forgejo migrate
+                if ! forgejo admin auth list | grep -q kanidm; then
+                  forgejo admin auth add-oauth \
+                    --name kanidm \
+                    --provider openidConnect \
+                    --key forgejo \
+                    --secret "${FORGEJO_OIDC_CLIENT_SECRET}" \
+                    --auto-discover-url "https://auth.00o.sh/oauth2/openid/forgejo/.well-known/openid-configuration" \
+                    --scopes "openid email profile"
+                fi
         containers:
           app:
             image:
