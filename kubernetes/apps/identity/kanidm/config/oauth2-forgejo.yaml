@@ -10,7 +10,7 @@ spec:
   origin: "https://git.00o.sh"
   allowInsecureClientDisablePkce: true
   redirectUrl:
-    - "https://git.00o.sh/user/oauth2/kanidm/callback"
+    - "https://git.00o.sh/user/oauth2/OIDC/callback"
   scopeMap:
     - group: forgejo-users
       scopes:
