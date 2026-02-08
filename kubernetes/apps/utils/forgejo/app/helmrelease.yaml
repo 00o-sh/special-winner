@@ -33,7 +33,7 @@ spec:
         oauth2_client:
           ENABLE_AUTO_REGISTRATION: true
           OPENID_CONNECT_SCOPES: openid email profile
-          USERNAME: preferred_username
+          USERNAME: nickname
         mailer:
           ENABLED: true
           PROTOCOL: smtp
