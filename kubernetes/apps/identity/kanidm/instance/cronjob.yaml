@@ -1,0 +1,70 @@
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: kanidm-backup-sync
+spec:
+  schedule: "30 */1 * * *"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      backoffLimit: 2
+      template:
+        spec:
+          automountServiceAccountToken: false
+          affinity:
+            podAffinity:
+              requiredDuringSchedulingIgnoredDuringExecution:
+                - labelSelector:
+                    matchLabels:
+                      kanidm.kaniop.rs/cluster: kanidm
+                  topologyKey: kubernetes.io/hostname
+          containers:
+            - name: backup-sync
+              # renovate: datasource=docker depName=amazon/aws-cli
+              image: amazon/aws-cli:2.33.17
+              command: ["/bin/sh", "-c"]
+              args:
+                - |
+                  if [ -d "/data/backups" ]; then
+                    aws --endpoint-url "$S3_ENDPOINT" s3 sync /data/backups/ s3://kanidm/backups/
+                    echo "backup sync completed"
+                  else
+                    echo "no backups directory found, skipping"
+                  fi
+              env:
+                - name: S3_ENDPOINT
+                  value: http://garage.volsync-system.svc.cluster.local:3900
+                - name: AWS_ACCESS_KEY_ID
+                  valueFrom:
+                    secretKeyRef:
+                      name: kanidm-s3-secret
+                      key: AWS_ACCESS_KEY_ID
+                - name: AWS_SECRET_ACCESS_KEY
+                  valueFrom:
+                    secretKeyRef:
+                      name: kanidm-s3-secret
+                      key: AWS_SECRET_ACCESS_KEY
+                - name: AWS_DEFAULT_REGION
+                  value: eu-west-1
+              resources:
+                requests:
+                  cpu: 1m
+                  memory: 32Mi
+                limits:
+                  memory: 128Mi
+              securityContext:
+                allowPrivilegeEscalation: false
+                capabilities:
+                  drop: ["ALL"]
+              volumeMounts:
+                - name: kanidm-data
+                  mountPath: /data
+                  readOnly: true
+          volumes:
+            - name: kanidm-data
+              persistentVolumeClaim:
+                claimName: kanidm-data-kanidm-default-0
+          restartPolicy: OnFailure
