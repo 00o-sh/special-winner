@@ -34,7 +34,7 @@ spec:
               FORGEJO__server__HTTP_PORT: &port 3000
               FORGEJO__server__SSH_DOMAIN: git.00o.sh
               FORGEJO__server__SSH_PORT: &sshPort 22
-              FORGEJO__server__SSH_LISTEN_PORT: *sshPort
+              FORGEJO__server__SSH_LISTEN_PORT: &sshContainerPort 2222
               FORGEJO__server__LFS_START_SERVER: "true"
               FORGEJO__service__DISABLE_REGISTRATION: "false"
               FORGEJO__service__REQUIRE_SIGNIN_VIEW: "false"
@@ -87,6 +87,7 @@ spec:
         ports:
           ssh:
             port: *sshPort
+            targetPort: *sshContainerPort
     route:
       app:
         hostnames:
