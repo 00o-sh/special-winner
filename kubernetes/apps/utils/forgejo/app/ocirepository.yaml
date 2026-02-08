@@ -11,4 +11,4 @@ spec:
     operation: copy
   ref:
     tag: 14.0.2
-  url: oci://codeberg.org/forgejo-helm/forgejo
+  url: oci://code.forgejo.org/forgejo-helm/forgejo
