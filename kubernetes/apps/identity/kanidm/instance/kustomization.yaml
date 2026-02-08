@@ -5,11 +5,5 @@ kind: Kustomization
 resources:
   - ./backendtlspolicy.yaml
   - ./certificate.yaml
-  - ./helmrelease.yaml
-  - ./ocirepository.yaml
-configMapGenerator:
-  - name: kanidm-configmap
-    files:
-      - ./resources/server.toml
-configurations:
-  - ./resources/kustomizeconfig.yaml
+  - ./httproute.yaml
+  - ./kanidm.yaml

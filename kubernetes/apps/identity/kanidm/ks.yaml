@@ -21,14 +21,10 @@ kind: Kustomization
 metadata:
   name: kanidm
 spec:
-  components:
-    - ../../../../components/volsync
   dependsOn:
     - name: kaniop
     - name: cert-manager
       namespace: cert-manager
-    - name: volsync
-      namespace: volsync-system
   healthChecks:
     - apiVersion: cert-manager.io/v1
       kind: Certificate
@@ -37,10 +33,6 @@ spec:
   interval: 1h
   path: ./kubernetes/apps/identity/kanidm/instance
   postBuild:
-    substitute:
-      APP: kanidm
-      VOLSYNC_CAPACITY: 10Gi
-      VOLSYNC_FSGROUP: "999"
     substituteFrom:
       - name: cluster-secrets
         kind: Secret

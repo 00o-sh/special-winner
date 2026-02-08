@@ -8,9 +8,10 @@ Available at `https://auth.00o.sh`
 
 ```
 identity/kanidm/
-├── app/          # Kaniop operator (manages Kanidm CRDs)
-├── instance/     # Kanidm server v1.8.5 (StatefulSet via app-template)
-└── ks.yaml       # Flux Kustomizations (operator -> instance dependency)
+├── app/          # Kaniop operator (Helm chart)
+├── instance/     # Kanidm CR (server deployed and managed by Kaniop)
+├── config/       # Identity resources (persons, groups, OAuth2 clients)
+└── ks.yaml       # Flux Kustomizations (operator -> instance -> config)
 ```
 
 ## Post-Deploy Bootstrap
@@ -20,10 +21,10 @@ Day-to-day management uses the `kanidm` CLI (available via the `kanidm/tools` im
 
 ```bash
 # 1. Recover admin account (runs kanidmd inside the server pod)
-kubectl -n identity exec -it sts/kanidm -- kanidmd recover-account admin
+kubectl -n identity exec -it sts/kanidm-default -c kanidm -- kanidmd recover-account admin
 
 # 2. Recover idm_admin account (for day-to-day identity management)
-kubectl -n identity exec -it sts/kanidm -- kanidmd recover-account idm_admin
+kubectl -n identity exec -it sts/kanidm-default -c kanidm -- kanidmd recover-account idm_admin
 ```
 
 A persistent `tools` sidecar container runs alongside the server with the `kanidm` CLI
@@ -31,7 +32,7 @@ pre-configured to connect via localhost. Session tokens persist across commands.
 
 ```bash
 # Open a shell in the tools container
-kubectl -n identity exec -it sts/kanidm -c tools -- sh
+kubectl -n identity exec -it sts/kanidm-default -c tools -- sh
 
 # Then inside the shell:
 kanidm login -D admin
@@ -42,7 +43,7 @@ kanidm person list
 Or run one-off commands directly:
 
 ```bash
-kubectl -n identity exec -it sts/kanidm -c tools -- kanidm self whoami
+kubectl -n identity exec -it sts/kanidm-default -c tools -- kanidm self whoami
 ```
 
 ## Managing Users, Groups & OAuth2 Clients
@@ -170,8 +171,8 @@ Kanidm RADIUS credentials (separate from their primary password).
 
 | Service | Port | Description |
 |---------|------|-------------|
-| HTTPS | 443 (-> 8443) | Web UI + OIDC provider |
-| LDAPS | 636 (-> 3636) | Read-only LDAP gateway |
+| HTTPS | 8443 | Web UI + OIDC provider |
+| LDAPS | 3636 | Read-only LDAP gateway |
 
 ## OIDC Endpoints
 
