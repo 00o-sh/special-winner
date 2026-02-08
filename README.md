@@ -553,7 +553,8 @@ Community member [@whazor](https://github.com/whazor) created [Kubesearch](https
 **Additional Services**
 - [ ] Forgejo (self-hosted Git platform)
 - [ ] Home Assistant + IoT stack (if needed)
-- [ ] Authelia or Authentik for SSO
+- [x] Kanidm (via Kaniop operator) for identity management and SSO
+- [ ] Migrate External Secrets from 1Password Connect to 1Password SDK (enables PushSecret for cross-namespace secret sync)
 
 ### Phase 2: Test Multi-Node Features
 
