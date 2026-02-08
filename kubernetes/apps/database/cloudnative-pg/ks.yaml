@@ -19,7 +19,7 @@ spec:
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: postgres-cluster
+  name: cnpg-bucket-init
 spec:
   dependsOn:
     - name: cloudnative-pg
@@ -27,6 +27,26 @@ spec:
       namespace: external-secrets
     - name: garage
       namespace: volsync-system
+  interval: 1h
+  path: ./kubernetes/apps/database/cloudnative-pg/bucket-init
+  force: true
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+    namespace: flux-system
+  targetNamespace: database
+  wait: true
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/kustomize.toolkit.fluxcd.io/kustomization_v1.json
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: postgres-cluster
+spec:
+  dependsOn:
+    - name: cloudnative-pg
+    - name: cnpg-bucket-init
   interval: 1h
   path: ./kubernetes/apps/database/cloudnative-pg/cluster
   prune: true
