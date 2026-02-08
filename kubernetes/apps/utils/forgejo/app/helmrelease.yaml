@@ -37,9 +37,9 @@ spec:
               - |
                 forgejo environment-to-ini
                 forgejo migrate
-                if ! forgejo admin auth list | grep -q kanidm; then
+                if ! forgejo admin auth list | grep -q OIDC; then
                   forgejo admin auth add-oauth \
-                    --name kanidm \
+                    --name OIDC \
                     --provider openidConnect \
                     --key forgejo \
                     --secret "${FORGEJO_OIDC_CLIENT_SECRET}" \
