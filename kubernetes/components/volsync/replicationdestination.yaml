@@ -25,7 +25,7 @@ spec:
     moverSecurityContext:
       runAsUser: ${VOLSYNC_PUID:=1000}
       runAsGroup: ${VOLSYNC_PGID:=1000}
-      fsGroup: ${VOLSYNC_PGID:=1000}
+      fsGroup: ${VOLSYNC_FSGROUP:=1000}
     repository: ${APP}-volsync-secret
     sourceIdentity:
       sourceName: ${APP}
