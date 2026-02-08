@@ -24,8 +24,10 @@ spec:
           SSH_LISTEN_PORT: 2222
           LFS_START_SERVER: true
         service:
+          ALLOW_ONLY_EXTERNAL_REGISTRATION: true
+          DEFAULT_KEEP_EMAIL_PRIVATE: true
           DISABLE_REGISTRATION: false
-          REQUIRE_SIGNIN_VIEW: false
+          SHOW_REGISTRATION_BUTTON: false
         openid:
           ENABLE_OPENID_SIGNIN: true
         oauth2_client:
@@ -90,6 +92,10 @@ spec:
       kind: Secret
       name: *secret
       valuesKey: FORGEJO_SECRET_KEY
+    - targetPath: gitea.config.security.INTERNAL_TOKEN
+      kind: Secret
+      name: *secret
+      valuesKey: FORGEJO_INTERNAL_TOKEN
   postRenderers:
     - kustomize:
         patches:
