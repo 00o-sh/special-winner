@@ -1,0 +1,38 @@
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: kanidm-bucket-init
+spec:
+  ttlSecondsAfterFinished: 3600
+  backoffLimit: 6
+  template:
+    spec:
+      restartPolicy: OnFailure
+      containers:
+        - name: bucket-init
+          # renovate: datasource=docker depName=amazon/aws-cli
+          image: amazon/aws-cli:2.33.17
+          env:
+            - name: AWS_ACCESS_KEY_ID
+              valueFrom:
+                secretKeyRef:
+                  name: kanidm-s3-secret
+                  key: AWS_ACCESS_KEY_ID
+            - name: AWS_SECRET_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: kanidm-s3-secret
+                  key: AWS_SECRET_ACCESS_KEY
+            - name: AWS_DEFAULT_REGION
+              value: eu-west-1
+          command:
+            - /bin/sh
+            - -c
+            - |
+              aws --endpoint-url http://garage.volsync-system.svc.cluster.local:3900 \
+                s3api head-bucket --bucket kanidm 2>/dev/null && \
+                echo "Bucket kanidm already exists" && exit 0
+              aws --endpoint-url http://garage.volsync-system.svc.cluster.local:3900 \
+                s3 mb s3://kanidm && \
+                echo "Bucket kanidm created successfully"
