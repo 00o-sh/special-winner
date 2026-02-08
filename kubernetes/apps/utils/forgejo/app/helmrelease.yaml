@@ -1,0 +1,144 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s-labs/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: forgejo
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: forgejo
+  interval: 1h
+  values:
+    controllers:
+      forgejo:
+        annotations:
+          reloader.stakater.com/auto: "true"
+        initContainers:
+          init-db:
+            image:
+              repository: ghcr.io/home-operations/postgres-init
+              tag: 18@sha256:3c54d39f19fdb82ed5b3f286450e4071133cc6025bd0e25856bc2c522f8fc030
+            envFrom:
+              - secretRef:
+                  name: forgejo-secret
+          init-oauth:
+            dependsOn: init-db
+            image:
+              repository: codeberg.org/forgejo/forgejo
+              tag: 10.0.1
+            env:
+              FORGEJO__database__DB_TYPE: postgres
+            envFrom:
+              - secretRef:
+                  name: forgejo-secret
+            command: ["/bin/sh", "-c"]
+            args:
+              - |
+                forgejo environment-to-ini
+                forgejo migrate
+                if ! forgejo admin auth list | grep -q OIDC; then
+                  forgejo admin auth add-oauth \
+                    --name OIDC \
+                    --provider openidConnect \
+                    --key forgejo \
+                    --secret "${FORGEJO_OIDC_CLIENT_SECRET}" \
+                    --auto-discover-url "https://auth.00o.sh/oauth2/openid/forgejo/.well-known/openid-configuration" \
+                    --scopes "openid email profile"
+                fi
+        containers:
+          app:
+            image:
+              repository: codeberg.org/forgejo/forgejo
+              tag: 10.0.1
+            env:
+              FORGEJO__database__DB_TYPE: postgres
+              FORGEJO__server__DOMAIN: git.00o.sh
+              FORGEJO__server__ROOT_URL: https://git.00o.sh
+              FORGEJO__server__HTTP_PORT: &port 3000
+              FORGEJO__server__SSH_DOMAIN: git.00o.sh
+              FORGEJO__server__SSH_PORT: &sshPort 22
+              FORGEJO__server__SSH_LISTEN_PORT: *sshPort
+              FORGEJO__server__LFS_START_SERVER: "true"
+              FORGEJO__service__DISABLE_REGISTRATION: "false"
+              FORGEJO__service__REQUIRE_SIGNIN_VIEW: "false"
+              FORGEJO__openid__ENABLE_OPENID_SIGNIN: "true"
+              FORGEJO__oauth2_client__ENABLE_AUTO_REGISTRATION: "true"
+              FORGEJO__oauth2_client__OPENID_CONNECT_SCOPES: "openid email profile"
+              FORGEJO__oauth2_client__USERNAME: preferred_username
+            envFrom:
+              - secretRef:
+                  name: forgejo-secret
+            probes:
+              liveness: &probes
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /api/healthz
+                    port: *port
+                  initialDelaySeconds: 15
+                  periodSeconds: 10
+                  timeoutSeconds: 1
+                  failureThreshold: 3
+              readiness: *probes
+            resources:
+              requests:
+                cpu: 50m
+                memory: 256Mi
+              limits:
+                memory: 1Gi
+    defaultPodOptions:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        fsGroupChangePolicy: OnRootMismatch
+    service:
+      app:
+        controller: forgejo
+        ports:
+          http:
+            port: *port
+      ssh:
+        type: LoadBalancer
+        controller: forgejo
+        annotations:
+          external-dns.alpha.kubernetes.io/hostname: git.00o.sh
+          lbipam.cilium.io/ips: 10.0.6.20
+        externalTrafficPolicy: Cluster
+        ports:
+          ssh:
+            port: *sshPort
+    route:
+      app:
+        hostnames:
+          - git.00o.sh
+        parentRefs:
+          - name: envoy-internal
+            namespace: network
+        rules:
+          - backendRefs:
+              - identifier: app
+                port: *port
+      external:
+        hostnames:
+          - git.00o.sh
+        parentRefs:
+          - name: envoy-external
+            namespace: network
+            sectionName: https
+        rules:
+          - backendRefs:
+              - identifier: app
+                port: *port
+    persistence:
+      data:
+        existingClaim: forgejo
+        globalMounts:
+          - path: /data
+      tmp:
+        type: emptyDir
+        globalMounts:
+          - path: /tmp
