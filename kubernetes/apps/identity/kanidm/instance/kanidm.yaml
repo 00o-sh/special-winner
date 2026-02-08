@@ -52,7 +52,7 @@ spec:
         - name: tools-cache
           mountPath: /.cache
   volumes:
-    - name: data
+    - name: kanidm-data
       persistentVolumeClaim:
         claimName: kanidm
     - name: tools-cache
