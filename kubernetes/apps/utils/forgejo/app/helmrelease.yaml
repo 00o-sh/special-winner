@@ -32,7 +32,7 @@ spec:
           ENABLE_OPENID_SIGNIN: true
         oauth2_client:
           ENABLE_AUTO_REGISTRATION: true
-          OPENID_CONNECT_SCOPES: openid email profile
+          OPENID_CONNECT_SCOPES: openid email profile groups
           USERNAME: nickname
         mailer:
           ENABLED: true
