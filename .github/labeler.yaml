@@ -89,6 +89,11 @@ area/flux-system:
       - any-glob-to-any-file:
           - kubernetes/apps/flux-system/**/*
 
+area/identity:
+  - changed-files:
+      - any-glob-to-any-file:
+          - kubernetes/apps/identity/**/*
+
 area/kube-system:
   - changed-files:
       - any-glob-to-any-file:
@@ -184,6 +189,11 @@ app/flux-operator:
   - changed-files:
       - any-glob-to-any-file:
           - kubernetes/apps/flux-system/flux-operator/**/*
+
+app/kanidm:
+  - changed-files:
+      - any-glob-to-any-file:
+          - kubernetes/apps/identity/kanidm/**/*
 
 app/cilium:
   - changed-files:
@@ -394,6 +404,16 @@ app/tuppr:
   - changed-files:
       - any-glob-to-any-file:
           - kubernetes/apps/system-upgrade/tuppr/**/*
+
+app/forgejo:
+  - changed-files:
+      - any-glob-to-any-file:
+          - kubernetes/apps/utils/forgejo/**/*
+
+app/homepage:
+  - changed-files:
+      - any-glob-to-any-file:
+          - kubernetes/apps/utils/homepage/**/*
 
 app/penpot:
   - changed-files:

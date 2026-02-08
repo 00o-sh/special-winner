@@ -54,6 +54,9 @@
 - name: area/flux-system
   color: "1d76db"
   description: "flux-system namespace"
+- name: area/identity
+  color: "1d76db"
+  description: "identity namespace"
 - name: area/kube-system
   color: "1d76db"
   description: "kube-system namespace"
@@ -113,6 +116,9 @@
 - name: app/flux-operator
   color: "6f42c1"
   description: "flux-operator in flux-system"
+- name: app/kanidm
+  color: "6f42c1"
+  description: "kanidm in identity"
 - name: app/cilium
   color: "6f42c1"
   description: "cilium in kube-system"
@@ -239,6 +245,12 @@
 - name: app/tuppr
   color: "6f42c1"
   description: "tuppr in system-upgrade"
+- name: app/forgejo
+  color: "6f42c1"
+  description: "forgejo in utils"
+- name: app/homepage
+  color: "6f42c1"
+  description: "homepage in utils"
 - name: app/penpot
   color: "6f42c1"
   description: "penpot in utils"
