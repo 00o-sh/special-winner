@@ -109,6 +109,9 @@ spec:
                 name: forgejo
               spec:
                 template:
+                  metadata:
+                    annotations:
+                      reloader.stakater.com/auto: "true"
                   spec:
                     initContainers:
                       - name: init-db
