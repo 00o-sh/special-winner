@@ -40,6 +40,7 @@ spec:
     substitute:
       APP: kanidm
       VOLSYNC_CAPACITY: 10Gi
+      VOLSYNC_FSGROUP: "999"
     substituteFrom:
       - name: cluster-secrets
         kind: Secret
