@@ -22,7 +22,14 @@ spec:
     - name: KANIDM_TRUST_X_FORWARD_FOR
       value: "true"
   storage:
-    emptyDir: {}
+    volumeClaimTemplate:
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 10Gi
+        storageClassName: openebs-hostpath
   securityContext:
     runAsUser: 999
     runAsGroup: 999
@@ -52,8 +59,5 @@ spec:
         - name: tools-cache
           mountPath: /.cache
   volumes:
-    - name: kanidm-data
-      persistentVolumeClaim:
-        claimName: kanidm
     - name: tools-cache
       emptyDir: {}
