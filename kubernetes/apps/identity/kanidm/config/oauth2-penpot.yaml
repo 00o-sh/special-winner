@@ -9,7 +9,6 @@ spec:
   displayname: Penpot
   origin: "https://penpot.00o.sh"
   allowInsecureClientDisablePkce: true
-  preferShortUsername: true
   redirectUrl:
     - "https://penpot.00o.sh/api/auth/oidc/callback"
   scopeMap:
