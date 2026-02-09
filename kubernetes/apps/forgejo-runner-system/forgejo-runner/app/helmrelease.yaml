@@ -34,7 +34,10 @@ spec:
         tag: 28-dind
       env:
         - name: GITEA_INSTANCE_URL
-          value: "${FORGEJO_INSTANCE_URL}"
+          valueFrom:
+            secretKeyRef:
+              name: forgejo-runner-secret
+              key: instance_url
         - name: GITEA_RUNNER_EPHEMERAL
           value: "1"
       persistence:
