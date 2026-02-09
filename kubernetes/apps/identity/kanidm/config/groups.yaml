@@ -39,3 +39,4 @@ spec:
     name: kanidm
   members:
     - all-apps
+    - herman
