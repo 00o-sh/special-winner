@@ -1,0 +1,18 @@
+---
+apiVersion: gateway.envoyproxy.io/v1alpha1
+kind: SecurityPolicy
+metadata:
+  name: dbgate-oidc
+spec:
+  targetRefs:
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      name: dbgate-app
+  oidc:
+    provider:
+      issuer: "https://auth.00o.sh/oauth2/openid/dbgate"
+    clientID: "dbgate"
+    clientSecret:
+      name: dbgate-oidc-secret
+    redirectURL: "https://dbgate.00o.sh/oauth2/callback"
+    logoutPath: "/oauth2/sign_out"
