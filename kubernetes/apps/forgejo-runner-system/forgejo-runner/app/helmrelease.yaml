@@ -5,9 +5,13 @@ kind: HelmRelease
 metadata:
   name: &name forgejo-runner
 spec:
-  chartRef:
-    kind: OCIRepository
-    name: forgejo-runner
+  chart:
+    spec:
+      chart: actions
+      version: 0.0.2
+      sourceRef:
+        kind: HelmRepository
+        name: gitea-charts
   interval: 1h
   values:
     fullnameOverride: *name
