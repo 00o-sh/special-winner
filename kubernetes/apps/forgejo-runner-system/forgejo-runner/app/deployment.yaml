@@ -1,0 +1,59 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: forgejo-runner
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: forgejo-runner
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: forgejo-runner
+    spec:
+      serviceAccountName: forgejo-runner
+      containers:
+        - name: runner
+          image: gitea/act_runner:0.2.11
+          env:
+            - name: DOCKER_HOST
+              value: tcp://localhost:2376
+            - name: DOCKER_TLS_VERIFY
+              value: "1"
+            - name: DOCKER_CERT_PATH
+              value: /certs/client
+            - name: GITEA_INSTANCE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: forgejo-runner-secret
+                  key: instance_url
+            - name: GITEA_RUNNER_REGISTRATION_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: forgejo-runner-secret
+                  key: token
+            - name: GITEA_RUNNER_EPHEMERAL
+              value: "1"
+          volumeMounts:
+            - name: docker-certs
+              mountPath: /certs
+              readOnly: true
+        - name: dind
+          image: docker:28-dind
+          securityContext:
+            privileged: true
+          env:
+            - name: DOCKER_TLS_CERTDIR
+              value: /certs
+          volumeMounts:
+            - name: docker-certs
+              mountPath: /certs
+            - name: docker-storage
+              mountPath: /var/lib/docker
+      volumes:
+        - name: docker-certs
+          emptyDir: {}
+        - name: docker-storage
+          emptyDir: {}
