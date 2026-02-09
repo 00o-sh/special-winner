@@ -1,0 +1,34 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/helm.toolkit.fluxcd.io/helmrelease_v2.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: &name forgejo-runner
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: forgejo-runner
+  interval: 1h
+  values:
+    fullnameOverride: *name
+    replicaCount: 1
+    runner:
+      config:
+        create: true
+        existingSecret: forgejo-runner-secret
+        instance: "${FORGEJO_INSTANCE_URL}"
+        file:
+          log:
+            level: info
+          runner:
+            capacity: 1
+            labels:
+              - "docker:docker://node:20-bookworm"
+              - "ubuntu-latest:docker://node:20-bookworm"
+              - "self-hosted:host://-"
+          container:
+            network: host
+            privileged: false
+            options: "-v /certs/client:/certs/client"
+            valid_volumes:
+              - "/certs/client"
