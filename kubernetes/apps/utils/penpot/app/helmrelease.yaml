@@ -190,7 +190,7 @@ spec:
         hostnames:
           - penpot.00o.sh
         parentRefs:
-          - name: envoy-internal
+          - name: envoy-external
             namespace: network
         rules:
           - backendRefs:
