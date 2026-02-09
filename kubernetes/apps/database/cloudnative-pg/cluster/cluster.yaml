@@ -11,7 +11,7 @@ spec:
 
   affinity:
     enablePodAntiAffinity: true
-    podAntiAffinityType: required
+    podAntiAffinityType: preferred
     topologyKey: kubernetes.io/hostname
 
   storage:
