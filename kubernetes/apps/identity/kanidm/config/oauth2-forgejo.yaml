@@ -9,6 +9,7 @@ spec:
   displayname: Forgejo
   origin: "https://git.00o.sh"
   allowInsecureClientDisablePkce: true
+  preferShortUsername: true
   redirectUrl:
     - "https://git.00o.sh/user/oauth2/OIDC/callback"
   scopeMap:
