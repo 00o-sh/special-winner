@@ -34,6 +34,7 @@ jobs:
 
       - name: Create Pull Request
         if: steps.changes.outputs.changed == 'true'
+        id: cpr
         uses: peter-evans/create-pull-request@c0f553fe549906ede9cf27b5156039d195d2ece0 # v8.1.0
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -58,3 +59,8 @@ jobs:
           labels: |
             area/github
             type/chore
+            auto-generated
+          assignees: |
+            @00o-sh
+          reviewers: |
+            @00o-sh
