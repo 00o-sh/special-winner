@@ -18,6 +18,7 @@ spec:
     name: kanidm
   members:
     - all-apps
+    - herman
 ---
 apiVersion: kaniop.rs/v1beta1
 kind: KanidmGroup
