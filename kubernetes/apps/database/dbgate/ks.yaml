@@ -7,6 +7,10 @@ metadata:
 spec:
   dependsOn:
     - name: cloudnative-pg
+    - name: kanidm-config
+      namespace: identity
+    - name: onepassword
+      namespace: external-secrets
   interval: 1h
   path: ./kubernetes/apps/database/dbgate/app
   postBuild:

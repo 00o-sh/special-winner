@@ -7,5 +7,6 @@ resources:
   - ./externalsecret-s3.yaml
   - ./persons.yaml
   - ./groups.yaml
+  - ./oauth2-dbgate.yaml
   - ./oauth2-forgejo.yaml
   - ./oauth2-penpot.yaml

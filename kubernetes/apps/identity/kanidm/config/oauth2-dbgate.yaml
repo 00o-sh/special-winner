@@ -1,0 +1,19 @@
+---
+apiVersion: kaniop.rs/v1beta1
+kind: KanidmOAuth2Client
+metadata:
+  name: dbgate
+spec:
+  kanidmRef:
+    name: kanidm
+  displayname: DbGate
+  origin: "https://dbgate.00o.sh"
+  allowInsecureClientDisablePkce: true
+  redirectUrl:
+    - "https://dbgate.00o.sh/oauth2/callback"
+  scopeMap:
+    - group: dbgate-users
+      scopes:
+        - openid
+        - email
+        - profile
