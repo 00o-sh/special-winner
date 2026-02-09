@@ -7,7 +7,7 @@ spec:
   targetRefs:
     - group: gateway.networking.k8s.io
       kind: HTTPRoute
-      name: dbgate-app
+      name: dbgate
   oidc:
     provider:
       issuer: "https://auth.00o.sh/oauth2/openid/dbgate"
