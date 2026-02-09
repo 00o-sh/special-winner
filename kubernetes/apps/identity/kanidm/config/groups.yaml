@@ -2,7 +2,7 @@
 apiVersion: kaniop.rs/v1beta1
 kind: KanidmGroup
 metadata:
-  name: app-users
+  name: all-apps
 spec:
   kanidmRef:
     name: kanidm
@@ -17,7 +17,7 @@ spec:
   kanidmRef:
     name: kanidm
   members:
-    - ebrody
+    - all-apps
 ---
 apiVersion: kaniop.rs/v1beta1
 kind: KanidmGroup
@@ -27,4 +27,4 @@ spec:
   kanidmRef:
     name: kanidm
   members:
-    - ebrody
+    - all-apps
