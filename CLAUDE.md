@@ -10,7 +10,7 @@ This document provides comprehensive guidance for AI assistants working with thi
 
 ### Core Components
 
-- **OS**: Talos Linux 1.12.2 (immutable Kubernetes OS)
+- **OS**: Talos Linux 1.12.3 (immutable Kubernetes OS)
 - **Orchestration**: Kubernetes 1.34.0
 - **GitOps**: Flux CD 2.7.5 (declarative continuous delivery)
 - **CNI**: Cilium 1.19.0 (eBPF-based networking)
@@ -21,6 +21,7 @@ This document provides comprehensive guidance for AI assistants working with thi
 - **Package Management**: Helm 4.1.0 (Helm v4 for chart management)
 - **Database**: CloudNative-PG (PostgreSQL 17.7) + Dragonfly (Redis-compatible)
 - **Virtualization**: KubeVirt 1.7.0 (virtual machine management)
+- **Identity**: Kanidm 1.8.5 (OIDC/LDAPS identity provider)
 
 ## Directory Structure
 
@@ -30,19 +31,22 @@ special-winner/
 │   ├── workflows/                    # CI/CD pipelines
 │   │   ├── e2e.yaml                 # End-to-end testing
 │   │   ├── flux-local.yaml          # Flux validation
+│   │   ├── label-generate.yaml      # Auto-generate labels from app structure
 │   │   └── ...
 │   └── tests/                        # Test configuration samples
 │
 ├── .taskfiles/                       # Task automation definitions
 │   ├── bootstrap/Taskfile.yaml       # Bootstrap tasks
 │   ├── talos/Taskfile.yaml          # Talos operations
-│   └── template/Taskfile.yaml       # Template rendering
+│   ├── template/Taskfile.yaml       # Template rendering
+│   └── vm/Taskfile.yaml             # KubeVirt VM management
 │
 ├── bootstrap/                        # Initial cluster bootstrap
 │   ├── helmfile.d/                  # Helm releases
 │   │   ├── 00-crds.yaml            # CRD extraction
 │   │   └── 01-apps.yaml            # Bootstrap apps
 │   ├── github-deploy-key.sops.yaml  # Encrypted deploy key
+│   ├── onepassword-clustersecretstore.yaml # 1Password secret store
 │   ├── onepassword-secret.sops.yaml # 1Password credentials
 │   └── sops-age.sops.yaml          # Age encryption key
 │
@@ -86,6 +90,7 @@ special-winner/
 │
 ├── scripts/                         # Utility scripts
 │   ├── bootstrap-apps.sh           # Main bootstrap script
+│   ├── generate-labels.sh          # GitHub label auto-generation
 │   └── lib/common.sh               # Shared utilities
 │
 ├── .mise.toml                       # Development tools config
@@ -178,6 +183,16 @@ task talos:upgrade-node IP=10.10.10.10
 **Upgrade Kubernetes version**:
 ```bash
 task talos:upgrade-k8s
+```
+
+**Manage KubeVirt VMs**:
+```bash
+task vm:list                              # List all VMs
+task vm:start name=<vm-name>              # Start a VM
+task vm:stop name=<vm-name>               # Stop a VM
+task vm:restart name=<vm-name>            # Restart a VM (force)
+task vm:console name=<vm-name>            # Open VM console
+task vm:redeploy name=<vm-name>           # Delete and recreate VM with disk
 ```
 
 **Reset cluster**:
@@ -358,6 +373,8 @@ Scopes (Common):
 - media: Media applications
 - network: Network infrastructure
 - utils: Utility services
+- identity: Identity/authentication
+- database: Database infrastructure
 
 Examples:
 - fix(container): update image ghcr.io/app/name ( 1.0.0 → 1.1.0 )
@@ -365,6 +382,8 @@ Examples:
 - ci(github-action): update action/checkout ( v3 → v4 )
 - chore(observability): disable buddy heartbeat monitor and alerts
 - fix(volsync): change backup schedule from every 5 minutes to daily at 2 AM
+- feat(identity): add Kanidm OIDC authentication for DbGate
+- feat(database): add DbGate web-based database manager
 ```
 
 ## AI Assistant Guidelines
@@ -410,6 +429,11 @@ When adding a new Kubernetes application:
    sops --encrypt --in-place kubernetes/apps/<namespace>/<app-name>/app/secret.sops.yaml
    ```
 
+6. **If the app needs OIDC/SSO** (optional):
+   - Create a KanidmOAuth2Client in `kubernetes/apps/identity/kanidm/config/`
+   - Add the app to the relevant Kanidm group for access control
+   - Use `kubernetes-identity` ClusterSecretStore for cross-namespace OAuth2 secret access
+
 ### Security Considerations
 
 1. **Never commit unencrypted secrets** - All sensitive data must be in `*.sops.yaml` files
@@ -431,8 +455,9 @@ When adding a new Kubernetes application:
 5. **Don't add unnecessary complexity** - Follow the principle of minimal necessary changes
 6. **Don't add comments/docstrings** to code you didn't modify
 7. **Don't create abstractions** for one-time operations
-8. **Be aware of Helm v4** - The repository uses Helm 4.0.5, which has breaking changes from v3 (see bootstrap scripts)
+8. **Be aware of Helm v4** - The repository uses Helm 4.1.0, which has breaking changes from v3 (see bootstrap scripts)
 9. **Self-hosted runners** - Be aware that some workflows run on `special-winner-runner` (self-hosted) which has cluster access
+10. **Kanidm pod structure** - Kanidm must run as a single-container StatefulSet (Kaniop requires pod exec access to the container)
 
 ### File Location Reference
 
@@ -457,6 +482,14 @@ When adding a new Kubernetes application:
 → Edit: `nodes.yaml` (if it exists)
 → Then run: `task configure`
 
+**Need to configure identity/SSO?**
+→ Edit: `kubernetes/apps/identity/kanidm/config/` (OAuth2 clients, groups, persons)
+→ Flux will auto-sync changes
+
+**Need to manage VMs?**
+→ Edit: `kubernetes/apps/kubevirt/virtualmachines/<vm-name>/`
+→ Use task commands: `task vm:list`, `task vm:start`, etc.
+
 ## Important Commands Reference
 
 | Task | Command |
@@ -474,6 +507,12 @@ When adding a new Kubernetes application:
 | Reset cluster | `task talos:reset` |
 | Validate K8s manifests | `task template:validate-kubernetes-config` |
 | Tidy templates | `task template:tidy` |
+| List VMs | `task vm:list` |
+| Start VM | `task vm:start name=<name>` |
+| Stop VM | `task vm:stop name=<name>` |
+| Restart VM | `task vm:restart name=<name>` |
+| VM console | `task vm:console name=<name>` |
+| Redeploy VM | `task vm:redeploy name=<name>` |
 
 ## Renovate Automation
 
@@ -516,6 +555,13 @@ Synchronizes GitHub repository labels:
 - Syncs labels defined in `.github/labels.yaml`
 - Deletes labels not defined in configuration
 - Maintains consistent labeling across the repository
+
+### label-generate.yaml
+Auto-generates labels from cluster app structure:
+- Triggered when `kubernetes/apps/**/kustomization.yaml` or `scripts/generate-labels.sh` changes
+- Runs `scripts/generate-labels.sh` to scan `kubernetes/apps/` directory
+- Creates PR with updated `.github/labels.yaml` and `.github/labeler.yaml`
+- Color-coded categories: green (general), blue (namespaces), purple (apps), dark purple (components)
 
 ### release.yaml
 Handles repository releases (if applicable)
@@ -608,6 +654,7 @@ talosctl logs --nodes <ip> --insecure
 **database**: Database infrastructure
 - cloudnative-pg (PostgreSQL operator)
 - postgres-cluster (PostgreSQL 17.7 HA cluster with 2 instances)
+- dbgate (web-based database manager with Kanidm OIDC)
 - dragonfly (Redis-compatible in-memory datastore operator)
 
 **default**: Default namespace
@@ -621,6 +668,9 @@ talosctl logs --nodes <ip> --insecure
 **flux-system**: GitOps
 - flux-instance
 - flux-operator
+
+**identity**: Identity and authentication
+- kanidm (OIDC/LDAPS identity provider with Kaniop operator)
 
 **kube-system**: Core Kubernetes
 - cilium (CNI)
@@ -657,6 +707,7 @@ talosctl logs --nodes <ip> --insecure
 - cloudflare-tunnel (external access)
 - envoy-gateway (ingress)
 - k8s-gateway (internal DNS)
+- macvtap-cni (virtual network device plugin for KubeVirt VMs)
 - multus (multi-network CNI)
 - unifi-dns
 
@@ -678,6 +729,8 @@ talosctl logs --nodes <ip> --insecure
 - tuppr (automated upgrades)
 
 **utils**: Utility services
+- forgejo (self-hosted Git repository platform with Kanidm SSO)
+- homepage (Kubernetes-aware dashboard)
 - penpot (open-source design and prototyping platform)
 - smtp-relay (SMTP relay for outbound email using Maddy)
 
@@ -697,11 +750,12 @@ talosctl logs --nodes <ip> --insecure
   - [SOPS](https://github.com/getsops/sops)
   - [Helm](https://helm.sh/) (Note: Using v4)
   - [KubeVirt](https://kubevirt.io/)
+  - [Kanidm](https://kanidm.com/)
 
 ## Version Information
 
 This documentation applies to:
-- Talos Linux: 1.12.2
+- Talos Linux: 1.12.3
 - Kubernetes: 1.34.0
 - Flux CD: 2.7.5
 - Cilium: 1.19.0
@@ -709,28 +763,34 @@ This documentation applies to:
 - Python: 3.14.3
 - CloudNative-PG: PostgreSQL 17.7
 - KubeVirt: 1.7.0
+- Kanidm: 1.8.5
+- Cloudflared: 2026.2.0
+- Talhelper: 3.1.4
 
 Check `.mise.toml` for exact versions of all tools.
 
 ## Recent Notable Changes
 
+- **2026-02-09**: Added Kanidm identity provider with OIDC/LDAPS in new identity namespace
+- **2026-02-09**: Added Forgejo self-hosted Git service with Kanidm SSO integration
+- **2026-02-09**: Added DbGate web-based database manager with Kanidm OIDC authentication
+- **2026-02-09**: Added Homepage Kubernetes-aware dashboard to utils namespace
+- **2026-02-09**: Added macvtap-cni virtual network plugin for KubeVirt VMs
+- **2026-02-09**: Added label-generate workflow for auto-generating GitHub labels from app structure
+- **2026-02-09**: Added VM management tasks (.taskfiles/vm/Taskfile.yaml)
+- **2026-02-09**: Talos Linux updated from 1.12.2 to 1.12.3
+- **2026-02-09**: Cloudflared updated from 2026.1.2 to 2026.2.0
 - **2026-02-04**: Added KubeVirt virtualization namespace with VMs (debian-desktop, debian-server, ubuntu-server, windows-server)
 - **2026-02-04**: Added Spegel for peer-to-peer container image sharing in kube-system
 - **2026-02-04**: Added kubevirt-manager web UI for VM management
 - **2026-02-04**: Added Grafana dashboards for Kubernetes infrastructure monitoring
-- **2026-02-04**: Python updated from 3.14.2 to 3.14.3
-- **2026-02-04**: VictoriaLogs datasource plugin updated to 0.24.0
 - **2026-01-31**: Added database namespace with CloudNative-PG (PostgreSQL 17.7 HA cluster) and Dragonfly operator
 - **2026-01-31**: Added Penpot design platform to utils namespace (backend, frontend, exporter, valkey)
-- **2026-01-31**: Talos Linux updated from 1.12.1 to 1.12.2
 - **2026-01-31**: Helm updated from 4.0.5 to 4.1.0
-- **2026-01-31**: Penpot images updated to 2.12.1, Valkey upgraded to 9.0.1
-- **2026-01-31**: kube-prometheus-stack updated to 81.4.2, Dragonfly operator to v1.4.0
 - **2026-01-21**: Added GitHub Actions self-hosted runner system (actions-runner-system namespace)
 - **2026-01-21**: Added SMTP relay service for outbound email (utils namespace with Maddy)
 - **2026-01-21**: New CI/CD workflows for automated image pulling and CRD schema publishing
 - **2026-01-15**: Expanded media stack with Radarr, Sonarr, Seerr, Recyclarr, Tautulli, FlareSolverr, TheLounge
-- **2026-01-09**: Buddy heartbeat monitoring disabled in observability stack
 - **2026-01-09**: Added comprehensive GitHub label automation (labeler and label-sync workflows)
 - **2026-01-08**: Multiple media applications added (Plex, Bazarr, Autobrr, Prowlarr, qBittorrent)
 - **2026-01-08**: Volsync backup schedule changed from every 5 minutes to daily at 2 AM
@@ -738,6 +798,101 @@ Check `.mise.toml` for exact versions of all tools.
 - **2026-01-08**: NFS-scaler component added using KEDA for smart scaling
 
 ## Component Deep Dives
+
+### Kanidm Identity Provider
+
+Located in `kubernetes/apps/identity/kanidm/`, this is the centralized identity and authentication platform for the cluster.
+
+**Architecture**:
+```
+kubernetes/apps/identity/kanidm/
+├── app/               # Kaniop operator (Helm release)
+├── instance/          # Kanidm server CR (StatefulSet)
+├── config/            # Identity resources & OAuth2 clients
+│   ├── oauth2-forgejo.yaml
+│   ├── oauth2-penpot.yaml
+│   ├── oauth2-dbgate.yaml
+│   ├── persons.yaml
+│   └── groups.yaml
+└── ks.yaml            # Flux dependency chain
+```
+
+**Components**:
+- **Kaniop operator**: Kubernetes operator managing Kanidm lifecycle via CRDs
+- **Kanidm server**: Rust-based identity management (port 8443 HTTPS, 3636 LDAPS)
+- **CRDs**: KanidmPersonAccount, KanidmGroup, KanidmOAuth2Client
+
+**Endpoints**:
+- Web UI / OIDC: `https://auth.00o.sh`
+
+**Features**:
+- OIDC provider for SSO across cluster applications
+- LDAPS read-only gateway (port 3636)
+- RADIUS support
+- SSH key distribution
+- PKCE support (can be disabled per client for compatibility)
+- Online backups: daily at 02:00 UTC, synced to Garage S3 hourly, 7-day retention
+
+**Storage**: 10Gi on openebs-hostpath
+
+**OAuth2 Integration Pattern**:
+1. Create KanidmOAuth2Client in `config/` directory
+2. Kaniop auto-creates OAuth2 secrets in the identity namespace
+3. Other namespaces access secrets via `kubernetes-identity` ClusterSecretStore
+4. Apps configure OIDC using the distributed secret
+
+**Currently Integrated Apps**: Forgejo, Penpot, DbGate
+
+**Admin Access**:
+- admin and idm_admin accounts managed via 1Password ExternalSecrets
+- Credential reset via Kaniop with 1Password integration
+
+### Forgejo (Self-Hosted Git Service)
+
+Located in `kubernetes/apps/utils/forgejo/`, Forgejo is a modern self-hosted Git repository platform (Gitea fork).
+
+**Configuration**:
+- Helm chart: `code.forgejo.org` (version 16.0.2)
+- Database: PostgreSQL via `postgres-rw.database.svc.cluster.local:5432`
+- OIDC: Kanidm SSO integration (preferred_username field)
+- Email: SMTP relay via `smtp-relay.utils.svc.cluster.local:25`
+
+**Endpoints**:
+- Web: `https://git.00o.sh` (internal + external via Envoy Gateway)
+- SSH: LoadBalancer on port 22 (IP: 10.0.6.20)
+
+**Features**:
+- Rootless image variant, unprivileged SSH on port 2222
+- Git LFS enabled
+- Metrics collection (Prometheus ServiceMonitor)
+- External registration disabled
+- Auto-reloads on secret changes (via Reloader)
+- OAuth2 username mapping from Kanidm
+
+### DbGate (Web-Based Database Manager)
+
+Located in `kubernetes/apps/database/dbgate/`, DbGate provides a web-based interface for database management.
+
+**Configuration**:
+- Image: `dbgate/dbgate:7.0.3-alpine`
+- Default connection: PostgreSQL cluster (`postgres-rw.database.svc.cluster.local:5432`)
+- Authentication: Kanidm OIDC via Envoy Gateway SecurityPolicy
+- UI port: 3000
+
+**Endpoint**: `https://dbgate.00o.sh` (internal only via envoy-internal)
+
+### Homepage (Kubernetes Dashboard)
+
+Located in `kubernetes/apps/utils/homepage/`, Homepage is a Kubernetes-aware dashboard aggregator.
+
+**Configuration**:
+- Image: `ghcr.io/00o-sh/homepage` (custom build)
+- RBAC: ClusterRole for reading nodes, pods, deployments, services, gateways
+- ConfigMap-based configuration (settings, widgets, services, bookmarks)
+
+**Endpoint**: `https://homepage.00o.sh`
+
+**Dashboard Sections**: Media, Downloads, Monitoring, Infrastructure, Storage, Utilities
 
 ### KubeVirt Virtualization Platform
 
@@ -768,7 +923,7 @@ Located in `kubernetes/apps/kubevirt/`, this namespace provides virtual machine 
 - CDI uses openebs-hostpath for scratch space during imports
 
 **Networking**:
-- VMs use Multus with macvtap for direct network access
+- VMs use Multus with macvtap for direct network access (via macvtap-cni DaemonSet)
 - Each VM has a dedicated MAC address
 - DNS endpoints configured via external-dns
 
@@ -801,11 +956,6 @@ Located in `kubernetes/apps/kube-system/spegel/`, this component enables peer-to
 - Grafana dashboard enabled (via GrafanaOperator)
 - ServiceMonitor for Prometheus metrics
 
-**Benefits**:
-- Faster image pulls for frequently used images
-- Reduced egress costs and external network dependency
-- Automatic image distribution across nodes
-
 ### GitHub Actions Self-Hosted Runner System
 
 Located in `kubernetes/apps/actions-runner-system/`, this system provides self-hosted GitHub Actions runners within the Kubernetes cluster.
@@ -821,12 +971,6 @@ Located in `kubernetes/apps/actions-runner-system/`, this system provides self-h
 - Provides isolated execution environment with cluster access
 - Used by workflows like `image-pull.yaml` and `schemas.yaml` that need cluster access
 
-**Benefits**:
-- Access to internal cluster resources (Talosctl for image pulling)
-- Faster job execution (no cold start, local image cache)
-- Cost savings (no GitHub-hosted runner minutes)
-- Custom runner configurations and tools
-
 **Configuration**: Runner scale sets are defined in `kubernetes/apps/actions-runner-system/actions-runner-controller/runners/`
 
 ### SMTP Relay Service
@@ -837,15 +981,7 @@ Located in `kubernetes/apps/utils/smtp-relay/`, this service provides a centrali
 - Uses Maddy mail server (lightweight, modern SMTP server)
 - Accepts email on port 25 via LoadBalancer service (10.0.6.15)
 - Relays through external SMTP provider (configured via secrets)
-- Supports STARTTLS and authentication
 - Hostname: smtp-relay.00o.sh (via external-dns)
-
-**Configuration**:
-- SMTP relay credentials stored in encrypted secrets
-- Config file mounted from ConfigMap
-- State and runtime data stored in emptyDir
-- Single replica with RollingUpdate strategy
-- Auto-reloads on secret changes (via Reloader)
 
 **Security**:
 - Non-root user (UID/GID 1000)
@@ -854,6 +990,59 @@ Located in `kubernetes/apps/utils/smtp-relay/`, this service provides a centrali
 - All capabilities dropped
 
 **Usage**: Applications can send email to `smtp-relay.utils.svc.cluster.local:25` or via the LoadBalancer IP.
+
+### Database Infrastructure
+
+Located in `kubernetes/apps/database/`, this namespace provides centralized database services for the cluster.
+
+**CloudNative-PG (PostgreSQL)**:
+- Kubernetes-native PostgreSQL operator
+- Runs PostgreSQL 17.7 with 2 instances for high availability
+- Uses OpenEBS hostpath storage (20Gi per instance)
+- Automated backups to Garage S3 storage with 30-day retention
+- Monitoring enabled via PodMonitor
+- Tuned for performance: 200 max connections, optimized buffer settings
+
+**Cluster Architecture**:
+```
+kubernetes/apps/database/cloudnative-pg/
+├── app/                    # Operator deployment
+│   ├── helmrelease.yaml
+│   └── ocirepository.yaml
+├── cluster/               # PostgreSQL cluster definition
+│   ├── cluster.yaml       # Main cluster spec
+│   ├── scheduledbackup.yaml
+│   └── externalsecret.yaml
+├── bucket-init/           # S3 bucket initialization
+└── recovery/              # Disaster recovery configs
+    └── cluster.yaml
+```
+
+**Dragonfly**:
+- Modern Redis-compatible in-memory datastore
+- Deploys the Dragonfly Operator for managing Dragonfly instances
+- Higher performance alternative to Redis/Valkey
+- Used by applications requiring fast caching or session storage
+
+**Usage**: Applications can connect to PostgreSQL via the `postgres-rw.database.svc.cluster.local` service.
+
+### Penpot Design Platform
+
+Located in `kubernetes/apps/utils/penpot/`, Penpot is an open-source design and prototyping platform.
+
+**Components**:
+- **Backend**: Main application server (penpotapp/backend:2.12.1)
+- **Frontend**: Web UI (penpotapp/frontend:2.12.1)
+- **Exporter**: Export service for file generation (penpotapp/exporter:2.12.1)
+- **Valkey**: Redis-compatible cache (valkey/valkey:9.0.1-alpine)
+
+**Architecture**:
+- Multi-controller deployment using app-template Helm chart
+- PostgreSQL database (via CloudNative-PG postgres-cluster)
+- Valkey for session storage and caching
+- Persistent storage for assets via Volsync (20Gi)
+- Exposed at `penpot.00o.sh` via Envoy Gateway
+- Kanidm OIDC integration (PKCE disabled for compatibility)
 
 ### NFS Scaler Component
 
@@ -885,80 +1074,15 @@ The repository uses an automated label management system:
 - `area/*`: Denotes which part of the codebase was changed (bootstrap, kubernetes, talos, etc.)
 - `size/*`: Indicates PR size (xs, s, m, l, xl)
 - Namespace-specific labels: `area/cert-manager`, `area/media`, `area/observability`, etc.
+- App-specific labels: auto-generated from `kubernetes/apps/` structure
 
 **Configuration Files**:
 - `.github/labels.yaml`: Defines all available labels with colors and descriptions
 - `.github/labeler.yaml`: Maps file paths to labels for automatic PR labeling
 
-**Benefits**:
-- Consistent labeling across all PRs
-- Easy filtering and organization of issues/PRs
-- Automatic size warnings for large PRs
-- Clear indication of which components are affected by changes
-
-### Database Infrastructure
-
-Located in `kubernetes/apps/database/`, this namespace provides centralized database services for the cluster.
-
-**CloudNative-PG (PostgreSQL)**:
-- Kubernetes-native PostgreSQL operator
-- Runs PostgreSQL 17.7 with 2 instances for high availability
-- Uses OpenEBS hostpath storage (20Gi per instance)
-- Automated backups to Garage S3 storage with 30-day retention
-- Monitoring enabled via PodMonitor
-- Tuned for performance: 200 max connections, optimized buffer settings
-
-**Cluster Architecture**:
-```
-kubernetes/apps/database/cloudnative-pg/
-├── app/                    # Operator deployment
-│   ├── helmrelease.yaml
-│   └── ocirepository.yaml
-├── cluster/               # PostgreSQL cluster definition
-│   ├── cluster.yaml       # Main cluster spec
-│   ├── scheduledbackup.yaml
-│   └── externalsecret.yaml
-└── recovery/              # Disaster recovery configs
-    └── cluster.yaml
-```
-
-**Dragonfly**:
-- Modern Redis-compatible in-memory datastore
-- Deploys the Dragonfly Operator for managing Dragonfly instances
-- Higher performance alternative to Redis/Valkey
-- Used by applications requiring fast caching or session storage
-
-**Usage**: Applications can connect to PostgreSQL via the `postgres-rw.database.svc.cluster.local` service.
-
-### Penpot Design Platform
-
-Located in `kubernetes/apps/utils/penpot/`, Penpot is an open-source design and prototyping platform.
-
-**Components**:
-- **Backend**: Main application server (penpotapp/backend:2.12.1)
-- **Frontend**: Web UI (penpotapp/frontend:2.12.1)
-- **Exporter**: Export service for file generation (penpotapp/exporter:2.12.1)
-- **Valkey**: Redis-compatible cache (valkey/valkey:9.0.1-alpine)
-
-**Architecture**:
-- Multi-controller deployment using app-template Helm chart
-- PostgreSQL database (via CloudNative-PG postgres-cluster)
-- Valkey for session storage and caching
-- Persistent storage for assets via Volsync (20Gi)
-- Exposed at `penpot.00o.sh` via Envoy Gateway
-
-**Dependencies**:
-- Volsync (for persistent storage)
-- postgres-cluster (for database)
-- onepassword (for secrets)
-
-**Configuration**:
-- Registration and password login enabled
-- Email verification disabled
-- Telemetry disabled
-- Automatic pod restarts via Reloader on secret changes
+**Auto-generation**: The `label-generate.yaml` workflow and `scripts/generate-labels.sh` automatically regenerate labels when the app structure changes.
 
 ---
 
-**Last Updated**: 2026-02-04
+**Last Updated**: 2026-02-09
 **Template Source**: [onedr0p/cluster-template](https://github.com/onedr0p/cluster-template)
