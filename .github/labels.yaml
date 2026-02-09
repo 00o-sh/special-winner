@@ -95,6 +95,9 @@
 - name: app/cloudnative-pg
   color: "6f42c1"
   description: "cloudnative-pg in database"
+- name: app/dbgate
+  color: "6f42c1"
+  description: "dbgate in database"
 - name: app/dragonfly
   color: "6f42c1"
   description: "dragonfly in database"
