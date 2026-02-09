@@ -11,3 +11,6 @@ spec:
   interval: 1h
   values:
     fullnameOverride: *name
+    image:
+      repository: ghcr.io/00o-sh/act_runner
+      tag: latest
