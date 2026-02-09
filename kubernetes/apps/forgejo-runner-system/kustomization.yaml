@@ -6,6 +6,7 @@ namespace: forgejo-runner-system
 
 components:
   - ../../components/alerts
+  - ../../components/sops
 
 resources:
   - ./namespace.yaml
