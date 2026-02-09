@@ -1,0 +1,85 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s-labs/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: dbgate
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: dbgate
+  interval: 1h
+  values:
+    controllers:
+      dbgate:
+        strategy: RollingUpdate
+        containers:
+          app:
+            image:
+              repository: dbgate/dbgate
+              tag: 7.0.3-alpine
+            env:
+              CONNECTIONS: postgres-cluster
+              LABEL_postgres-cluster: Postgres Cluster
+              SERVER_postgres-cluster: postgres-rw.database.svc.cluster.local
+              USER_postgres-cluster: postgres
+              PASSWORD_postgres-cluster:
+                valueFrom:
+                  secretKeyRef:
+                    name: cloudnative-pg-secret
+                    key: password
+              PORT_postgres-cluster: "5432"
+              ENGINE_postgres-cluster: postgres@dbgate-plugin-postgres
+            probes:
+              liveness: &probes
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /
+                    port: &port 3000
+                  initialDelaySeconds: 15
+                  periodSeconds: 10
+                  timeoutSeconds: 1
+                  failureThreshold: 3
+              readiness: *probes
+            securityContext:
+              allowPrivilegeEscalation: false
+              capabilities: { drop: ["ALL"] }
+            resources:
+              requests:
+                cpu: 10m
+                memory: 128Mi
+              limits:
+                memory: 512Mi
+    service:
+      app:
+        controller: dbgate
+        ports:
+          http:
+            port: *port
+    route:
+      app:
+        annotations:
+          gethomepage.dev/enabled: "true"
+          gethomepage.dev/group: Infrastructure
+          gethomepage.dev/name: DbGate
+          gethomepage.dev/icon: mdi-database-search
+          gethomepage.dev/description: Database Manager
+          gethomepage.dev/href: "https://dbgate.00o.sh"
+        hostnames:
+          - dbgate.${SECRET_DOMAIN}
+        parentRefs:
+          - name: envoy-internal
+            namespace: network
+        rules:
+          - backendRefs:
+              - identifier: app
+                port: *port
+    persistence:
+      data:
+        type: emptyDir
+        advancedMounts:
+          dbgate:
+            app:
+              - path: /root/.dbgate
