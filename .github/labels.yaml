@@ -54,6 +54,9 @@
 - name: area/flux-system
   color: "1d76db"
   description: "flux-system namespace"
+- name: area/forgejo-runner-system
+  color: "1d76db"
+  description: "forgejo-runner-system namespace"
 - name: area/identity
   color: "1d76db"
   description: "identity namespace"
@@ -119,6 +122,9 @@
 - name: app/flux-operator
   color: "6f42c1"
   description: "flux-operator in flux-system"
+- name: app/forgejo-runner
+  color: "6f42c1"
+  description: "forgejo-runner in forgejo-runner-system"
 - name: app/kanidm
   color: "6f42c1"
   description: "kanidm in identity"
