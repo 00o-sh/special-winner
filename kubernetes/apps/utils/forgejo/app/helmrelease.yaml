@@ -33,7 +33,7 @@ spec:
         oauth2_client:
           ENABLE_AUTO_REGISTRATION: true
           OPENID_CONNECT_SCOPES: openid email profile groups
-          USERNAME: nickname
+          USERNAME: preferred_username
         mailer:
           ENABLED: true
           PROTOCOL: smtp
@@ -109,6 +109,9 @@ spec:
                 name: forgejo
               spec:
                 template:
+                  metadata:
+                    annotations:
+                      reloader.stakater.com/auto: "true"
                   spec:
                     initContainers:
                       - name: init-db
@@ -116,3 +119,24 @@ spec:
                         envFrom:
                           - secretRef:
                               name: forgejo-secret
+          - target:
+              kind: Deployment
+              name: forgejo
+            patch: |
+              - op: add
+                path: /spec/template/spec/initContainers/-
+                value:
+                  name: fix-oauth-secret
+                  image: ghcr.io/home-operations/postgres-init:18
+                  envFrom:
+                    - secretRef:
+                        name: forgejo-secret
+                  command:
+                    - sh
+                    - -c
+                    - |
+                      export PGPASSWORD="$POSTGRES_PASSWORD"
+                      psql -h postgres-rw.database.svc.cluster.local -p 5432 \
+                        -U "$POSTGRES_USERNAME" -d "$POSTGRES_DB" \
+                        --set oauth_secret="$secret" \
+                        -c "UPDATE login_source SET cfg = jsonb_set(cfg::jsonb, '{ClientSecret}', to_jsonb(:'oauth_secret'::text)) WHERE name = 'OIDC';"
