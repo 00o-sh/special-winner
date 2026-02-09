@@ -1,0 +1,48 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/helm.toolkit.fluxcd.io/helmrelease_v2.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: &name special-winner-forgejo-runner
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: act-runner-scale-set
+  interval: 1h
+  values:
+    giteaConfigSecret: special-winner-forgejo-runner-secret
+    minRunners: 1
+    maxRunners: 3
+    containerMode:
+      type: kubernetes
+      kubernetesModeWorkVolumeClaim:
+        accessModes:
+          - ReadWriteOnce
+        storageClassName: openebs-hostpath
+        resources:
+          requests:
+            storage: 25Gi
+    controllerServiceAccount:
+      name: forgejo-runner-controller
+      namespace: forgejo-runner-system
+    template:
+      spec:
+        containers:
+          - name: runner
+            image: ghcr.io/00o-sh/act_runner:latest
+            command:
+              - /usr/local/bin/run.sh
+            env:
+              - name: NODE
+                valueFrom:
+                  fieldRef:
+                    fieldPath: status.hostIP
+            volumeMounts:
+              - mountPath: /var/run/secrets/talos.dev
+                name: talos
+                readOnly: true
+        serviceAccountName: *name
+        volumes:
+          - name: talos
+            secret:
+              secretName: *name
