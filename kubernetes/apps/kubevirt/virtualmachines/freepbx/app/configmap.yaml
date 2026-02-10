@@ -4,7 +4,7 @@ kind: ConfigMap
 metadata:
   name: freepbx-vars
 data:
-  VM_NAME: freepbx
+  VM_NAME: b1-k3s01
   VM_IP: 192.168.57.14
   VM_MAC: "52:54:00:57:00:14"
   VM_CPU: "2"
