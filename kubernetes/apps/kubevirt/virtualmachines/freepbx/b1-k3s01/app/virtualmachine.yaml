@@ -69,10 +69,10 @@ spec:
                 expire: false
                 users:
                   - name: root
-                    password: ${FPBX_ROOT_PASSWORD}
+                    password: 123456aA
                     type: text
                   - name: user
-                    password: ${FPBX_USER_PASSWORD}
+                    password: 123456aA
                     type: text
               users:
                 - name: root
