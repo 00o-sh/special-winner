@@ -18,7 +18,6 @@ spec:
     ephemeral: true
     containerMode:
       type: dind
-    securityContext: {}
     persistence:
       enabled: true
       storageClass: openebs-hostpath
