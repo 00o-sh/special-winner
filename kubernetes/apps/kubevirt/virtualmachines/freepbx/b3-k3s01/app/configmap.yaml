@@ -2,11 +2,11 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: b1-k3s01-vars
+  name: b3-k3s01-vars
 data:
-  VM_NAME: b1-k3s01
-  VM_IP: 192.168.57.14
-  VM_MAC: "52:54:00:57:00:14"
+  VM_NAME: b3-k3s01
+  VM_IP: 192.168.57.16
+  VM_MAC: "52:54:00:57:00:16"
   VM_CPU: "1"
   VM_MEMORY: 1G
   VM_STORAGE: 20Gi
