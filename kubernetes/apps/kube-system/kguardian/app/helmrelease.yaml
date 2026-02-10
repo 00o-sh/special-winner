@@ -10,30 +10,20 @@ spec:
     name: kguardian
   interval: 1h
   values:
-    # Controller: eBPF-based runtime observer (DaemonSet)
-    # Runs in observe-only / audit mode - collects data but does NOT
-    # auto-apply any NetworkPolicies or seccomp profiles.
+    broker:
+      image:
+        repository: ghcr.io/kguardian-dev/kguardian/broker
+        tag: v1.6.0
     controller:
+      image:
+        repository: ghcr.io/kguardian-dev/kguardian/controller
+        tag: v1.7.0
       excludedNamespaces:
         - kube-system
-        - flux-system
-      ignoreDaemonSet: true
-
-    # Broker: intermediary service for controller data
-    broker:
-      replicas: 1
-
-    # Frontend: web UI for visualizing observed traffic and generated policies
     frontend:
-      replicas: 1
-      ingress:
-        enabled: false
-
-    # Disable internal database - using existing CloudNative-PG postgres cluster
-    database:
-      replicas: 0
-
-    # Optional AI features - disabled for audit-only deployment
+      image:
+        repository: ghcr.io/kguardian-dev/kguardian/frontend
+        tag: v1.6.2
     llmBridge:
       enabled: false
     mcpServer:
