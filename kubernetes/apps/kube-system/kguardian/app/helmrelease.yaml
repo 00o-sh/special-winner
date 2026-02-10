@@ -24,6 +24,15 @@ spec:
           tag: stable@sha256:b9598f8c98e24d0ad42c1742c32516772c3aa2151011ebaf639089bd18c605b8
       excludedNamespaces:
         - kube-system
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: node.kubernetes.io/instance-type
+                    operator: NotIn
+                    values:
+                      - proxmox-vm
     database:
       image:
         repository: postgres
@@ -61,7 +70,7 @@ spec:
                           name: kguardian-secret
           - target:
               kind: Deployment
-              name: kguardian-database
+              name: kguardian-db
             patch: |
               - op: replace
                 path: /spec/replicas
