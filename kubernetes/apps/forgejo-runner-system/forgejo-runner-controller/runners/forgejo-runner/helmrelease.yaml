@@ -3,14 +3,14 @@
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: &name special-winner-forgejo-runner
+  name: &name forgejo-runner
 spec:
   chartRef:
     kind: OCIRepository
     name: act-runner-scale-set
   interval: 1h
   values:
-    giteaConfigSecret: special-winner-forgejo-runner-secret
+    giteaConfigSecret: forgejo-runner-secret
     minRunners: 1
     maxRunners: 3
     containerMode:
