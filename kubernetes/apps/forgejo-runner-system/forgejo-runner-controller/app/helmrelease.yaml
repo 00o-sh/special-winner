@@ -12,9 +12,8 @@ spec:
   values:
     fullnameOverride: *name
     forgejo:
+      url: "${FORGEJO_INSTANCE_URL}"
       apiTokenSecret:
         name: forgejo-runner-controller-secret
         key: token
       scope: admin
-    reconcileInterval: 30
-    scaleDownDelay: 300

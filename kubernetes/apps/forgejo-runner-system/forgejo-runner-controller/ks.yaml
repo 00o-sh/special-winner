@@ -8,8 +8,15 @@ spec:
   dependsOn:
     - name: external-secrets
       namespace: external-secrets
+    - name: keda
+      namespace: observability
   interval: 1h
   path: ./kubernetes/apps/forgejo-runner-system/forgejo-runner-controller/app
+  postBuild:
+    substituteFrom:
+      - kind: Secret
+        name: forgejo-runner-controller-secret
+        optional: true
   prune: true
   sourceRef:
     kind: GitRepository
@@ -28,10 +35,16 @@ spec:
     - name: forgejo-runner-controller
     - name: external-secrets
       namespace: external-secrets
+    - name: keda
+      namespace: observability
     - name: openebs
       namespace: openebs-system
   interval: 1h
   path: ./kubernetes/apps/forgejo-runner-system/forgejo-runner-controller/runners
+  postBuild:
+    substituteFrom:
+      - kind: Secret
+        name: forgejo-runner-controller-secret
   prune: true
   sourceRef:
     kind: GitRepository

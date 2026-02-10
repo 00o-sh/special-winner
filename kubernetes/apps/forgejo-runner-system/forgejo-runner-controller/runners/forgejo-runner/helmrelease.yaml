@@ -10,6 +10,7 @@ spec:
     name: act-runner-scale-set
   interval: 1h
   values:
+    giteaConfigUrl: "${FORGEJO_INSTANCE_URL}"
     giteaConfigSecret:
       name: forgejo-runner-secret
     minRunners: 1
@@ -21,6 +22,17 @@ spec:
       enabled: true
       storageClass: openebs-hostpath
       size: 25Gi
+    keda:
+      enabled: true
+      triggerAuthenticationRef: forgejo-runner-controller
+      forgejoApiUrl: "${FORGEJO_INSTANCE_URL}"
+      forgejoApiScope: admin
+      pollingInterval: 30
+      cooldownPeriod: 300
+      scaledJob:
+        ttlSecondsAfterFinished: 300
+        successfulJobsHistoryLimit: 5
+        failedJobsHistoryLimit: 5
     extraEnv:
       - name: NODE
         valueFrom:
