@@ -5,9 +5,13 @@ kind: Cluster
 metadata:
   name: postgres
 spec:
-  instances: 2
+  instances: 3
   imageName: ghcr.io/cloudnative-pg/postgresql:17.7-202601260808-system-bullseye
   primaryUpdateStrategy: unsupervised
+
+  affinity:
+    enablePodAntiAffinity: true
+    topologyKey: kubernetes.io/hostname
 
   storage:
     size: 20Gi

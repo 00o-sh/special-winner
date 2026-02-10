@@ -4,6 +4,7 @@ machine:
       allowedKubernetesNamespaces:
         - system-upgrade
         - actions-runner-system
+        - forgejo-runner-system
       allowedRoles:
         - os:admin
       enabled: true
