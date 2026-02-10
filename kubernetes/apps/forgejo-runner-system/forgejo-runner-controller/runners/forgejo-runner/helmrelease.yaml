@@ -10,39 +10,39 @@ spec:
     name: act-runner-scale-set
   interval: 1h
   values:
-    giteaConfigSecret: forgejo-runner-secret
+    giteaConfigUrl: "${FORGEJO_INSTANCE_URL}"
+    giteaConfigSecret:
+      name: forgejo-runner-secret
     minRunners: 1
     maxRunners: 3
+    ephemeral: true
     containerMode:
-      type: kubernetes
-      kubernetesModeWorkVolumeClaim:
-        accessModes:
-          - ReadWriteOnce
-        storageClassName: openebs-hostpath
-        resources:
-          requests:
-            storage: 25Gi
-    controllerServiceAccount:
-      name: forgejo-runner-controller
-      namespace: forgejo-runner-system
-    template:
-      spec:
-        containers:
-          - name: runner
-            image: ghcr.io/00o-sh/act_runner:0.2.14
-            command:
-              - /usr/local/bin/run.sh
-            env:
-              - name: NODE
-                valueFrom:
-                  fieldRef:
-                    fieldPath: status.hostIP
-            volumeMounts:
-              - mountPath: /var/run/secrets/talos.dev
-                name: talos
-                readOnly: true
-        serviceAccountName: *name
-        volumes:
-          - name: talos
-            secret:
-              secretName: *name
+      type: dind
+    persistence:
+      enabled: true
+      storageClass: openebs-hostpath
+      size: 25Gi
+    keda:
+      enabled: true
+      triggerAuthenticationRef: forgejo-runner-controller
+      forgejoApiUrl: "${FORGEJO_INSTANCE_URL}"
+      forgejoApiScope: admin
+      pollingInterval: 30
+      cooldownPeriod: 300
+      scaledJob:
+        ttlSecondsAfterFinished: 300
+        successfulJobsHistoryLimit: 5
+        failedJobsHistoryLimit: 5
+    extraEnv:
+      - name: NODE
+        valueFrom:
+          fieldRef:
+            fieldPath: status.hostIP
+    extraVolumeMounts:
+      - mountPath: /var/run/secrets/talos.dev
+        name: talos
+        readOnly: true
+    extraVolumes:
+      - name: talos
+        secret:
+          secretName: *name
