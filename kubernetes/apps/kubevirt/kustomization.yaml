@@ -14,7 +14,7 @@ resources:
   - ./virtualmachines/debian-server/app/configmap.yaml
   - ./virtualmachines/ubuntu-server/app/configmap.yaml
   - ./virtualmachines/windows-server/app/configmap.yaml
-  - ./virtualmachines/freepbx/app/configmap.yaml
+  - ./virtualmachines/freepbx/b1-k3s01/app/configmap.yaml
   - ./kubevirt/ks.yaml
   - ./cdi/ks.yaml
   - ./kubevirt-manager/ks.yaml
@@ -22,4 +22,4 @@ resources:
   - ./virtualmachines/debian-server/ks.yaml
   - ./virtualmachines/ubuntu-server/ks.yaml
   - ./virtualmachines/windows-server/ks.yaml
-  - ./virtualmachines/freepbx/ks.yaml
+  - ./virtualmachines/freepbx/b1-k3s01/ks.yaml
