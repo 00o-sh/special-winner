@@ -17,10 +17,9 @@ spec:
     maxRunners: 3
     ephemeral: true
     containerMode:
-      type: dind-rootless
+      type: dind
     securityContext:
-      seccompProfile:
-        type: Unconfined
+      privileged: true
     persistence:
       enabled: true
       storageClass: openebs-hostpath
