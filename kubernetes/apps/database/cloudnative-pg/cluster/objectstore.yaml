@@ -14,7 +14,7 @@ spec:
       secretAccessKey:
         name: cloudnative-pg-secret
         key: AWS_SECRET_ACCESS_KEY
-  wal:
-    compression: bzip2
-    maxParallel: 2
+    wal:
+      compression: bzip2
+      maxParallel: 2
   retentionPolicy: "30d"
