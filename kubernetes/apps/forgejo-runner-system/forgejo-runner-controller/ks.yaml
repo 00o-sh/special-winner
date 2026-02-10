@@ -5,6 +5,9 @@ kind: Kustomization
 metadata:
   name: forgejo-runner-controller
 spec:
+  dependsOn:
+    - name: external-secrets
+      namespace: external-secrets
   interval: 1h
   path: ./kubernetes/apps/forgejo-runner-system/forgejo-runner-controller/app
   prune: true
