@@ -1,0 +1,102 @@
+---
+apiVersion: kubevirt.io/v1
+kind: VirtualMachine
+metadata:
+  name: ${VM_NAME}
+spec:
+  running: true
+  template:
+    metadata:
+      labels:
+        kubevirt.io/vm: ${VM_NAME}
+      annotations:
+        kubevirt.io/allow-pod-bridge-network-live-migration: "true"
+        k8s.v1.cni.cncf.io/networks: |-
+          [{
+            "name": "vm-macvtap",
+            "namespace": "network",
+            "mac": "${VM_MAC}"
+          }]
+    spec:
+      evictionStrategy: LiveMigrate
+      domain:
+        cpu:
+          cores: ${VM_CPU}
+        resources:
+          requests:
+            memory: ${VM_MEMORY}
+        devices:
+          disks:
+            - name: rootdisk
+              disk:
+                bus: virtio
+            - name: cloudinitdisk
+              disk:
+                bus: virtio
+          interfaces:
+            - name: lan
+              binding:
+                name: macvtap
+      networks:
+        - name: lan
+          multus:
+            networkName: ${VM_NETWORK}
+      volumes:
+        - name: rootdisk
+          dataVolume:
+            name: ${VM_NAME}-pvc
+        - name: cloudinitdisk
+          cloudInitNoCloud:
+            networkData: |
+              network:
+                version: 1
+                config:
+                  - type: physical
+                    name: enp1s0
+                    subnets:
+                      - type: static
+                        address: ${VM_IP}/24
+                        gateway: ${VM_GATEWAY}
+                        dns_nameservers:
+                          - ${VM_DNS}
+            userData: |
+              #cloud-config
+              hostname: ${VM_NAME}
+              manage_etc_hosts: true
+              no_ssh_fingerprints: true
+              users:
+                - name: user
+                  gecos: User
+                  groups: [adm, sudo]
+                  shell: /bin/bash
+                  sudo: ALL=(ALL) NOPASSWD:ALL
+                  lock_passwd: true
+                  ssh_authorized_keys:
+                    - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKTGSd9Ukp/CKEWssokvlEop1wrACYVS75fdKy5gNo37
+                    - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAqkeDwM1SWrSy7w+tR0oyVzLIcAU5yz5doTgI8u/eaw
+                    - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKRG6pXx4rXDOY8X5xamGwrZCb/OLTXgv963EsqI0HJp
+              package_update: true
+              package_upgrade: true
+              packages:
+                - qemu-guest-agent
+                - wget
+                - curl
+                - gnupg
+              runcmd:
+                - systemctl enable --now qemu-guest-agent || true
+                - wget -qO /root/sng_freepbx_debian_install.sh https://github.com/FreePBX/sng_freepbx_debian_install/raw/master/sng_freepbx_debian_install.sh
+                - bash /root/sng_freepbx_debian_install.sh --nointeractive
+  dataVolumeTemplates:
+    - metadata:
+        name: ${VM_NAME}-pvc
+      spec:
+        storage:
+          resources:
+            requests:
+              storage: ${VM_STORAGE}
+          accessModes:
+            - ReadWriteMany
+          storageClassName: nfs-fast
+        source:
+          registry:
+            url: "${VM_IMAGE}"
