@@ -122,9 +122,9 @@
 - name: app/flux-operator
   color: "6f42c1"
   description: "flux-operator in flux-system"
-- name: app/forgejo-runner
+- name: app/forgejo-runner-controller
   color: "6f42c1"
-  description: "forgejo-runner in forgejo-runner-system"
+  description: "forgejo-runner-controller in forgejo-runner-system"
 - name: app/kanidm
   color: "6f42c1"
   description: "kanidm in identity"
