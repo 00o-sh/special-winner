@@ -200,10 +200,10 @@ app/flux-operator:
       - any-glob-to-any-file:
           - kubernetes/apps/flux-system/flux-operator/**/*
 
-app/forgejo-runner:
+app/forgejo-runner-controller:
   - changed-files:
       - any-glob-to-any-file:
-          - kubernetes/apps/forgejo-runner-system/forgejo-runner/**/*
+          - kubernetes/apps/forgejo-runner-system/forgejo-runner-controller/**/*
 
 app/kanidm:
   - changed-files:
