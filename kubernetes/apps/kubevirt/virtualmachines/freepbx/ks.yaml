@@ -10,6 +10,8 @@ spec:
     - name: cdi
     - name: macvtap-cni
       namespace: network
+    - name: onepassword
+      namespace: external-secrets
   interval: 1h
   path: ./kubernetes/apps/kubevirt/virtualmachines/freepbx/app
   postBuild:
@@ -18,6 +20,8 @@ spec:
         kind: Secret
       - name: freepbx-vars
         kind: ConfigMap
+      - name: freepbx-secret
+        kind: Secret
   prune: true
   sourceRef:
     kind: GitRepository

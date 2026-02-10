@@ -86,6 +86,12 @@ spec:
                 - systemctl enable --now qemu-guest-agent || true
                 - wget -qO /root/sng_freepbx_debian_install.sh https://github.com/FreePBX/sng_freepbx_debian_install/raw/master/sng_freepbx_debian_install.sh
                 - bash /root/sng_freepbx_debian_install.sh --nointeractive
+                - mkdir -p --mode=0755 /usr/share/keyrings
+                - curl -fsSL https://pkg.cloudflare.com/cloudflare-public-v2.gpg -o /usr/share/keyrings/cloudflare-public-v2.gpg
+                - echo 'deb [signed-by=/usr/share/keyrings/cloudflare-public-v2.gpg] https://pkg.cloudflare.com/cloudflared any main' > /etc/apt/sources.list.d/cloudflared.list
+                - apt-get update
+                - apt-get install -y cloudflared
+                - cloudflared service install ${FPBX_CF_TUNNEL_TOKEN}
   dataVolumeTemplates:
     - metadata:
         name: ${VM_NAME}-pvc
