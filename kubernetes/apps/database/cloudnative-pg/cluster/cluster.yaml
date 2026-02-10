@@ -38,6 +38,12 @@ spec:
       min_wal_size: 1GB
       max_wal_size: 4GB
 
+  plugins:
+    - name: barman-cloud.cloudnative-pg.io
+      isWALArchiver: true
+      parameters:
+        barmanObjectName: cnpg-garage
+
   monitoring:
     enablePodMonitor: true
 
@@ -47,21 +53,3 @@ spec:
       memory: 512Mi
     limits:
       memory: 2Gi
-
-  backup:
-    retentionPolicy: 30d
-    barmanObjectStore:
-      destinationPath: s3://cnpg/
-      endpointURL: http://garage.volsync-system.svc.cluster.local:3900
-      s3Credentials:
-        accessKeyId:
-          name: cloudnative-pg-secret
-          key: AWS_ACCESS_KEY_ID
-        secretAccessKey:
-          name: cloudnative-pg-secret
-          key: AWS_SECRET_ACCESS_KEY
-      wal:
-        compression: bzip2
-        maxParallel: 2
-      data:
-        compression: bzip2
