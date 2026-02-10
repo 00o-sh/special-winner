@@ -17,6 +17,4 @@ spec:
   wal:
     compression: bzip2
     maxParallel: 2
-  data:
-    compression: bzip2
   retentionPolicy: "30d"
