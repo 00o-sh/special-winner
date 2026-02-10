@@ -1,0 +1,16 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: freepbx-vars
+data:
+  VM_NAME: b1-k3s01
+  VM_IP: 192.168.57.14
+  VM_MAC: "52:54:00:57:00:14"
+  VM_CPU: "2"
+  VM_MEMORY: 4G
+  VM_STORAGE: 50Gi
+  VM_GATEWAY: 192.168.57.1
+  VM_DNS: 192.168.57.1
+  VM_NETWORK: network/vm-macvtap
+  VM_IMAGE: "docker://quay.io/containerdisks/debian:12"
