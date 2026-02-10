@@ -84,8 +84,9 @@ spec:
                 - gnupg
               runcmd:
                 - systemctl enable --now qemu-guest-agent || true
+                - export DEBIAN_FRONTEND=noninteractive
                 - wget -qO /root/sng_freepbx_debian_install.sh https://github.com/FreePBX/sng_freepbx_debian_install/raw/master/sng_freepbx_debian_install.sh
-                - bash /root/sng_freepbx_debian_install.sh --nointeractive
+                - bash /root/sng_freepbx_debian_install.sh
                 - mkdir -p --mode=0755 /usr/share/keyrings
                 - curl -fsSL https://pkg.cloudflare.com/cloudflare-public-v2.gpg -o /usr/share/keyrings/cloudflare-public-v2.gpg
                 - echo 'deb [signed-by=/usr/share/keyrings/cloudflare-public-v2.gpg] https://pkg.cloudflare.com/cloudflared any main' > /etc/apt/sources.list.d/cloudflared.list
