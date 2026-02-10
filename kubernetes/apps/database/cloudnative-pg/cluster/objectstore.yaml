@@ -1,0 +1,22 @@
+---
+apiVersion: barmancloud.cnpg.io/v1
+kind: ObjectStore
+metadata:
+  name: cnpg-garage
+spec:
+  configuration:
+    destinationPath: s3://cnpg/
+    endpointURL: http://garage.volsync-system.svc.cluster.local:3900
+    s3Credentials:
+      accessKeyId:
+        name: cloudnative-pg-secret
+        key: AWS_ACCESS_KEY_ID
+      secretAccessKey:
+        name: cloudnative-pg-secret
+        key: AWS_SECRET_ACCESS_KEY
+  wal:
+    compression: bzip2
+    maxParallel: 2
+  data:
+    compression: bzip2
+  retentionPolicy: "30d"

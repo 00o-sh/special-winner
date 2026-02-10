@@ -28,18 +28,17 @@ spec:
 
   externalClusters:
     - name: postgres-backup
-      barmanObjectStore:
-        destinationPath: s3://cnpg/
-        endpointURL: http://garage.volsync-system.svc.cluster.local:3900
-        s3Credentials:
-          accessKeyId:
-            name: cloudnative-pg-secret
-            key: AWS_ACCESS_KEY_ID
-          secretAccessKey:
-            name: cloudnative-pg-secret
-            key: AWS_SECRET_ACCESS_KEY
-        wal:
-          maxParallel: 2
+      plugin:
+        name: barman-cloud.cloudnative-pg.io
+        parameters:
+          barmanObjectName: cnpg-garage
+          serverName: postgres
+
+  plugins:
+    - name: barman-cloud.cloudnative-pg.io
+      isWALArchiver: true
+      parameters:
+        barmanObjectName: cnpg-garage
 
   postgresql:
     parameters:
@@ -66,22 +65,3 @@ spec:
       memory: 512Mi
     limits:
       memory: 2Gi
-
-  # Resume backups after recovery
-  backup:
-    retentionPolicy: 30d
-    barmanObjectStore:
-      destinationPath: s3://cnpg/
-      endpointURL: http://garage.volsync-system.svc.cluster.local:3900
-      s3Credentials:
-        accessKeyId:
-          name: cloudnative-pg-secret
-          key: AWS_ACCESS_KEY_ID
-        secretAccessKey:
-          name: cloudnative-pg-secret
-          key: AWS_SECRET_ACCESS_KEY
-      wal:
-        compression: bzip2
-        maxParallel: 2
-      data:
-        compression: bzip2
