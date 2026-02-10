@@ -24,9 +24,8 @@ spec:
       size: 25Gi
     keda:
       enabled: true
-      triggerAuthenticationRef: forgejo-runner-controller
-      forgejoApiUrl: "${FORGEJO_INSTANCE_URL}"
-      forgejoApiScope: admin
+      triggerAuthenticationRef: forgejo-runner-controller-trigger-auth
+      metricsUrl: "${FORGEJO_INSTANCE_URL}/api/v1/admin/runners/jobs?status=waiting&limit=1"
       pollingInterval: 30
       cooldownPeriod: 300
       scaledJob:
