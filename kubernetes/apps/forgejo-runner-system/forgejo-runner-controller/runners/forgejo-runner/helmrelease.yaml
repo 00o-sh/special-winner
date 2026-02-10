@@ -18,6 +18,10 @@ spec:
     ephemeral: true
     containerMode:
       type: dind-rootless
+    securityContext:
+      seccompProfile:
+      type: Unconfined
+
     persistence:
       enabled: true
       storageClass: openebs-hostpath
