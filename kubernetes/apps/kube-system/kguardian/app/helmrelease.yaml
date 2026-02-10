@@ -18,8 +18,16 @@ spec:
       image:
         repository: ghcr.io/kguardian-dev/kguardian/controller
         tag: v1.7.0
+      initContainer:
+        image:
+          repository: busybox
+          tag: stable@sha256:b9598f8c98e24d0ad42c1742c32516772c3aa2151011ebaf639089bd18c605b8
       excludedNamespaces:
         - kube-system
+    database:
+      image:
+        repository: postgres
+        tag: 17-alpine@sha256:bb377b7239d2774ac8cc76f481596ce96c5a6b5e9d141f6d0a0ee371a6e7c0f2
     frontend:
       image:
         repository: ghcr.io/kguardian-dev/kguardian/frontend
