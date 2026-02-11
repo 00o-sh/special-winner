@@ -47,7 +47,19 @@ spec:
             name: ${VM_NAME}-pvc
         - name: cloudinitdisk
           cloudInitNoCloud:
-            secretRef:
+            networkData: |
+              network:
+                version: 1
+                config:
+                  - type: physical
+                    name: enp1s0
+                    subnets:
+                      - type: static
+                        address: ${VM_IP}/24
+                        gateway: ${VM_GATEWAY}
+                        dns_nameservers:
+                          - ${VM_DNS}
+            userDataSecretRef:
               name: ${VM_NAME}-cloudinit
   dataVolumeTemplates:
     - metadata:
