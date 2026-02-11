@@ -59,7 +59,7 @@ spec:
                         gateway: ${VM_GATEWAY}
                         dns_nameservers:
                           - ${VM_DNS}
-            userDataSecretRef:
+            secretRef:
               name: ${VM_NAME}-cloudinit
   dataVolumeTemplates:
     - metadata:
