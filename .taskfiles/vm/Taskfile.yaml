@@ -5,13 +5,14 @@ tasks:
 
   redeploy:
     desc: Delete and recreate a KubeVirt VM [name=required] [namespace=kubevirt]
-    prompt: This will delete VM '{{.name}}' and its disk, then recreate it... continue?
+    prompt: This will delete VM '{{.name}}', its disk, and cloud-init secret, then recreate it... continue?
     vars:
       namespace: '{{.namespace | default "kubevirt"}}'
     cmds:
       - kubectl delete vm {{.name}} -n {{.namespace}} --ignore-not-found
       - kubectl delete dv {{.name}}-pvc -n {{.namespace}} --ignore-not-found
-      - flux reconcile ks {{.name}} -n {{.namespace}}
+      - kubectl delete secret {{.name}}-cloudinit -n {{.namespace}} --ignore-not-found
+      - flux reconcile ks {{.name}} -n flux-system
     requires:
       vars: [name]
     preconditions:
