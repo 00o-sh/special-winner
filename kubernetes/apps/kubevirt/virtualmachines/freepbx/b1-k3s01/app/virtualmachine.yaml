@@ -49,6 +49,8 @@ spec:
           cloudInitNoCloud:
             secretRef:
               name: ${VM_NAME}-cloudinit
+            networkDataSecretRef:
+              name: ${VM_NAME}-cloudinit
   dataVolumeTemplates:
     - metadata:
         name: ${VM_NAME}-pvc
