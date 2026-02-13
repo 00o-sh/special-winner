@@ -7,6 +7,10 @@ metadata:
 spec:
   dependsOn:
     - name: kube-prometheus-stack
+    - name: kanidm-config
+      namespace: identity
+    - name: onepassword
+      namespace: external-secrets
   interval: 1h
   path: ./kubernetes/apps/observability/opencost/app
   prune: true

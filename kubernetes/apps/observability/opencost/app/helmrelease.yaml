@@ -5,13 +5,9 @@ kind: HelmRelease
 metadata:
   name: opencost
 spec:
-  chart:
-    spec:
-      chart: opencost
-      version: "2.5.8"
-      sourceRef:
-        kind: HelmRepository
-        name: opencost
+  chartRef:
+    kind: OCIRepository
+    name: opencost
   interval: 1h
   values:
     opencost:
@@ -47,5 +43,13 @@ spec:
           spotRAM: "0.65"
           GPU: "693.50"
           storage: "0.04"
+    service:
+      annotations:
+        gethomepage.dev/enabled: "true"
+        gethomepage.dev/group: Monitoring
+        gethomepage.dev/name: OpenCost
+        gethomepage.dev/icon: https://raw.githubusercontent.com/opencost/opencost/HEAD/ui/src/opencost-icon.svg
+        gethomepage.dev/description: Kubernetes Cost Monitoring
+        gethomepage.dev/href: "https://opencost.00o.sh"
     serviceMonitor:
       enabled: true

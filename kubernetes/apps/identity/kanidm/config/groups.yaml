@@ -33,6 +33,16 @@ spec:
 apiVersion: kaniop.rs/v1beta1
 kind: KanidmGroup
 metadata:
+  name: opencost-users
+spec:
+  kanidmRef:
+    name: kanidm
+  members:
+    - all-apps
+---
+apiVersion: kaniop.rs/v1beta1
+kind: KanidmGroup
+metadata:
   name: penpot-users
 spec:
   kanidmRef:

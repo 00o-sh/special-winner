@@ -9,4 +9,5 @@ resources:
   - ./groups.yaml
   - ./oauth2-dbgate.yaml
   - ./oauth2-forgejo.yaml
+  - ./oauth2-opencost.yaml
   - ./oauth2-penpot.yaml
