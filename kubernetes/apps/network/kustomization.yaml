@@ -16,3 +16,4 @@ resources:
   - ./macvtap-cni/ks.yaml
   - ./multus/ks.yaml
   - ./unifi-dns/ks.yaml
+  - ./unifi-toolkit/ks.yaml
