@@ -22,6 +22,7 @@ spec:
             env:
               DEPLOYMENT_TYPE: local
               LOG_LEVEL: INFO
+              UNIFI_CONTROLLER_URL: https://10.0.6.1
               UNIFI_SITE_ID: default
               UNIFI_VERIFY_SSL: "false"
             envFrom:
