@@ -137,6 +137,9 @@
 - name: app/csi-driver-nfs
   color: "6f42c1"
   description: "csi-driver-nfs in kube-system"
+- name: app/kguardian
+  color: "6f42c1"
+  description: "kguardian in kube-system"
 - name: app/metrics-server
   color: "6f42c1"
   description: "metrics-server in kube-system"
@@ -242,6 +245,9 @@
 - name: app/kube-prometheus-stack
   color: "6f42c1"
   description: "kube-prometheus-stack in observability"
+- name: app/opencost
+  color: "6f42c1"
+  description: "opencost in observability"
 - name: app/silence-operator
   color: "6f42c1"
   description: "silence-operator in observability"

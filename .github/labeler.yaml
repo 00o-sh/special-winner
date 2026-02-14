@@ -225,6 +225,11 @@ app/csi-driver-nfs:
       - any-glob-to-any-file:
           - kubernetes/apps/kube-system/csi-driver-nfs/**/*
 
+app/kguardian:
+  - changed-files:
+      - any-glob-to-any-file:
+          - kubernetes/apps/kube-system/kguardian/**/*
+
 app/metrics-server:
   - changed-files:
       - any-glob-to-any-file:
@@ -399,6 +404,11 @@ app/kube-prometheus-stack:
   - changed-files:
       - any-glob-to-any-file:
           - kubernetes/apps/observability/kube-prometheus-stack/**/*
+
+app/opencost:
+  - changed-files:
+      - any-glob-to-any-file:
+          - kubernetes/apps/observability/opencost/**/*
 
 app/silence-operator:
   - changed-files:
