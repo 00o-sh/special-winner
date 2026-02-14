@@ -1,0 +1,19 @@
+---
+apiVersion: kaniop.rs/v1beta1
+kind: KanidmOAuth2Client
+metadata:
+  name: kubevirt-manager
+spec:
+  kanidmRef:
+    name: kanidm
+  displayname: KubeVirt Manager
+  origin: "https://kubevirt.00o.sh"
+  allowInsecureClientDisablePkce: true
+  redirectUrl:
+    - "https://kubevirt.00o.sh/oauth2/callback"
+  scopeMap:
+    - group: kubevirt-manager-users
+      scopes:
+        - openid
+        - email
+        - profile

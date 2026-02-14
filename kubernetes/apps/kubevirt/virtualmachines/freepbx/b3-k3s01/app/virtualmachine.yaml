@@ -4,7 +4,7 @@ kind: VirtualMachine
 metadata:
   name: ${VM_NAME}
 spec:
-  running: true
+  running: false
   template:
     metadata:
       labels:
