@@ -98,7 +98,7 @@ spec:
           app:
             image:
               repository: penpotapp/frontend
-              tag: 2.13.0
+              tag: 2.13.2
             env:
               PENPOT_FLAGS: enable-registration enable-login-with-password enable-login-with-oidc disable-email-verification
               PENPOT_BACKEND_URI: http://penpot-backend:6060
