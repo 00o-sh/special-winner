@@ -46,6 +46,15 @@
       minimumGroupSize: 3,
     },
     {
+      description: "Penpot Group",
+      groupName: "penpot",
+      matchDatasources: ["docker"],
+      matchPackageNames: ["/penpotapp/"],
+      group: {
+        commitMessageTopic: "{{{groupName}}} group",
+      },
+    },
+    {
       description: "Auto-merge GitHub Actions",
       matchManagers: ["github-actions"],
       automerge: true,
