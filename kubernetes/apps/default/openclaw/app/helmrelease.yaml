@@ -1,0 +1,66 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: openclaw
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: openclaw
+  interval: 1h
+  values:
+    controllers:
+      openclaw:
+        containers:
+          app:
+            image:
+              repository: ghcr.io/openclaw/openclaw
+              tag: 2026.2.12@sha256:6d1937db20fa6590b634ee9e25a4f7f80f65b44eba7129119b69e69c973e41d9
+            env:
+              TZ: America/New_York
+              OPENCLAW_GATEWAY_TOKEN: 1234
+            probes:
+              liveness: &probes
+                enabled: false
+              readiness: *probes
+              startup: *probes
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities: { drop: ["ALL"] }
+            resources:
+              requests:
+                cpu: 100m
+                memory: 400Mi
+              limits:
+                memory: 2Gi
+    defaultPodOptions:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        fsGroupChangePolicy: OnRootMismatch
+    service:
+      app:
+        ports:
+          http:
+            port: &port 18789
+    route:
+      app:
+        hostnames: ["{{ .Release.Name }}.${SECRET_DOMAIN}"]
+        parentRefs:
+          - name: envoy-external
+            namespace: network
+            sectionName: https
+        rules:
+          - backendRefs:
+              - identifier: app
+                port: *port
+    persistence:
+      config:
+        existingClaim: "{{ .Release.Name }}"
+        globalMounts:
+          - path: /home/node
+      tmp:
+        type: emptyDir

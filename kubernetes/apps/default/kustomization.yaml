@@ -10,3 +10,4 @@ components:
 resources:
   - ./namespace.yaml
   - ./echo/ks.yaml
+  - ./openclaw/ks.yaml
