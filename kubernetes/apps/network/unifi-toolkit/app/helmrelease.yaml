@@ -72,7 +72,7 @@ spec:
           gethomepage.dev/description: UniFi Network Management
           gethomepage.dev/href: "https://unifi-toolkit.00o.sh"
         hostnames:
-          - "{{ .Release.Name }}.00o.sh"
+          - "unifi-toolkit.00o.sh"
         parentRefs:
           - name: envoy-internal
             namespace: network
