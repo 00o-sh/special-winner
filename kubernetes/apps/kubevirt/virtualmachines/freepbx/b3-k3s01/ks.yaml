@@ -8,7 +8,7 @@ spec:
   dependsOn:
     - name: onepassword
       namespace: external-secrets
-  interval: 1h
+  interval: 4h
   path: ./kubernetes/apps/kubevirt/virtualmachines/freepbx/b3-k3s01/secrets
   prune: true
   sourceRef:
@@ -30,7 +30,7 @@ spec:
     - name: macvtap-cni
       namespace: network
     - name: b3-k3s01-secrets
-  interval: 1h
+  interval: 4h
   path: ./kubernetes/apps/kubevirt/virtualmachines/freepbx/b3-k3s01/app
   postBuild:
     substituteFrom:
