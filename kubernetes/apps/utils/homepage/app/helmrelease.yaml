@@ -19,8 +19,8 @@ spec:
           app:
             image:
               repository: ghcr.io/00o-sh/homepage
-              tag: dev
-              digest: sha256:393b6c6785182340873d975e4c5e8f4ce03c649a10b235130ad9917be585729f
+              tag: nightly
+              digest: sha256:838f9cbcce0d09ab3358e35d5652eccfd583ec588a54dce47583b97e829299c7
             env:
               HOMEPAGE_ALLOWED_HOSTS: homepage.00o.sh
               LOG_TARGETS: stdout
