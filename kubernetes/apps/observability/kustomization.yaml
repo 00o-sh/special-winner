@@ -16,5 +16,6 @@ resources:
   - ./keda/ks.yaml
   - ./kromgo/ks.yaml
   - ./kube-prometheus-stack/ks.yaml
+  - ./opencost/ks.yaml
   - ./silence-operator/ks.yaml
   - ./victoria-logs/ks.yaml

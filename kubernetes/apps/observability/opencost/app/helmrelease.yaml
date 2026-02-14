@@ -1,0 +1,55 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/helm.toolkit.fluxcd.io/helmrelease_v2.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: opencost
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: opencost
+  interval: 1h
+  values:
+    opencost:
+      exporter:
+        defaultClusterId: special-winner
+        resources:
+          requests:
+            cpu: 10m
+            memory: 55Mi
+          limits:
+            memory: 256Mi
+      prometheus:
+        internal:
+          enabled: true
+          namespaceName: observability
+          serviceName: prometheus-operated
+          port: 9090
+      ui:
+        enabled: true
+        resources:
+          requests:
+            cpu: 10m
+            memory: 55Mi
+          limits:
+            memory: 128Mi
+      customPricing:
+        enabled: true
+        provider: custom
+        costModel:
+          CPU: "28.0"
+          spotCPU: "6.5"
+          RAM: "3.09"
+          spotRAM: "0.65"
+          GPU: "693.50"
+          storage: "0.04"
+    service:
+      annotations:
+        gethomepage.dev/enabled: "true"
+        gethomepage.dev/group: Monitoring
+        gethomepage.dev/name: OpenCost
+        gethomepage.dev/icon: https://raw.githubusercontent.com/opencost/opencost/HEAD/ui/src/opencost-icon.svg
+        gethomepage.dev/description: Kubernetes Cost Monitoring
+        gethomepage.dev/href: "https://opencost.00o.sh"
+    serviceMonitor:
+      enabled: true

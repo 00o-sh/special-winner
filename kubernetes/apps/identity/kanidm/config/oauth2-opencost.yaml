@@ -1,0 +1,19 @@
+---
+apiVersion: kaniop.rs/v1beta1
+kind: KanidmOAuth2Client
+metadata:
+  name: opencost
+spec:
+  kanidmRef:
+    name: kanidm
+  displayname: OpenCost
+  origin: "https://opencost.00o.sh"
+  allowInsecureClientDisablePkce: true
+  redirectUrl:
+    - "https://opencost.00o.sh/oauth2/callback"
+  scopeMap:
+    - group: opencost-users
+      scopes:
+        - openid
+        - email
+        - profile
