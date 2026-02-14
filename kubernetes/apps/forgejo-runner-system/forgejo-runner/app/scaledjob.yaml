@@ -37,7 +37,7 @@ spec:
                   --instance "${FORGEJO_INSTANCE_URL}" \
                   --token "${FORGEJO_RUNNER_TOKEN}" \
                   --name "runner-$(hostname)" \
-                  --labels "ubuntu-latest:docker://node:20-bookworm" && \
+                  --labels "ubuntu-latest:docker://node:24-bookworm" && \
                 forgejo-runner daemon --one-job
             env:
               - name: DOCKER_HOST
