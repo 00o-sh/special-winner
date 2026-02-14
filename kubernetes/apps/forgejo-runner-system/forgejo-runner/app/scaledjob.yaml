@@ -1,0 +1,87 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/keda.sh/scaledjob_v1alpha1.json
+apiVersion: keda.sh/v1alpha1
+kind: ScaledJob
+metadata:
+  name: forgejo-runner
+spec:
+  jobTargetRef:
+    ttlSecondsAfterFinished: 300
+    backoffLimit: 0
+    template:
+      metadata:
+        labels:
+          app.kubernetes.io/name: forgejo-runner
+      spec:
+        serviceAccountName: forgejo-runner
+        initContainers:
+          - name: dind
+            image: docker:27-dind
+            restartPolicy: Always
+            securityContext:
+              privileged: true
+            env:
+              - name: DOCKER_TLS_CERTDIR
+                value: ""
+            volumeMounts:
+              - name: docker-data
+                mountPath: /var/lib/docker
+        containers:
+          - name: runner
+            image: code.forgejo.org/forgejo/runner:6.3.1
+            command:
+              - sh
+              - -c
+              - |
+                forgejo-runner register --no-interactive \
+                  --instance "${FORGEJO_INSTANCE_URL}" \
+                  --token "${FORGEJO_RUNNER_TOKEN}" \
+                  --name "runner-$(hostname)" \
+                  --labels "ubuntu-latest:docker://node:20-bookworm" && \
+                forgejo-runner daemon --one-job
+            env:
+              - name: DOCKER_HOST
+                value: tcp://localhost:2375
+              - name: FORGEJO_INSTANCE_URL
+                valueFrom:
+                  secretKeyRef:
+                    name: forgejo-runner-secret
+                    key: FORGEJO_INSTANCE_URL
+              - name: FORGEJO_RUNNER_TOKEN
+                valueFrom:
+                  secretKeyRef:
+                    name: forgejo-runner-secret
+                    key: token
+              - name: NODE
+                valueFrom:
+                  fieldRef:
+                    fieldPath: status.hostIP
+            volumeMounts:
+              - name: runner-data
+                mountPath: /data
+              - name: talos
+                mountPath: /var/run/secrets/talos.dev
+                readOnly: true
+        volumes:
+          - name: docker-data
+            emptyDir: {}
+          - name: runner-data
+            emptyDir: {}
+          - name: talos
+            secret:
+              secretName: forgejo-runner
+        restartPolicy: Never
+  pollingInterval: 30
+  successfulJobsHistoryLimit: 5
+  failedJobsHistoryLimit: 5
+  minReplicaCount: 0
+  maxReplicaCount: 3
+  triggers:
+    - type: forgejo-runner
+      metadata:
+        name: "forgejo-runner"
+        address: "${FORGEJO_INSTANCE_URL}"
+        global: "true"
+        labels: "ubuntu-latest"
+      authenticationRef:
+        name: forgejo-runner-trigger-auth
