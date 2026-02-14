@@ -11,6 +11,8 @@ spec:
   values:
     controllers:
       openclaw:
+        annotations:
+          reloader.stakater.com/auto: "true"
         containers:
           app:
             image:
@@ -18,7 +20,9 @@ spec:
               tag: 2026.2.12@sha256:6d1937db20fa6590b634ee9e25a4f7f80f65b44eba7129119b69e69c973e41d9
             env:
               TZ: America/New_York
-              OPENCLAW_GATEWAY_TOKEN: 1234
+            envFrom:
+              - secretRef:
+                  name: openclaw-secret
             probes:
               liveness: &probes
                 enabled: false
