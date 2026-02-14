@@ -224,6 +224,9 @@
 - name: app/unifi-dns
   color: "6f42c1"
   description: "unifi-dns in network"
+- name: app/unifi-toolkit
+  color: "6f42c1"
+  description: "unifi-toolkit in network"
 - name: app/blackbox-exporter
   color: "6f42c1"
   description: "blackbox-exporter in observability"

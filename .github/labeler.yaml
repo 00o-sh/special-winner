@@ -370,6 +370,11 @@ app/unifi-dns:
       - any-glob-to-any-file:
           - kubernetes/apps/network/unifi-dns/**/*
 
+app/unifi-toolkit:
+  - changed-files:
+      - any-glob-to-any-file:
+          - kubernetes/apps/network/unifi-toolkit/**/*
+
 app/blackbox-exporter:
   - changed-files:
       - any-glob-to-any-file:
