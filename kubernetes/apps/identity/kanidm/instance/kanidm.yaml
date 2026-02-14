@@ -5,7 +5,7 @@ metadata:
   name: kanidm
 spec:
   # renovate: datasource=docker depName=docker.io/kanidm/server
-  image: docker.io/kanidm/server:1.8.5
+  image: docker.io/kanidm/server:1.8.6
   domain: auth.${SECRET_DOMAIN}
   replicaGroups:
     - name: default
