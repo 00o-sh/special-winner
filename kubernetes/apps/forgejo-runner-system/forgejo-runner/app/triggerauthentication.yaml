@@ -1,0 +1,11 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/keda.sh/triggerauthentication_v1alpha1.json
+apiVersion: keda.sh/v1alpha1
+kind: TriggerAuthentication
+metadata:
+  name: forgejo-runner-trigger-auth
+spec:
+  secretTargetRef:
+    - parameter: token
+      name: forgejo-runner-secret
+      key: api-token
