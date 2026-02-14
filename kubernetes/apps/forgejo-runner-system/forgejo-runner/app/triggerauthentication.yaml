@@ -8,4 +8,4 @@ spec:
   secretTargetRef:
     - parameter: token
       name: forgejo-runner-secret
-      key: api-token
+      key: API_TOKEN
