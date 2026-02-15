@@ -19,7 +19,7 @@ A Kubernetes cluster deployed with [Talos Linux](https://github.com/siderolabs/t
 ### Core Infrastructure
 
 **Operating System & Orchestration:**
-- [Talos Linux](https://github.com/siderolabs/talos) 1.12.2 - Immutable Kubernetes OS
+- [Talos Linux](https://github.com/siderolabs/talos) 1.12.4 - Immutable Kubernetes OS
 - [Kubernetes](https://kubernetes.io/) 1.34.0 - Container orchestration
 - [Flux CD](https://github.com/fluxcd/flux2) 2.7.5 - GitOps continuous delivery
 
@@ -30,8 +30,13 @@ A Kubernetes cluster deployed with [Talos Linux](https://github.com/siderolabs/t
 - [k8s_gateway](https://github.com/ori-edge/k8s_gateway) - Internal DNS for cluster services
 - [Cloudflare Tunnel](https://github.com/cloudflare/cloudflared) - Secure external access
 - [Multus CNI](https://github.com/k8snetworkplumbingwg/multus-cni) - Multi-network support
+- [Macvtap CNI](https://github.com/kubevirt/macvtap-cni) - Direct network connectivity for VMs
 
-**Security & Secrets:**
+**Identity & Security:**
+- [Kanidm](https://kanidm.com/) - Identity provider with OAuth2/OIDC SSO
+- [kGuardian](https://github.com/kguardian-dev/kguardian) - eBPF-based security monitoring
+
+**Secrets:**
 - [cert-manager](https://github.com/cert-manager/cert-manager) - TLS certificate automation
 - [External Secrets Operator](https://external-secrets.io/) - External secret management
 - [1Password](https://1password.com/) - Secret storage backend
@@ -46,8 +51,9 @@ A Kubernetes cluster deployed with [Talos Linux](https://github.com/siderolabs/t
 - [Snapshot Controller](https://github.com/kubernetes-csi/external-snapshotter) - Volume snapshots
 
 **Database:**
-- [CloudNative-PG](https://cloudnative-pg.io/) - PostgreSQL 17.7 HA cluster (2 instances)
+- [CloudNative-PG](https://cloudnative-pg.io/) - PostgreSQL 17.7 HA cluster (3 instances)
 - [Dragonfly](https://www.dragonflydb.io/) - Redis-compatible in-memory datastore
+- [DBGate](https://dbgate.org/) - Database management web UI
 
 **Observability:**
 - [Grafana](https://grafana.com/) - Metrics visualization
@@ -59,12 +65,12 @@ A Kubernetes cluster deployed with [Talos Linux](https://github.com/siderolabs/t
 - [Blackbox Exporter](https://github.com/prometheus/blackbox_exporter) - Endpoint monitoring
 - [Kromgo](https://github.com/kashalls/kromgo) - Custom metrics publishing
 - [Silence Operator](https://github.com/kbudde/silence-operator) - Alert silencing automation
+- [OpenCost](https://www.opencost.io/) - Kubernetes cost monitoring and analysis
 
 **Virtualization:**
 - [KubeVirt](https://kubevirt.io/) - Virtual machine management on Kubernetes
 - [CDI](https://github.com/kubevirt/containerized-data-importer) - Containerized Data Importer for VM disk images
 - [KubeVirt Manager](https://kubevirt-manager.io/) - Web UI for VM management
-- [Macvtap CNI](https://github.com/kubevirt/macvtap-cni) - Direct network connectivity for VMs
 
 **System Management:**
 - [Reloader](https://github.com/stakater/Reloader) - Automatic pod restarts on config changes
@@ -90,8 +96,10 @@ A Kubernetes cluster deployed with [Talos Linux](https://github.com/siderolabs/t
 
 **Infrastructure & Utilities:**
 - [GitHub Actions Runner Controller](https://github.com/actions/actions-runner-controller) - Self-hosted GitHub Actions runners
+- [Forgejo](https://forgejo.org/) - Self-hosted Git repository service with CI/CD runners
 - [SMTP Relay](https://github.com/foxcpp/maddy) - Outbound email relay using Maddy
 - [Penpot](https://penpot.app/) - Open-source design and prototyping platform
+- [Homepage](https://gethomepage.dev/) - Cluster dashboard for all services
 
 **Additional DNS:**
 - Cloudflare DNS integration
@@ -486,6 +494,12 @@ This cluster already includes several advanced features beyond the base template
 - **✅ SMTP Relay** - Centralized email relay for cluster applications
 - **✅ Advanced Automation** - KEDA autoscaling, NFS-aware scaling, Discord alerts, automated image pre-pulling
 - **✅ KubeVirt Virtualization** - VM management with CDI and Macvtap CNI for direct network access
+- **✅ Identity & SSO** - Kanidm identity provider with OAuth2 integrations for cluster applications
+- **✅ Self-hosted Git** - Forgejo with CI/CD runners for internal Git workflows
+- **✅ Cluster Dashboard** - Homepage for unified service access and status monitoring
+- **✅ Security Monitoring** - kGuardian eBPF-based security toolkit for runtime policy generation
+- **✅ Cost Analysis** - OpenCost for Kubernetes cost monitoring and allocation
+- **✅ Database Management** - DBGate web UI for database administration
 
 ### Additional Enhancements to Consider
 
@@ -551,7 +565,7 @@ Community member [@whazor](https://github.com/whazor) created [Kubesearch](https
 - [x] [kguardian](https://github.com/kguardian-dev/kguardian) - eBPF-based security toolkit for auto-generating NetworkPolicy/CiliumNetworkPolicy and seccomp profiles from observed runtime behavior (audit mode)
 
 **Additional Services**
-- [ ] Forgejo (self-hosted Git platform)
+- [x] Forgejo (self-hosted Git platform)
 - [ ] Home Assistant + IoT stack (if needed)
 - [x] Kanidm (via Kaniop operator) for identity management and SSO
 - [ ] Migrate External Secrets from 1Password Connect to 1Password SDK (enables PushSecret for cross-namespace secret sync)
@@ -635,10 +649,10 @@ If this repo is too hot to handle or too cold to hold check out these following 
 
 ## 📊 Repository Stats
 
-**Deployed Components:** 55+ applications across 15 namespaces
+**Deployed Components:** 65+ applications across 17 namespaces
 **Template Source:** [onedr0p/cluster-template](https://github.com/onedr0p/cluster-template)
 **Infrastructure:** GitOps with Flux CD + Talos Linux
-**Last Updated:** 2026-02-04
+**Last Updated:** 2026-02-14
 
 ---
 

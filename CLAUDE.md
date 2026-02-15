@@ -10,17 +10,19 @@ This document provides comprehensive guidance for AI assistants working with thi
 
 ### Core Components
 
-- **OS**: Talos Linux 1.12.2 (immutable Kubernetes OS)
+- **OS**: Talos Linux 1.12.4 (immutable Kubernetes OS)
 - **Orchestration**: Kubernetes 1.34.0
 - **GitOps**: Flux CD 2.7.5 (declarative continuous delivery)
 - **CNI**: Cilium 1.19.0 (eBPF-based networking)
-- **Ingress**: Envoy Gateway (HTTP routing)
+- **Ingress**: Envoy Gateway v1.6.3 (HTTP routing)
 - **Secrets**: SOPS 3.11.0 + Age 1.3.1 encryption
+- **Identity**: Kanidm (SSO/OAuth2 identity provider)
 - **DNS**: k8s_gateway + CoreDNS + External-DNS
 - **Certificates**: cert-manager with Cloudflare integration
-- **Package Management**: Helm 4.1.0 (Helm v4 for chart management)
+- **Package Management**: Helm 4.1.1 (Helm v4 for chart management)
 - **Database**: CloudNative-PG (PostgreSQL 17.7) + Dragonfly (Redis-compatible)
 - **Virtualization**: KubeVirt 1.7.0 (virtual machine management)
+- **External Secrets**: External Secrets Operator 2.0.0 + 1Password integration
 
 ## Directory Structure
 
@@ -36,7 +38,8 @@ special-winner/
 ├── .taskfiles/                       # Task automation definitions
 │   ├── bootstrap/Taskfile.yaml       # Bootstrap tasks
 │   ├── talos/Taskfile.yaml          # Talos operations
-│   └── template/Taskfile.yaml       # Template rendering
+│   ├── template/Taskfile.yaml       # Template rendering
+│   └── vm/Taskfile.yaml             # Virtual machine operations
 │
 ├── bootstrap/                        # Initial cluster bootstrap
 │   ├── helmfile.d/                  # Helm releases
@@ -76,6 +79,7 @@ special-winner/
 │       ├── global/                # All nodes
 │       ├── controller/            # Controller-specific
 │       ├── worker/                # Worker-specific
+│       ├── vm-node/              # VM-specific (KubeVirt nodes)
 │       └── ${node-hostname}/      # Per-node
 │
 ├── templates/                       # Jinja2 templates
@@ -410,6 +414,20 @@ When adding a new Kubernetes application:
    sops --encrypt --in-place kubernetes/apps/<namespace>/<app-name>/app/secret.sops.yaml
    ```
 
+6. **Consider SSO integration** - If the app has a web UI, ask whether Kanidm OAuth2 SSO should be configured (add OAuth2 client definition in `kubernetes/apps/identity/kanidm/app/`)
+
+7. **Add to Homepage dashboard** - New services should be added to the Homepage configuration in `kubernetes/apps/utils/homepage/`
+
+8. **Update documentation** - Update this CLAUDE.md file with the new application entry in the Deployed Applications section
+
+9. **Add Volsync backup config** - Stateful apps with persistent data should include Volsync backup configuration (use `kubernetes/components/volsync/` component)
+
+10. **Add monitoring** - If the app exposes metrics, add ServiceMonitor/PodMonitor and Grafana dashboards when available
+
+11. **Add Discord alert notifications** - Critical applications should have Discord webhook alert integration configured
+
+12. **Add NFS-scaler component** - Applications that mount NFS volumes should use the NFS-scaler component (`kubernetes/components/nfs-scaler/`) to prevent crash-loops when NFS is unavailable
+
 ### Security Considerations
 
 1. **Never commit unencrypted secrets** - All sensitive data must be in `*.sops.yaml` files
@@ -431,7 +449,7 @@ When adding a new Kubernetes application:
 5. **Don't add unnecessary complexity** - Follow the principle of minimal necessary changes
 6. **Don't add comments/docstrings** to code you didn't modify
 7. **Don't create abstractions** for one-time operations
-8. **Be aware of Helm v4** - The repository uses Helm 4.0.5, which has breaking changes from v3 (see bootstrap scripts)
+8. **Be aware of Helm v4** - The repository uses Helm 4.1.1, which has breaking changes from v3 (see bootstrap scripts)
 9. **Self-hosted runners** - Be aware that some workflows run on `special-winner-runner` (self-hosted) which has cluster access
 
 ### File Location Reference
@@ -474,6 +492,8 @@ When adding a new Kubernetes application:
 | Reset cluster | `task talos:reset` |
 | Validate K8s manifests | `task template:validate-kubernetes-config` |
 | Tidy templates | `task template:tidy` |
+| VM console | `task vm:console VM=<name>` |
+| VM start/stop | `task vm:start VM=<name>` / `task vm:stop VM=<name>` |
 
 ## Renovate Automation
 
@@ -537,6 +557,11 @@ CRD schema extraction and publishing:
 - Runs on self-hosted runner (special-winner-runner)
 - Uses Python 3.14 and Node 24.x for processing
 - Enables IDE autocompletion and validation for custom resources
+
+### label-generate.yaml
+Generates label configuration from repository structure:
+- Automates `.github/labels.yaml` and `.github/labeler.yaml` updates
+- Ensures labels stay in sync with namespace and directory changes
 
 ## Template System Details
 
@@ -607,7 +632,8 @@ talosctl logs --nodes <ip> --insecure
 
 **database**: Database infrastructure
 - cloudnative-pg (PostgreSQL operator)
-- postgres-cluster (PostgreSQL 17.7 HA cluster with 2 instances)
+- dbgate (database management web UI)
+- postgres-cluster (PostgreSQL 17.7 HA cluster with 3 instances)
 - dragonfly (Redis-compatible in-memory datastore operator)
 
 **default**: Default namespace
@@ -622,6 +648,12 @@ talosctl logs --nodes <ip> --insecure
 - flux-instance
 - flux-operator
 
+**forgejo-runner-system**: Forgejo CI/CD Infrastructure
+- forgejo-runner (Forgejo Actions runner with ScaledJob for on-demand scaling)
+
+**identity**: Identity and SSO
+- kanidm (identity provider with OAuth2 integrations for dbgate, forgejo, kubevirt-manager, opencost, penpot)
+
 **kube-system**: Core Kubernetes
 - cilium (CNI)
 - coredns (DNS)
@@ -629,13 +661,14 @@ talosctl logs --nodes <ip> --insecure
 - metrics-server
 - reloader (automatic pod restarts)
 - snapshot-controller (volume snapshots)
+- kguardian (Kubernetes security monitoring and guardian)
 - spegel (peer-to-peer container image sharing)
 
 **kubevirt**: Virtual machine infrastructure
 - cdi (Containerized Data Importer for VM disk management)
 - kubevirt (KubeVirt operator)
 - kubevirt-manager (web UI for VM management)
-- virtualmachines (VM instances: debian-desktop, debian-server, ubuntu-server, windows-server)
+- virtualmachines (VM instances: debian-desktop, debian-server, ubuntu-server, windows-server, freepbx-b1-k3s01, freepbx-b2-k3s01, freepbx-b3-k3s01)
 
 **media**: Media applications
 - autobrr (automation for torrent trackers)
@@ -657,8 +690,10 @@ talosctl logs --nodes <ip> --insecure
 - cloudflare-tunnel (external access)
 - envoy-gateway (ingress)
 - k8s-gateway (internal DNS)
+- macvtap-cni (macvtap CNI plugin for direct VM network access)
 - multus (multi-network CNI)
 - unifi-dns
+- unifi-toolkit (Unifi network management toolkit)
 
 **observability**: Monitoring and alerting
 - blackbox-exporter (endpoint monitoring)
@@ -668,6 +703,7 @@ talosctl logs --nodes <ip> --insecure
 - keda (event-driven autoscaling)
 - kromgo (custom metrics)
 - kube-prometheus-stack (Prometheus, AlertManager, Grafana)
+- opencost (Kubernetes cost monitoring and analysis)
 - silence-operator (alert silencing)
 - victoria-logs (log aggregation)
 
@@ -678,6 +714,8 @@ talosctl logs --nodes <ip> --insecure
 - tuppr (automated upgrades)
 
 **utils**: Utility services
+- forgejo (self-hosted Git repository service)
+- homepage (cluster dashboard)
 - penpot (open-source design and prototyping platform)
 - smtp-relay (SMTP relay for outbound email using Maddy)
 
@@ -697,23 +735,43 @@ talosctl logs --nodes <ip> --insecure
   - [SOPS](https://github.com/getsops/sops)
   - [Helm](https://helm.sh/) (Note: Using v4)
   - [KubeVirt](https://kubevirt.io/)
+  - [Kanidm](https://kanidm.com/) (Identity/SSO)
+  - [Forgejo](https://forgejo.org/) (Self-hosted Git)
+  - [OpenCost](https://www.opencost.io/) (Cost monitoring)
 
 ## Version Information
 
 This documentation applies to:
-- Talos Linux: 1.12.2
+- Talos Linux: 1.12.4
 - Kubernetes: 1.34.0
 - Flux CD: 2.7.5
 - Cilium: 1.19.0
-- Helm: 4.1.0
+- Helm: 4.1.1
 - Python: 3.14.3
+- Envoy Gateway: v1.6.3
+- External Secrets: 2.0.0
 - CloudNative-PG: PostgreSQL 17.7
 - KubeVirt: 1.7.0
+- kGuardian: 1.7.0
+- Kanidm: (identity provider)
 
 Check `.mise.toml` for exact versions of all tools.
 
 ## Recent Notable Changes
 
+- **2026-02-14**: Added Kanidm identity provider with OAuth2 SSO for dbgate, forgejo, kubevirt-manager, opencost, penpot
+- **2026-02-14**: Added Forgejo self-hosted Git service and Forgejo runner system
+- **2026-02-14**: Added Homepage cluster dashboard to utils namespace
+- **2026-02-14**: Added DBGate database management UI to database namespace
+- **2026-02-14**: Added kGuardian security monitoring to kube-system
+- **2026-02-14**: Added OpenCost Kubernetes cost analysis to observability
+- **2026-02-14**: Added macvtap-cni and unifi-toolkit to network namespace
+- **2026-02-14**: Added FreePBX telephony VMs (3 instances: b1-k3s01, b2-k3s01, b3-k3s01)
+- **2026-02-14**: Added VM task automation (.taskfiles/vm/Taskfile.yaml)
+- **2026-02-14**: Added label-generate workflow for automated label management
+- **2026-02-14**: Talos Linux updated from 1.12.2 to 1.12.4
+- **2026-02-14**: Helm updated from 4.1.0 to 4.1.1
+- **2026-02-14**: PostgreSQL HA cluster expanded from 2 to 3 instances
 - **2026-02-04**: Added KubeVirt virtualization namespace with VMs (debian-desktop, debian-server, ubuntu-server, windows-server)
 - **2026-02-04**: Added Spegel for peer-to-peer container image sharing in kube-system
 - **2026-02-04**: Added kubevirt-manager web UI for VM management
@@ -761,6 +819,9 @@ Located in `kubernetes/apps/kubevirt/`, this namespace provides virtual machine 
 - **debian-server**: Debian 13 headless server (1 CPU, 1G RAM, 50Gi NFS storage)
 - **ubuntu-server**: Ubuntu server instance
 - **windows-server**: Windows Server 2022 with virtio drivers (2 CPU, 2G RAM, 60Gi NFS storage)
+- **freepbx-b1-k3s01**: FreePBX telephony/PBX system (with secrets)
+- **freepbx-b2-k3s01**: FreePBX telephony/PBX system (with secrets)
+- **freepbx-b3-k3s01**: FreePBX telephony/PBX system (with secrets)
 
 **Storage**:
 - Uses NFS (nfs-fast storageClass) for VM disks with ReadWriteMany access
@@ -902,11 +963,13 @@ Located in `kubernetes/apps/database/`, this namespace provides centralized data
 
 **CloudNative-PG (PostgreSQL)**:
 - Kubernetes-native PostgreSQL operator
-- Runs PostgreSQL 17.7 with 2 instances for high availability
+- Runs PostgreSQL 17.7 with 3 instances for high availability
 - Uses OpenEBS hostpath storage (20Gi per instance)
-- Automated backups to Garage S3 storage with 30-day retention
+- Pod anti-affinity for distribution across hosts
+- Automated backups to Garage S3 storage via barman-cloud plugin
 - Monitoring enabled via PodMonitor
-- Tuned for performance: 200 max connections, optimized buffer settings
+- Tuned for performance: 200 max connections, 256MB shared_buffers, 512MB effective_cache_size
+- Resources: 100m CPU request, 512Mi memory request, 2Gi memory limit
 
 **Cluster Architecture**:
 ```
@@ -958,7 +1021,66 @@ Located in `kubernetes/apps/utils/penpot/`, Penpot is an open-source design and 
 - Telemetry disabled
 - Automatic pod restarts via Reloader on secret changes
 
+### Kanidm Identity Provider
+
+Located in `kubernetes/apps/identity/kanidm/`, Kanidm provides centralized identity management and SSO for the cluster.
+
+**How it works**:
+- Modern identity provider with OAuth2/OIDC support
+- Provides single sign-on for multiple cluster applications
+- Manages user accounts, groups, and authentication policies
+
+**OAuth2 Integrations**:
+- **DBGate**: Database management UI authentication
+- **Forgejo**: Git service authentication
+- **KubeVirt Manager**: VM management UI authentication
+- **OpenCost**: Cost analysis dashboard authentication
+- **Penpot**: Design platform authentication
+
+**Important**: When adding new applications that have a web UI, always consider whether Kanidm SSO integration should be configured. Each OAuth2 client is defined in a separate YAML file under `kubernetes/apps/identity/kanidm/app/`.
+
+### Forgejo (Self-Hosted Git)
+
+Located in `kubernetes/apps/utils/forgejo/`, Forgejo is a lightweight, self-hosted Git service.
+
+**Features**:
+- Git repository hosting
+- Kanidm SSO integration for authentication
+- Forgejo Actions (CI/CD) via forgejo-runner-system namespace
+
+**Related**: The `forgejo-runner-system` namespace provides on-demand CI/CD runners using KEDA ScaledJobs that scale based on Forgejo webhook events.
+
+### kGuardian (Security Monitoring)
+
+Located in `kubernetes/apps/kube-system/kguardian/`, kGuardian provides security monitoring and guardianship for the Kubernetes cluster.
+
+**Components**:
+- **Broker** (v1.6.0): Message broker for security events
+- **Controller** (v1.7.0): Core security monitoring engine
+- **Frontend** (v1.6.2): Web UI for security insights
+- **PostgreSQL**: Uses external CloudNative-PG database (init container for DB setup)
+
+**Configuration**:
+- LLM Bridge: disabled
+- MCP Server: disabled
+- Excluded namespaces: kube-system (from database monitoring)
+
+### OpenCost (Cost Monitoring)
+
+Located in `kubernetes/apps/observability/opencost/`, OpenCost provides Kubernetes cost monitoring and analysis.
+
+**Features**:
+- Real-time cost allocation and analysis
+- Kanidm SSO integration for dashboard access
+- Integrates with Prometheus for metrics
+
+### Homepage (Cluster Dashboard)
+
+Located in `kubernetes/apps/utils/homepage/`, Homepage provides a unified dashboard for all cluster services and applications.
+
+**Purpose**: Central entry point for accessing all deployed services with status monitoring.
+
 ---
 
-**Last Updated**: 2026-02-04
+**Last Updated**: 2026-02-14
 **Template Source**: [onedr0p/cluster-template](https://github.com/onedr0p/cluster-template)
