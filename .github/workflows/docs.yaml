@@ -36,10 +36,18 @@ jobs:
       - name: Build site
         run: mkdocs build --strict
 
+      - name: Create Cloudflare Pages project (if needed)
+        uses: cloudflare/wrangler-action@da0e0dfe58b7a431659754fdf3f186c529afbe65 # v3.14.1
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages project create special-winner-docs --production-branch main
+        continue-on-error: true
+
       - name: Publish to Cloudflare Pages
         uses: cloudflare/wrangler-action@da0e0dfe58b7a431659754fdf3f186c529afbe65 # v3.14.1
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           workingDirectory: site
-          command: pages deploy --project-name=special-winner-docs --branch main .
+          command: pages deploy --project-name=special-winner-docs --branch main --commit-dirty=true .
