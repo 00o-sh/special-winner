@@ -80,7 +80,6 @@ spec:
     - type: forgejo-runner
       metadata:
         name: "forgejo-runner"
-        address: "${FORGEJO_INSTANCE_URL}"
         global: "true"
         labels: "ubuntu-latest"
       authenticationRef:
