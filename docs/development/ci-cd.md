@@ -83,3 +83,60 @@ Some workflows run on `special-winner-runner` (self-hosted) with cluster access:
 - `schemas.yaml` -- Needs kubectl for CRD extraction
 
 Runners are managed by Actions Runner Controller in the `actions-runner-system` namespace.
+
+## Troubleshooting CI/CD
+
+### flux-local Validation Fails
+
+The most common PR failure. Check the workflow output for specific errors:
+
+```sh
+# Run flux-local locally to reproduce
+flux-local test --enable-helm --all-namespaces
+
+# Common issues:
+# - Invalid YAML syntax in HelmRelease or Kustomization
+# - Missing OCIRepository reference
+# - Duplicate resource names in the same namespace
+```
+
+### image-pull Fails
+
+This workflow runs on the self-hosted runner and needs cluster access:
+
+1. Check that the `special-winner-runner` pods are running:
+
+    ```sh
+    kubectl -n actions-runner-system get pods
+    ```
+
+2. Verify Talosctl connectivity to nodes (the runner needs access to pull images)
+
+3. If the runner is unavailable, the job will stay queued — check the Actions Runner Controller logs:
+
+    ```sh
+    kubectl -n actions-runner-system logs -l app.kubernetes.io/name=actions-runner-controller-gha-rs-controller
+    ```
+
+### schemas.yaml Fails
+
+- Requires the self-hosted runner with `kubectl` access
+- Check that CRDs are installed in the cluster
+- Verify Cloudflare Pages deployment token is valid
+
+### docs.yaml Fails
+
+- Check for MkDocs build errors (broken links, invalid YAML frontmatter)
+- Run locally to reproduce:
+
+    ```sh
+    pip install mkdocs-material
+    mkdocs build --strict
+    ```
+
+### General Debugging Tips
+
+- **View workflow logs**: Go to the Actions tab on GitHub, click the failed run
+- **Re-run a failed job**: Use the "Re-run jobs" button in the Actions UI
+- **Check runner availability**: Self-hosted runner jobs will queue if no runners are available
+- **Concurrency**: Most workflows use concurrency groups to prevent duplicate runs — a new push will cancel the previous run

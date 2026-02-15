@@ -10,38 +10,106 @@ graph LR
     Git[Git Repository] -->|GitOps| State[Cluster State]
 ```
 
+The cluster uses a layered backup strategy:
+
+| Data Type | Backup Method | Destination | Schedule |
+|-----------|--------------|-------------|----------|
+| Application config (PVCs) | VolSync + Kopia | Garage S3 | Daily at 2 AM |
+| PostgreSQL databases | barman-cloud (WAL + base backups) | Garage S3 | Continuous WAL + scheduled |
+| Cluster state | Git repository | GitHub | On every push |
+| Secrets | SOPS-encrypted in Git + 1Password | GitHub + 1Password | On every push |
+
 ## VolSync
 
 [VolSync](https://volsync.readthedocs.io/) replicates PersistentVolumeClaims to S3-compatible storage.
 
-### Schedule
+### Configuration Details
 
-Backups run **daily at 2 AM** by default.
+The VolSync component at `kubernetes/components/volsync/` provides reusable backup/restore templates:
 
-### Component
+| Setting | Value |
+|---------|-------|
+| **Schedule** | `0 2 * * *` (daily at 2 AM UTC) |
+| **Compression** | `zstd-fastest` |
+| **Copy method** | `Direct` |
+| **Parallelism** | `2` threads |
+| **Cache storage** | `openebs-hostpath` (5Gi) |
+| **Mover user** | UID/GID 1000 |
 
-The VolSync component is at `kubernetes/components/volsync/`. Apply it to stateful applications:
+**Retention policy:**
+
+- 24 hourly, 7 daily, 4 weekly, 6 monthly, 2 yearly
+
+### Applying VolSync to an Application
+
+Reference the VolSync component in your app's `ks.yaml`:
 
 ```yaml
-# In your app's ks.yaml, reference the volsync component
+# In your app's ks.yaml
 spec:
   components:
     - name: volsync
 ```
 
+VolSync uses the `${APP}` variable (from Flux substitution) to name resources. Each app gets its own `ReplicationSource` and Kopia secret.
+
 ### Checking Backup Status
 
 ```sh
+# List all backup sources and their last sync time
 kubectl get replicationsource -A
+
+# List all restore destinations
 kubectl get replicationdestination -A
+
+# Detailed status for a specific app
+kubectl -n <namespace> describe replicationsource <app-name>
 ```
+
+### Restoring from a VolSync Backup
+
+!!! warning
+    Restoring overwrites the existing PVC data. Ensure you understand the implications before proceeding.
+
+1. **Scale down the application** to release the PVC:
+
+    ```sh
+    flux suspend hr <app-name> -n <namespace>
+    kubectl -n <namespace> scale deploy/<app-name> --replicas=0
+    ```
+
+2. **Trigger the restore** by annotating the `ReplicationDestination`:
+
+    ```sh
+    kubectl -n <namespace> patch replicationdestination <app-name> \
+      --type merge -p '{"spec":{"trigger":{"manual":"restore-once"}}}'
+    ```
+
+3. **Wait for the restore to complete**:
+
+    ```sh
+    kubectl -n <namespace> get replicationdestination <app-name> -w
+    ```
+
+4. **Resume the application**:
+
+    ```sh
+    flux resume hr <app-name> -n <namespace>
+    ```
+
+5. **Verify** the application is running with restored data:
+
+    ```sh
+    kubectl -n <namespace> get pods
+    ```
 
 ## PostgreSQL Backups
 
-CloudNative-PG handles PostgreSQL backups independently:
+CloudNative-PG handles PostgreSQL backups independently via the barman-cloud plugin:
 
-- **WAL archiving** to Garage S3 via barman-cloud plugin
-- **Scheduled backups** with configurable retention
+- **Continuous WAL archiving** to Garage S3 (enables point-in-time recovery)
+- **Scheduled base backups** with configurable retention
+- **S3 bucket**: `cnpg-garage`
 - Recovery cluster definition at `kubernetes/apps/database/cloudnative-pg/recovery/`
 
 ### Triggering a Manual Backup
@@ -62,42 +130,106 @@ EOF
 ### Checking Backup Status
 
 ```sh
+# List all backups
 kubectl -n database get backups
+
+# List scheduled backups
 kubectl -n database get scheduledbackups
+
+# Check backup details
+kubectl -n database describe backup <backup-name>
+
+# Check WAL archiving status
+kubectl -n database get cluster postgres -o jsonpath='{.status.firstRecoverabilityPoint}'
 ```
 
 ## Disaster Recovery
 
 ### Full Cluster Recovery
 
-Since the cluster is GitOps-managed, recovery involves:
+Since the cluster is GitOps-managed, a full recovery follows these steps:
 
-1. Bootstrap new Talos nodes
-2. Run `task bootstrap:talos` and `task bootstrap:apps`
-3. Flux restores all application state from Git
-4. VolSync restores PVC data from Garage S3
-5. PostgreSQL recovers from WAL archives
+1. **Prepare hardware** — Boot new nodes with Talos Linux (see [Machine Preparation](../getting-started/index.md))
+
+2. **Bootstrap the cluster**:
+
+    ```sh
+    task bootstrap:talos
+    task bootstrap:apps
+    ```
+
+3. **Flux restores application state** — All manifests are pulled from Git automatically
+
+4. **VolSync restores PVC data** — Application data is restored from Garage S3 backups
+
+5. **PostgreSQL recovers from WAL archives** — Use the recovery cluster definition (see below)
+
+6. **Verify all services**:
+
+    ```sh
+    flux get ks -A
+    flux get hr -A
+    kubectl get pods -A | grep -v Running
+    ```
 
 ### PostgreSQL Point-in-Time Recovery
 
-Use the recovery cluster definition:
+The recovery cluster definition at `kubernetes/apps/database/cloudnative-pg/recovery/cluster.yaml` bootstraps a new PostgreSQL cluster from S3 backups:
 
-```
-kubernetes/apps/database/cloudnative-pg/recovery/cluster.yaml
-```
+| Setting | Value |
+|---------|-------|
+| **Instances** | 2 (reduced for recovery, scale up after) |
+| **PostgreSQL** | 17.7 (matches production) |
+| **Source** | `postgres-backup` (Garage S3 via barman-cloud) |
+| **S3 bucket** | `cnpg-garage` |
 
-### What's Not in Git
+**Recovery steps:**
 
-These items require manual restoration or are ephemeral:
+1. **Apply the recovery cluster** (modify target time if needed for PITR):
 
-- Active VM state (VMs restart from disk images)
-- In-memory caches (Dragonfly data)
-- Real-time metrics (Prometheus TSDB rebuilds from scrapes)
+    ```sh
+    kubectl apply -f kubernetes/apps/database/cloudnative-pg/recovery/cluster.yaml
+    ```
+
+2. **Monitor recovery progress**:
+
+    ```sh
+    kubectl -n database get cluster postgres-recovery -w
+    kubectl -n database logs -l cnpg.io/cluster=postgres-recovery -f
+    ```
+
+3. **Verify data integrity** once the cluster is ready:
+
+    ```sh
+    kubectl -n database exec -it postgres-recovery-1 -- psql -U postgres -c '\l'
+    ```
+
+4. **Promote the recovery cluster** to production (update the main cluster definition to point to the recovered data, or rename the recovery cluster).
+
+!!! tip
+    For point-in-time recovery, add a `recoveryTarget` to the recovery cluster spec:
+    ```yaml
+    bootstrap:
+      recovery:
+        source: postgres-backup
+        recoveryTarget:
+          targetTime: "2026-02-14T12:00:00Z"
+    ```
+
+### What's Backed Up vs. Not
+
+| Backed up | Not backed up (ephemeral) |
+|-----------|--------------------------|
+| Application PVCs (via VolSync) | Active VM state (VMs restart from disk images) |
+| PostgreSQL databases (via WAL archiving) | In-memory caches (Dragonfly data) |
+| Cluster manifests (in Git) | Real-time metrics (Prometheus TSDB rebuilds) |
+| Secrets (SOPS in Git + 1Password) | Pod logs (Victoria Logs rebuilds from Fluent Bit) |
 
 ## Garage S3
 
 [Garage](https://garagehq.deuxfleurs.fr/) provides the S3-compatible storage backend:
 
-- Self-hosted within the cluster
-- Stores VolSync and PostgreSQL backups
-- Located in `kubernetes/apps/volsync-system/garage/`
+- Self-hosted within the cluster (`kubernetes/apps/volsync-system/garage/`)
+- Stores both VolSync and PostgreSQL backups
+- Lightweight and resource-efficient
+- Compatible with standard S3 clients and tools
