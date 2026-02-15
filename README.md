@@ -4,6 +4,8 @@
 
 A Kubernetes homelab cluster deployed with [Talos Linux](https://github.com/siderolabs/talos) and [Flux CD](https://github.com/fluxcd/flux2) for GitOps. This repository is based on the [onedr0p/cluster-template](https://github.com/onedr0p/cluster-template) and uses [makejinja](https://github.com/mirkolenz/makejinja) for configuration templating.
 
+> **📖 Full Documentation:** [docs.00o.sh](https://docs.00o.sh) — Comprehensive guides covering architecture, infrastructure, applications, operations, and development.
+
 At its core, this project leverages [makejinja](https://github.com/mirkolenz/makejinja), a powerful tool for rendering templates. By reading configuration files—`cluster.yaml` and `nodes.yaml`—Makejinja generates the necessary configurations to deploy a Kubernetes cluster with the following features:
 
 - Easy configuration through YAML files
@@ -542,20 +544,15 @@ Community member [@whazor](https://github.com/whazor) created [Kubesearch](https
 **VM Infrastructure**
 - [x] Install KubeVirt + CDI for VM management
 - [x] Configure Multus NetworkAttachmentDefinitions for VM networking
+- [x] Configure Macvtap CNI for direct VM network access
 - [ ] Export VMs from Proxmox nodes
-- [ ] Import and test VMs in KubeVirt (single node, local/NFS storage)
+- [x] Import and test VMs in KubeVirt (single node, NFS storage)
 - [ ] Test Windows 11 VM
-- [ ] Test Windows Server VM
-- [ ] Test Debian Server VM
-- [ ] Test Debian Desktop VM
+- [x] Test Windows Server VM (Windows Server 2022 w/ virtio drivers)
+- [x] Test Debian Server VM
+- [x] Test Debian Desktop VM (Debian 13 w/ XFCE4)
 - [ ] Test Kali Linux VM
-
-**Cloud Service Mirroring**
-- [ ] Nextcloud + OnlyOffice (Google Drive, Office 365, Calendar, Contacts mirror)
-- [ ] Immich (Google Photos backup)
-- [ ] Vaultwarden (Bitwarden/1Password supplementary instance)
-- [ ] rclone CronJobs for automated cloud sync
-- [ ] Linkding (bookmark backup)
+- [x] Deploy FreePBX telephony VMs (3 instances: b1, b2, b3)
 
 **Security & Observability**
 - [ ] Kyverno or OPA Gatekeeper for policy enforcement
@@ -563,11 +560,21 @@ Community member [@whazor](https://github.com/whazor) created [Kubesearch](https
 - [ ] Grafana Tempo for distributed tracing
 - [ ] Falco or Trivy Operator for runtime security
 - [x] [kguardian](https://github.com/kguardian-dev/kguardian) - eBPF-based security toolkit for auto-generating NetworkPolicy/CiliumNetworkPolicy and seccomp profiles from observed runtime behavior (audit mode)
+- [x] OpenCost for Kubernetes cost monitoring and allocation
+- [x] Grafana dashboards for Kubernetes infrastructure monitoring
 
 **Additional Services**
-- [x] Forgejo (self-hosted Git platform)
+- [x] Forgejo (self-hosted Git platform) with CI/CD runners (ScaledJob via KEDA)
 - [ ] Home Assistant + IoT stack (if needed)
-- [x] Kanidm (via Kaniop operator) for identity management and SSO
+- [x] Kanidm (via Kaniop operator) for identity management and SSO (dbgate, forgejo, kubevirt-manager, opencost, penpot)
+- [x] Homepage cluster dashboard for unified service access
+- [x] DBGate database management web UI
+- [x] Penpot design and prototyping platform
+- [ ] Nextcloud + OnlyOffice (Google Drive, Office 365, Calendar, Contacts mirror)
+- [ ] Immich (Google Photos backup)
+- [ ] Vaultwarden (Bitwarden/1Password supplementary instance)
+- [ ] rclone CronJobs for automated cloud sync
+- [ ] Linkding (bookmark backup)
 - [ ] Migrate External Secrets from 1Password Connect to 1Password SDK (enables PushSecret for cross-namespace secret sync)
 
 ### Phase 2: Test Multi-Node Features
@@ -579,11 +586,13 @@ Community member [@whazor](https://github.com/whazor) created [Kubesearch](https
 
 **VM Testing**
 - [ ] Migrate test VMs to Longhorn storage
-- [ ] Test VM live migration between nodes
+- [ ] Test VM live migration between nodes (LiveMigration feature gate enabled)
 - [ ] Test VM startup on different nodes
-- [ ] Verify VM networking across nodes
+- [ ] Verify VM networking across nodes (macvtap + Multus)
 
 **High Availability Testing**
+- [x] PostgreSQL HA cluster expanded to 3 instances with pod anti-affinity
+- [x] Automated PostgreSQL backups to Garage S3 via barman-cloud
 - [ ] Deploy critical workloads with replicas across nodes
 - [ ] Test pod rescheduling (kill a node, watch pods move)
 - [ ] Test volsync backup/restore
@@ -622,16 +631,19 @@ Community member [@whazor](https://github.com/whazor) created [Kubesearch](https
 
 **Documentation**
 - [ ] Document the disaster recovery procedure
-- [ ] Document VM management workflow
-- [ ] Update CLAUDE.md with lessons learned
+- [x] Document VM management workflow (docs/operations/vm-management.md + .taskfiles/vm/Taskfile.yaml)
+- [x] Update CLAUDE.md with lessons learned
+- [x] Set up MkDocs documentation site (docs.00o.sh)
+- [ ] Create runbooks for common failure scenarios
 
 ## 🙋 Support
 
 ### Community Resources
 
+- **Documentation**: [docs.00o.sh](https://docs.00o.sh) — Full documentation site with architecture, operations, and development guides
+- **AI Assistant Guide**: [CLAUDE.md](./CLAUDE.md) — Detailed guidance for AI-assisted development
 - **Upstream Template**: [onedr0p/cluster-template discussions](https://github.com/onedr0p/cluster-template/discussions)
-- **Discord**: [Home Operations](https://discord.gg/home-operations) - Join the `#cluster-template` channel
-- **Documentation**: Check [CLAUDE.md](./CLAUDE.md) for detailed AI assistant guidance
+- **Discord**: [Home Operations](https://discord.gg/home-operations) — Join the `#cluster-template` channel
 
 ### Acknowledgments
 
@@ -649,10 +661,13 @@ If this repo is too hot to handle or too cold to hold check out these following 
 
 ## 📊 Repository Stats
 
-**Deployed Components:** 65+ applications across 17 namespaces
-**Template Source:** [onedr0p/cluster-template](https://github.com/onedr0p/cluster-template)
-**Infrastructure:** GitOps with Flux CD + Talos Linux
-**Last Updated:** 2026-02-14
+| Metric | Value |
+|--------|-------|
+| **Deployed Components** | 65+ applications across 17 namespaces |
+| **Template Source** | [onedr0p/cluster-template](https://github.com/onedr0p/cluster-template) |
+| **Infrastructure** | GitOps with Flux CD + Talos Linux |
+| **Documentation** | [docs.00o.sh](https://docs.00o.sh) |
+| **Last Updated** | 2026-02-15 |
 
 ---
 
