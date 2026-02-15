@@ -1,15 +1,26 @@
+# makejinja configuration (https://github.com/mirkolenz/makejinja)
+# Renders Jinja2 templates from templates/ into the repository root.
+# Data sources: cluster.yaml (cluster-wide settings) and nodes.yaml (node definitions).
+# Run via: task configure
+
 [makejinja]
 inputs = ["./templates/overrides","./templates/config"]
 output = "./"
 exclude_patterns = ["*.partial.yaml.j2"]
 data = ["./cluster.yaml", "./nodes.yaml"]
 import_paths = ["./templates/scripts"]
-loaders = ["plugin:Plugin"]
+loaders = ["plugin:Plugin"]                     # Custom filters from templates/scripts/plugin.py
 jinja_suffix = ".j2"
 copy_metadata = true
-force = true
-undefined = "chainable"
+force = true                                    # Overwrite existing output files
+undefined = "chainable"                         # Allow undefined variables to chain without error
 
+# Custom delimiters to avoid conflicts with YAML anchors, Helm {{ }}, and Go templates.
+# Standard Jinja2 uses {{ }}, {% %}, {# #} which conflict with Helm chart values.
+# These custom delimiters use #-prefixed syntax instead:
+#   Variables: #{ variable }#    (instead of {{ variable }})
+#   Blocks:    #% if cond %#     (instead of {% if cond %})
+#   Comments:  #| comment #|     (instead of {# comment #})
 [makejinja.delimiter]
 block_start = "#%"
 block_end = "%#"

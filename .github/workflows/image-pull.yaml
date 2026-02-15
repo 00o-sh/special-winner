@@ -1,4 +1,7 @@
 ---
+# Pre-pulls new container images to cluster nodes on PRs.
+# Compares images between PR and main branch, then pulls new ones via Talosctl.
+# Runs on self-hosted runner (special-winner-runner) with cluster access.
 # yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
 name: Image Pull
 

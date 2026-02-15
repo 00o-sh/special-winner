@@ -1,4 +1,7 @@
 ---
+# Talos Linux node management tasks.
+# Requires: talhelper, talosctl, yq, sops
+# Config source: talos/talconfig.yaml and talos/talenv.yaml
 version: '3'
 
 tasks:

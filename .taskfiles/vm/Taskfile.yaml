@@ -1,4 +1,7 @@
 ---
+# KubeVirt virtual machine management tasks.
+# All tasks default to namespace=kubevirt.
+# Requires: kubectl, flux (for redeploy)
 version: '3'
 
 tasks:

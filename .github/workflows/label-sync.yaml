@@ -1,4 +1,6 @@
 ---
+# Synchronizes GitHub repository labels from .github/labels.yaml.
+# Deletes labels not defined in the config to maintain consistency.
 name: "Label Sync"
 
 on:

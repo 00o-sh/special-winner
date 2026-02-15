@@ -1,4 +1,7 @@
 ---
+# Root Taskfile - entry point for all task automation.
+# Run `task --list` to see available tasks.
+# Subtask files are in .taskfiles/ (bootstrap, talos, template, vm).
 version: '3'
 
 set: [pipefail]
@@ -18,10 +21,10 @@ env:
   TALOSCONFIG: '{{.TALOSCONFIG}}'
 
 includes:
-  bootstrap: .taskfiles/bootstrap
-  talos: .taskfiles/talos
-  template: .taskfiles/template
-  vm: .taskfiles/vm
+  bootstrap: .taskfiles/bootstrap     # Cluster bootstrap (task bootstrap:talos, bootstrap:apps)
+  talos: .taskfiles/talos             # Talos node operations (apply, upgrade, reset)
+  template: .taskfiles/template       # Template rendering and validation (init, configure)
+  vm: .taskfiles/vm                   # KubeVirt VM management (start, stop, console, redeploy)
 
 tasks:
 

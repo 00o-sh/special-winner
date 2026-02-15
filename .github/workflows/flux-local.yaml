@@ -1,4 +1,7 @@
 ---
+# Validates Flux manifests on pull requests using flux-local.
+# Generates diffs for HelmReleases and Kustomizations to review changes.
+# Only triggers when kubernetes/ files are modified.
 name: "Flux Local"
 
 on:

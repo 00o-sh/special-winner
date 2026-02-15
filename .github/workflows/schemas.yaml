@@ -1,4 +1,7 @@
 ---
+# Extracts CRD schemas from the cluster and publishes to Cloudflare Pages.
+# Enables IDE autocompletion and validation for custom Kubernetes resources.
+# Runs daily on schedule and on self-hosted runner (special-winner-runner).
 # yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
 name: Schemas
 

@@ -1,4 +1,7 @@
 ---
+# End-to-end test of the configuration pipeline.
+# Runs `task init` and `task configure` with sample configs (public/private matrix).
+# Validates that templates render correctly and pass flux-local checks.
 name: "e2e"
 
 on:

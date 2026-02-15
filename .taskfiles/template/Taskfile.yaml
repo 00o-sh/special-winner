@@ -1,4 +1,8 @@
 ---
+# Template rendering and validation tasks.
+# Handles: init (generate config from samples), configure (render + validate),
+#          tidy (archive templates after bootstrap), debug, reset.
+# Uses makejinja for Jinja2 rendering and CUE/kubeconform for validation.
 version: '3'
 
 vars:

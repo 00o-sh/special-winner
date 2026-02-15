@@ -1,4 +1,6 @@
 ---
+# Automatically labels PRs based on changed file paths (area/*) and size (xs/s/m/l/xl).
+# Configuration: .github/labeler.yaml for path-to-label mapping.
 name: "Labeler"
 
 on:
