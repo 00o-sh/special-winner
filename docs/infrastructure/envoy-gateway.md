@@ -115,7 +115,7 @@ responseOverride:
 
 This applies globally to all routes behind `envoy-internal` and `envoy-external` since the policy targets all Gateways via `targetSelectors`.
 
-**Template:** The error-pages service uses the "connection" template with `SHOW_DETAILS=false`.
+**Template:** The error-pages service uses the "hacker-terminal" template with `SHOW_DETAILS=true`.
 
 ## Monitoring
 
