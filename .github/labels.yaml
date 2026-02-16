@@ -269,6 +269,9 @@
 - name: app/homepage
   color: "6f42c1"
   description: "homepage in utils"
+- name: app/n8n
+  color: "6f42c1"
+  description: "n8n in utils"
 - name: app/penpot
   color: "6f42c1"
   description: "penpot in utils"

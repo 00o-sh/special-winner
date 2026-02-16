@@ -445,6 +445,11 @@ app/homepage:
       - any-glob-to-any-file:
           - kubernetes/apps/utils/homepage/**/*
 
+app/n8n:
+  - changed-files:
+      - any-glob-to-any-file:
+          - kubernetes/apps/utils/n8n/**/*
+
 app/penpot:
   - changed-files:
       - any-glob-to-any-file:
