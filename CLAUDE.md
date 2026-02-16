@@ -688,7 +688,7 @@ talosctl logs --nodes <ip> --insecure
 **network**: Network infrastructure
 - cloudflare-dns
 - cloudflare-tunnel (external access)
-- envoy-gateway (ingress)
+- envoy-gateway (ingress, with error-pages for custom error responses)
 - k8s-gateway (internal DNS)
 - macvtap-cni (macvtap CNI plugin for direct VM network access)
 - multus (multi-network CNI)
@@ -760,6 +760,7 @@ Check `.mise.toml` for exact versions of all tools.
 
 ## Recent Notable Changes
 
+- **2026-02-16**: Added error-pages service for Envoy Gateway with responseOverride redirects (403, 404, 500, 502, 503, 504)
 - **2026-02-16**: Added n8n workflow automation platform to utils namespace (PostgreSQL backend, ExternalSecrets)
 - **2026-02-14**: Added Kanidm identity provider with OAuth2 SSO for dbgate, forgejo, kubevirt-manager, opencost, penpot
 - **2026-02-14**: Added Forgejo self-hosted Git service and Forgejo runner system
@@ -1084,5 +1085,5 @@ Located in `kubernetes/apps/utils/homepage/`, Homepage provides a unified dashbo
 
 ---
 
-**Last Updated**: 2026-02-14
+**Last Updated**: 2026-02-16
 **Template Source**: [onedr0p/cluster-template](https://github.com/onedr0p/cluster-template)
