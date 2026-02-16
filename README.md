@@ -29,6 +29,7 @@ A Kubernetes cluster deployed with [Talos Linux](https://github.com/siderolabs/t
 - [Cilium](https://github.com/cilium/cilium) 1.19.0 - eBPF-based CNI
 - [CoreDNS](https://coredns.io/) - Cluster DNS
 - [Envoy Gateway](https://github.com/envoyproxy/gateway) - HTTP routing and ingress
+- [Error Pages](https://github.com/tarampampam/error-pages) - Custom error pages for Envoy Gateway
 - [k8s_gateway](https://github.com/ori-edge/k8s_gateway) - Internal DNS for cluster services
 - [Cloudflare Tunnel](https://github.com/cloudflare/cloudflared) - Secure external access
 - [Multus CNI](https://github.com/k8snetworkplumbingwg/multus-cni) - Multi-network support
@@ -667,7 +668,7 @@ If this repo is too hot to handle or too cold to hold check out these following 
 | **Template Source** | [onedr0p/cluster-template](https://github.com/onedr0p/cluster-template) |
 | **Infrastructure** | GitOps with Flux CD + Talos Linux |
 | **Documentation** | [docs.00o.sh](https://docs.00o.sh) |
-| **Last Updated** | 2026-02-15 |
+| **Last Updated** | 2026-02-16 |
 
 ---
 
