@@ -20,6 +20,20 @@
 !!! note
     When adding new applications, always add them to the Homepage configuration.
 
+## n8n
+
+[n8n](https://n8n.io/) is a workflow automation platform:
+
+- Located in `kubernetes/apps/utils/n8n/`
+- PostgreSQL database via CloudNative-PG
+- Exposed at `n8n.00o.sh`
+- Automatic execution data pruning (168 hours / 50k max)
+
+### Dependencies
+
+- CloudNative-PG postgres-cluster
+- 1Password for secrets (encryption key, database credentials)
+
 ## Penpot
 
 [Penpot](https://penpot.app/) is an open-source design and prototyping platform:

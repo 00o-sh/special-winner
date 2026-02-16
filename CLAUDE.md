@@ -716,6 +716,7 @@ talosctl logs --nodes <ip> --insecure
 **utils**: Utility services
 - forgejo (self-hosted Git repository service)
 - homepage (cluster dashboard)
+- n8n (workflow automation platform)
 - penpot (open-source design and prototyping platform)
 - smtp-relay (SMTP relay for outbound email using Maddy)
 
@@ -759,6 +760,7 @@ Check `.mise.toml` for exact versions of all tools.
 
 ## Recent Notable Changes
 
+- **2026-02-16**: Added n8n workflow automation platform to utils namespace (PostgreSQL backend, ExternalSecrets)
 - **2026-02-14**: Added Kanidm identity provider with OAuth2 SSO for dbgate, forgejo, kubevirt-manager, opencost, penpot
 - **2026-02-14**: Added Forgejo self-hosted Git service and Forgejo runner system
 - **2026-02-14**: Added Homepage cluster dashboard to utils namespace
