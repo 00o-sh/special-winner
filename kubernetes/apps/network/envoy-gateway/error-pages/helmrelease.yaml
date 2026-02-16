@@ -1,0 +1,71 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: error-pages
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: error-pages
+  interval: 1h
+  values:
+    defaultPodOptions:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        fsGroupChangePolicy: OnRootMismatch
+
+    controllers:
+      error-pages:
+        containers:
+          app:
+            image:
+              repository: ghcr.io/tarampampam/error-pages
+              tag: 3.8.0@sha256:6fda7ff61de68b3b188538221f718d834fd9aa6ddaf0c13044febc6100515fd1
+            env:
+              TEMPLATE_NAME: connection
+              SHOW_DETAILS: "false"
+              LISTEN_PORT: &port 8080
+            probes:
+              liveness:
+                enabled: true
+              readiness:
+                enabled: true
+              startup:
+                enabled: true
+            resources:
+              requests:
+                cpu: 5m
+                memory: 16M
+              limits:
+                memory: 32M
+            securityContext:
+              readOnlyRootFilesystem: true
+              allowPrivilegeEscalation: false
+              capabilities: { drop: ["ALL"] }
+
+    service:
+      app:
+        controller: error-pages
+        ports:
+          http:
+            port: *port
+
+    route:
+      internal: &route
+        hostnames:
+          - error.${SECRET_DOMAIN}
+        parentRefs:
+          - name: envoy-internal
+            namespace: network
+        rules:
+          - backendRefs:
+              - identifier: app
+                port: *port
+      external:
+        <<: *route
+        parentRefs:
+          - name: envoy-external
+            namespace: network
