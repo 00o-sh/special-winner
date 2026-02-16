@@ -1,4 +1,8 @@
 ---
+# Bootstrap tasks for initial cluster setup.
+# Usage: task bootstrap:talos    (install Talos on nodes)
+#        task bootstrap:apps     (install Flux, Cilium, CoreDNS, and sync cluster)
+#        task bootstrap:postgres-recovery  (restore PostgreSQL from S3 backup)
 version: '3'
 
 tasks:

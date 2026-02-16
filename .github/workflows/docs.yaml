@@ -1,4 +1,6 @@
 ---
+# Builds the MkDocs Material documentation site and publishes to Cloudflare Pages.
+# Triggered on changes to docs/ or mkdocs.yml.
 # yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
 name: Docs
 

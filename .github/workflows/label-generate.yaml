@@ -1,4 +1,6 @@
 ---
+# Auto-generates .github/labels.yaml and .github/labeler.yaml from repository structure.
+# Keeps label definitions in sync with namespace and directory changes.
 name: "Label Generate"
 
 on:

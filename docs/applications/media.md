@@ -20,14 +20,49 @@ graph LR
     FlareSolverr[FlareSolverr] --> Prowlarr
 ```
 
+## Storage Pattern
+
+All media apps follow a consistent three-tier storage strategy:
+
+| Mount | Type | Storage Class | Access Mode | Purpose |
+|-------|------|--------------|-------------|---------|
+| `/config` | PVC | `openebs-hostpath` | ReadWriteOnce | App config, databases (backed up via VolSync) |
+| `/media` | NFS | External NAS | ReadWriteMany | Shared media library |
+| `/tmp` | emptyDir | — | — | Ephemeral scratch space |
+
+**NFS media mount:**
+
+- Server: `nas.3226texas.com`
+- Path: `/mnt/Rust/Media`
+- Container path: `/media`
+- Plex mounts as **read-only**; *arr apps mount as **read-write**
+
+### Security Context
+
+All media apps run with a standard security profile:
+
+```yaml
+securityContext:
+  runAsNonRoot: true
+  runAsUser: 1000
+  runAsGroup: 1000
+  fsGroup: 1000
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: true
+  capabilities:
+    drop: ["ALL"]
+```
+
 ## Applications
 
 ### Plex
 
 Media server for streaming movies, TV shows, music, and photos.
 
-- Multiple component directories for complex configuration
-- NFS storage for media library
+- LoadBalancer service at `10.0.6.14`
+- Exposed at `plex.00o.sh` and `plex-direct.00o.sh`
+- Resources: 100m CPU, 256Mi–2Gi memory
+- NFS media mounted read-only
 
 ### Radarr & Sonarr
 
@@ -36,6 +71,8 @@ Movie and TV series collection managers:
 - Automate downloading and organizing media
 - Integration with Prowlarr for indexer management
 - Quality profiles managed by Recyclarr
+- External authentication via Kanidm
+- Resources: 100m CPU, 1Gi–4Gi memory
 
 ### Prowlarr
 
@@ -74,7 +111,30 @@ Subtitle management:
 
 ### Supporting Services
 
-- **Recyclarr** -- Syncs quality profiles to *arr apps from TRaSH Guides
-- **Tautulli** -- Plex monitoring and statistics
-- **FlareSolverr** -- Cloudflare bypass proxy for Prowlarr
-- **TheLounge** -- Self-hosted IRC client for tracker communication
+- **Recyclarr** — Syncs quality profiles to *arr apps from TRaSH Guides
+- **Tautulli** — Plex monitoring and statistics
+- **FlareSolverr** — Cloudflare bypass proxy for Prowlarr
+- **TheLounge** — Self-hosted IRC client for tracker communication
+
+## NFS Dependency
+
+Media apps that mount NFS volumes should include the NFS-scaler component to prevent crash-loops when NFS is unavailable:
+
+```yaml
+# In the app's ks.yaml
+spec:
+  components:
+    - name: nfs-scaler
+```
+
+The NFS-scaler uses KEDA to monitor `probe_success{instance=~".+:2049"}` and scales the deployment to 0 when NFS is down.
+
+## Adding a New Media App
+
+1. Create directory: `kubernetes/apps/media/<app-name>/app/`
+2. Follow the standard HelmRelease pattern with NFS media mount
+3. Use UID/GID 1000 in security context (matches NFS permissions)
+4. Add NFS-scaler component if the app mounts NFS
+5. Add VolSync component for config backup
+6. Add to Homepage dashboard
+7. Update the namespace kustomization

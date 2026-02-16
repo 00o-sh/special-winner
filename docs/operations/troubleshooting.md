@@ -147,6 +147,113 @@ kubectl get pvc -A
 kubectl describe pvc <name> -n <namespace>
 ```
 
+## VM Issues
+
+### VM Not Starting
+
+```sh
+# Check VirtualMachine status
+kubectl -n kubevirt get vm <vm-name>
+kubectl -n kubevirt describe vm <vm-name>
+
+# Check VirtualMachineInstance (the running instance)
+kubectl -n kubevirt get vmi <vm-name>
+
+# Check CDI DataVolume import status (for new VMs)
+kubectl -n kubevirt get dv <vm-name>-disk
+kubectl -n kubevirt describe dv <vm-name>-disk
+```
+
+### VM Console Not Connecting
+
+```sh
+# Ensure virtctl is installed
+virtctl version
+
+# Try direct console access
+virtctl console <vm-name> -n kubevirt
+
+# Check VMI is in Running phase
+kubectl -n kubevirt get vmi <vm-name> -o jsonpath='{.status.phase}'
+```
+
+### VM Live Migration Fails
+
+Requirements for live migration:
+
+1. Storage must be ReadWriteMany (NFS `nfs-fast` class)
+2. LiveMigration feature gate must be enabled (default)
+3. Sufficient resources on the target node
+4. No hostPath mounts
+
+```sh
+# Check migration status
+kubectl -n kubevirt get vmim
+kubectl -n kubevirt describe vmim <migration-name>
+```
+
+## Database Issues
+
+### PostgreSQL Cluster Unhealthy
+
+```sh
+# Check cluster status
+kubectl -n database get cluster postgres
+
+# Check individual pod status
+kubectl -n database get pods -l cnpg.io/cluster=postgres
+
+# View PostgreSQL logs
+kubectl -n database logs -l cnpg.io/cluster=postgres --tail=50
+
+# Check replication status
+kubectl -n database exec -it postgres-1 -- psql -U postgres -c 'SELECT * FROM pg_stat_replication;'
+```
+
+### PostgreSQL Connection Issues
+
+```sh
+# Verify the service exists
+kubectl -n database get svc postgres-rw
+
+# Test connectivity from a debug pod
+kubectl run -it --rm pg-debug --image=postgres:17 -- \
+  psql -h postgres-rw.database.svc.cluster.local -U postgres
+```
+
+### PostgreSQL Backup Failures
+
+```sh
+# Check scheduled backup status
+kubectl -n database get scheduledbackups
+kubectl -n database get backups --sort-by='.metadata.creationTimestamp'
+
+# Check WAL archiving
+kubectl -n database get cluster postgres -o jsonpath='{.status.firstRecoverabilityPoint}'
+```
+
+## Certificate Issues
+
+### Certificate Not Ready
+
+```sh
+# Check certificate status
+kubectl -n network get certificates
+kubectl -n network describe certificate <cert-name>
+
+# Check certificate requests
+kubectl get certificaterequests -A
+
+# Check cert-manager logs
+kubectl -n cert-manager logs -l app.kubernetes.io/name=cert-manager --tail=50
+```
+
+### Common Certificate Problems
+
+1. **DNS challenge failing**: Check Cloudflare API token permissions
+2. **Rate limited by Let's Encrypt**: Wait and retry (check `kubectl describe certificate`)
+3. **Secret not found**: Verify the certificate secret name matches the TLS secret reference in your Gateway
+
 ## Reset Cluster
 
 !!! danger
