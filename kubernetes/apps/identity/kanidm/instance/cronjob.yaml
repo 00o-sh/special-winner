@@ -53,7 +53,7 @@ spec:
                       name: kanidm-s3-secret
                       key: AWS_SECRET_ACCESS_KEY
                 - name: AWS_DEFAULT_REGION
-                  value: eu-west-1
+                  value: USTX01
               resources:
                 requests:
                   cpu: 1m
