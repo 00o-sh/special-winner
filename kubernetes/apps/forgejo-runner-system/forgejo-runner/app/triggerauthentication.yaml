@@ -9,3 +9,6 @@ spec:
     - parameter: token
       name: forgejo-runner-secret
       key: API_TOKEN
+    - parameter: address
+      name: forgejo-runner-secret
+      key: FORGEJO_INSTANCE_URL

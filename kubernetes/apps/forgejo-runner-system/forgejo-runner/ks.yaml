@@ -12,11 +12,6 @@ spec:
       namespace: observability
   interval: 1h
   path: ./kubernetes/apps/forgejo-runner-system/forgejo-runner/app
-  postBuild:
-    substituteFrom:
-      - kind: Secret
-        name: forgejo-runner-secret
-        optional: true
   prune: true
   sourceRef:
     kind: GitRepository
