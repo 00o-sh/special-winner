@@ -111,6 +111,63 @@ spec:
     - type: Gzip
   connection:
     bufferLimit: 8Mi
+  responseOverride:
+    - match:
+        statusCodes:
+          - type: Value
+            value: 403
+      redirect: &redirect
+        scheme: https
+        hostname: error.${SECRET_DOMAIN}
+        path:
+          type: &pathType ReplaceFullPath
+          replaceFullPath: /403.html
+        statusCode: 302
+    - match:
+        statusCodes:
+          - type: Value
+            value: 404
+      redirect:
+        <<: *redirect
+        path:
+          type: *pathType
+          replaceFullPath: /404.html
+    - match:
+        statusCodes:
+          - type: Value
+            value: 500
+      redirect:
+        <<: *redirect
+        path:
+          type: *pathType
+          replaceFullPath: /500.html
+    - match:
+        statusCodes:
+          - type: Value
+            value: 502
+      redirect:
+        <<: *redirect
+        path:
+          type: *pathType
+          replaceFullPath: /502.html
+    - match:
+        statusCodes:
+          - type: Value
+            value: 503
+      redirect:
+        <<: *redirect
+        path:
+          type: *pathType
+          replaceFullPath: /503.html
+    - match:
+        statusCodes:
+          - type: Value
+            value: 504
+      redirect:
+        <<: *redirect
+        path:
+          type: *pathType
+          replaceFullPath: /504.html
   targetSelectors:
     - group: gateway.networking.k8s.io
       kind: Gateway
