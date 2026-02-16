@@ -120,6 +120,12 @@ spec:
                 port: *port
 
     persistence:
+      cache:
+        type: emptyDir
+        advancedMounts:
+          n8n:
+            app:
+              - path: /home/node/.cache
       data:
         type: emptyDir
         advancedMounts:
