@@ -130,7 +130,7 @@ kubernetes/apps/<namespace>/<app-name>/
 | `kube-system` | Core services | Cilium, CoreDNS, Spegel, kGuardian |
 | `kubevirt` | Virtualization | KubeVirt, CDI, VMs |
 | `media` | Media apps | Plex, *arr stack, qBittorrent |
-| `network` | Network infra | Envoy Gateway, Cloudflare, Multus |
+| `network` | Network infra | Envoy Gateway, Error Pages, Cloudflare, Multus |
 | `observability` | Monitoring | Prometheus, Grafana, Victoria Logs |
 | `openebs-system` | Block storage | OpenEBS |
 | `system-upgrade` | Upgrades | Tuppr |
@@ -140,7 +140,7 @@ kubernetes/apps/<namespace>/<app-name>/
 ## Network Architecture
 
 - **Cilium** provides eBPF-based CNI with advanced network policies
-- **Envoy Gateway** handles HTTP routing with internal and external gateways
+- **Envoy Gateway** handles HTTP routing with internal and external gateways, with custom error pages via responseOverride redirects
 - **Cloudflare Tunnel** provides secure external access without port forwarding
 - **Multus + Macvtap** gives VMs direct network access with dedicated MAC addresses
 - **k8s_gateway** provides split-horizon DNS for internal service resolution
