@@ -28,6 +28,7 @@ All applications are deployed via Flux CD from manifests in `kubernetes/apps/`.
 |-----|-------------|-----------|
 | [Forgejo](https://forgejo.org/) | Self-hosted Git | utils |
 | [Homepage](https://gethomepage.dev/) | Cluster dashboard | utils |
+| [n8n](https://n8n.io/) | Workflow automation | utils |
 | [Penpot](https://penpot.app/) | Design platform | utils |
 | [SMTP Relay](https://github.com/foxcpp/maddy) | Email relay (Maddy) | utils |
 | [DBGate](https://dbgate.org/) | Database web UI | database |

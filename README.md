@@ -101,6 +101,7 @@ A Kubernetes cluster deployed with [Talos Linux](https://github.com/siderolabs/t
 - [GitHub Actions Runner Controller](https://github.com/actions/actions-runner-controller) - Self-hosted GitHub Actions runners
 - [Forgejo](https://forgejo.org/) - Self-hosted Git repository service with CI/CD runners
 - [SMTP Relay](https://github.com/foxcpp/maddy) - Outbound email relay using Maddy
+- [n8n](https://n8n.io/) - Workflow automation platform
 - [Penpot](https://penpot.app/) - Open-source design and prototyping platform
 - [Homepage](https://gethomepage.dev/) - Cluster dashboard for all services
 
