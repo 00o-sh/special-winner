@@ -112,8 +112,9 @@ spec:
         hostnames:
           - n8n.00o.sh
         parentRefs:
-          - name: envoy-intenal
+          - name: envoy-external
             namespace: network
+            sectionName: https
         rules:
           - backendRefs:
               - identifier: app
