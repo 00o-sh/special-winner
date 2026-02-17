@@ -56,6 +56,33 @@
       },
     },
     {
+      description: "Group ghcr.io pin dependencies",
+      matchUpdateTypes: ["pin"],
+      matchDatasources: ["docker"],
+      matchPackageNames: ["/^ghcr\\.io\\//"],
+      groupName: "ghcr.io pin dependencies",
+    },
+    {
+      description: "Group quay.io pin dependencies",
+      matchUpdateTypes: ["pin"],
+      matchDatasources: ["docker"],
+      matchPackageNames: ["/^quay\\.io\\//"],
+      groupName: "quay.io pin dependencies",
+    },
+    {
+      description: "Group Docker Hub pin dependencies",
+      matchUpdateTypes: ["pin"],
+      matchDatasources: ["docker"],
+      excludePackageNames: ["/^ghcr\\.io\\//", "/^quay\\.io\\//"],
+      groupName: "docker hub pin dependencies",
+    },
+    {
+      description: "Group GitHub Actions pin dependencies",
+      matchUpdateTypes: ["pin"],
+      matchManagers: ["github-actions"],
+      groupName: "github-actions pin dependencies",
+    },
+    {
       description: "Auto-merge GitHub Actions",
       matchManagers: ["github-actions"],
       automerge: true,
