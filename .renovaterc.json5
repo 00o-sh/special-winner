@@ -73,8 +73,8 @@
       description: "Group Docker Hub pin dependencies",
       matchUpdateTypes: ["pin"],
       matchDatasources: ["docker"],
-      excludePackageNames: ["/^ghcr\\.io\\//", "/^quay\\.io\\//"],
       groupName: "docker hub pin dependencies",
+      matchPackageNames: ["!/^ghcr\\.io\\//", "!/^quay\\.io\\//"],
     },
     {
       description: "Group GitHub Actions pin dependencies",
