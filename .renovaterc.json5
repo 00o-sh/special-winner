@@ -64,6 +64,14 @@
       ignoreTests: true,
     },
     {
+      description: "Talos split minor - major updates",
+      matchManagers: ["docker"],
+      matchPackageNames: ["ghcr.io/siderolabs/installer"],
+      separateMajorMinor: true,
+      separateMinorPatch: true,
+      minimumReleaseAge: "3 days",
+    },
+    {
       description: "Auto-merge Mise Tools",
       matchManagers: ["mise"],
       automerge: true,
