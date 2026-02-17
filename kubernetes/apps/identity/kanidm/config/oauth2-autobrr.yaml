@@ -1,0 +1,19 @@
+---
+apiVersion: kaniop.rs/v1beta1
+kind: KanidmOAuth2Client
+metadata:
+  name: autobrr
+spec:
+  kanidmRef:
+    name: kanidm
+  displayname: Autobrr
+  origin: "https://autobrr.00o.sh"
+  allowInsecureClientDisablePkce: true
+  redirectUrl:
+    - "https://autobrr.00o.sh/oauth2/callback"
+  scopeMap:
+    - group: autobrr-users
+      scopes:
+        - openid
+        - email
+        - profile

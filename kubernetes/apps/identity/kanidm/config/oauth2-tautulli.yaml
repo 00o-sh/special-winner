@@ -1,0 +1,19 @@
+---
+apiVersion: kaniop.rs/v1beta1
+kind: KanidmOAuth2Client
+metadata:
+  name: tautulli
+spec:
+  kanidmRef:
+    name: kanidm
+  displayname: Tautulli
+  origin: "https://tautulli.00o.sh"
+  allowInsecureClientDisablePkce: true
+  redirectUrl:
+    - "https://tautulli.00o.sh/oauth2/callback"
+  scopeMap:
+    - group: tautulli-users
+      scopes:
+        - openid
+        - email
+        - profile

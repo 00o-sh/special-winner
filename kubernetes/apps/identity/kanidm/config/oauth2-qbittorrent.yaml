@@ -1,0 +1,19 @@
+---
+apiVersion: kaniop.rs/v1beta1
+kind: KanidmOAuth2Client
+metadata:
+  name: qbittorrent
+spec:
+  kanidmRef:
+    name: kanidm
+  displayname: qBittorrent
+  origin: "https://qbittorrent.00o.sh"
+  allowInsecureClientDisablePkce: true
+  redirectUrl:
+    - "https://qbittorrent.00o.sh/oauth2/callback"
+  scopeMap:
+    - group: qbittorrent-users
+      scopes:
+        - openid
+        - email
+        - profile

@@ -1,0 +1,18 @@
+---
+apiVersion: gateway.envoyproxy.io/v1alpha1
+kind: SecurityPolicy
+metadata:
+  name: autobrr-oidc
+spec:
+  targetRefs:
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      name: autobrr
+  oidc:
+    provider:
+      issuer: "https://auth.00o.sh/oauth2/openid/autobrr"
+    clientID: "autobrr"
+    clientSecret:
+      name: autobrr-oidc-secret
+    redirectURL: "https://autobrr.00o.sh/oauth2/callback"
+    logoutPath: "/oauth2/sign_out"

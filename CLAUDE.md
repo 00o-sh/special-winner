@@ -652,7 +652,7 @@ talosctl logs --nodes <ip> --insecure
 - forgejo-runner (Forgejo Actions runner with ScaledJob for on-demand scaling)
 
 **identity**: Identity and SSO
-- kanidm (identity provider with OAuth2 integrations for dbgate, forgejo, kubevirt-manager, opencost, penpot)
+- kanidm (identity provider with OAuth2 integrations for autobrr, bazarr, dbgate, forgejo, grafana, kopia, kubevirt-manager, n8n, opencost, penpot, prowlarr, qbittorrent, qui, radarr, sonarr, tautulli, thelounge, unifi-toolkit)
 
 **kube-system**: Core Kubernetes
 - cilium (CNI)
@@ -760,6 +760,7 @@ Check `.mise.toml` for exact versions of all tools.
 
 ## Recent Notable Changes
 
+- **2026-02-17**: Added Kanidm OAuth2 SSO to 13 additional apps: radarr, sonarr, prowlarr, bazarr, autobrr, tautulli, qbittorrent, qui, thelounge, n8n, kopia, unifi-toolkit, grafana
 - **2026-02-16**: Added error-pages service for Envoy Gateway with responseOverride redirects (403, 404, 500, 502, 503, 504)
 - **2026-02-16**: Added n8n workflow automation platform to utils namespace (PostgreSQL backend, ExternalSecrets)
 - **2026-02-14**: Added Kanidm identity provider with OAuth2 SSO for dbgate, forgejo, kubevirt-manager, opencost, penpot
@@ -1034,11 +1035,24 @@ Located in `kubernetes/apps/identity/kanidm/`, Kanidm provides centralized ident
 - Manages user accounts, groups, and authentication policies
 
 **OAuth2 Integrations**:
+- **Autobrr**: Torrent automation UI authentication
+- **Bazarr**: Subtitle management UI authentication
 - **DBGate**: Database management UI authentication
 - **Forgejo**: Git service authentication
+- **Grafana**: Metrics visualization authentication
+- **Kopia**: Backup repository UI authentication
 - **KubeVirt Manager**: VM management UI authentication
+- **n8n**: Workflow automation authentication
 - **OpenCost**: Cost analysis dashboard authentication
 - **Penpot**: Design platform authentication
+- **Prowlarr**: Indexer manager UI authentication
+- **qBittorrent**: Torrent client UI authentication
+- **Qui**: qBittorrent web UI authentication
+- **Radarr**: Movie management UI authentication
+- **Sonarr**: TV series management UI authentication
+- **Tautulli**: Plex monitoring UI authentication
+- **TheLounge**: IRC client UI authentication
+- **UniFi Toolkit**: Network management UI authentication
 
 **Important**: When adding new applications that have a web UI, always consider whether Kanidm SSO integration should be configured. Each OAuth2 client is defined in a separate YAML file under `kubernetes/apps/identity/kanidm/app/`.
 

@@ -1,0 +1,19 @@
+---
+apiVersion: kaniop.rs/v1beta1
+kind: KanidmOAuth2Client
+metadata:
+  name: qui
+spec:
+  kanidmRef:
+    name: kanidm
+  displayname: Qui
+  origin: "https://qui.00o.sh"
+  allowInsecureClientDisablePkce: true
+  redirectUrl:
+    - "https://qui.00o.sh/oauth2/callback"
+  scopeMap:
+    - group: qui-users
+      scopes:
+        - openid
+        - email
+        - profile

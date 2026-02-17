@@ -1,0 +1,19 @@
+---
+apiVersion: kaniop.rs/v1beta1
+kind: KanidmOAuth2Client
+metadata:
+  name: unifi-toolkit
+spec:
+  kanidmRef:
+    name: kanidm
+  displayname: UniFi Toolkit
+  origin: "https://unifi-toolkit.00o.sh"
+  allowInsecureClientDisablePkce: true
+  redirectUrl:
+    - "https://unifi-toolkit.00o.sh/oauth2/callback"
+  scopeMap:
+    - group: unifi-toolkit-users
+      scopes:
+        - openid
+        - email
+        - profile

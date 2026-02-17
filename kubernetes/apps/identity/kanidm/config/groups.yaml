@@ -60,3 +60,133 @@ spec:
   members:
     - all-apps
     - herman
+---
+apiVersion: kaniop.rs/v1beta1
+kind: KanidmGroup
+metadata:
+  name: radarr-users
+spec:
+  kanidmRef:
+    name: kanidm
+  members:
+    - all-apps
+---
+apiVersion: kaniop.rs/v1beta1
+kind: KanidmGroup
+metadata:
+  name: sonarr-users
+spec:
+  kanidmRef:
+    name: kanidm
+  members:
+    - all-apps
+---
+apiVersion: kaniop.rs/v1beta1
+kind: KanidmGroup
+metadata:
+  name: prowlarr-users
+spec:
+  kanidmRef:
+    name: kanidm
+  members:
+    - all-apps
+---
+apiVersion: kaniop.rs/v1beta1
+kind: KanidmGroup
+metadata:
+  name: bazarr-users
+spec:
+  kanidmRef:
+    name: kanidm
+  members:
+    - all-apps
+---
+apiVersion: kaniop.rs/v1beta1
+kind: KanidmGroup
+metadata:
+  name: autobrr-users
+spec:
+  kanidmRef:
+    name: kanidm
+  members:
+    - all-apps
+---
+apiVersion: kaniop.rs/v1beta1
+kind: KanidmGroup
+metadata:
+  name: tautulli-users
+spec:
+  kanidmRef:
+    name: kanidm
+  members:
+    - all-apps
+---
+apiVersion: kaniop.rs/v1beta1
+kind: KanidmGroup
+metadata:
+  name: qbittorrent-users
+spec:
+  kanidmRef:
+    name: kanidm
+  members:
+    - all-apps
+---
+apiVersion: kaniop.rs/v1beta1
+kind: KanidmGroup
+metadata:
+  name: qui-users
+spec:
+  kanidmRef:
+    name: kanidm
+  members:
+    - all-apps
+---
+apiVersion: kaniop.rs/v1beta1
+kind: KanidmGroup
+metadata:
+  name: thelounge-users
+spec:
+  kanidmRef:
+    name: kanidm
+  members:
+    - all-apps
+---
+apiVersion: kaniop.rs/v1beta1
+kind: KanidmGroup
+metadata:
+  name: n8n-users
+spec:
+  kanidmRef:
+    name: kanidm
+  members:
+    - all-apps
+---
+apiVersion: kaniop.rs/v1beta1
+kind: KanidmGroup
+metadata:
+  name: kopia-users
+spec:
+  kanidmRef:
+    name: kanidm
+  members:
+    - all-apps
+---
+apiVersion: kaniop.rs/v1beta1
+kind: KanidmGroup
+metadata:
+  name: unifi-toolkit-users
+spec:
+  kanidmRef:
+    name: kanidm
+  members:
+    - all-apps
+---
+apiVersion: kaniop.rs/v1beta1
+kind: KanidmGroup
+metadata:
+  name: grafana-users
+spec:
+  kanidmRef:
+    name: kanidm
+  members:
+    - all-apps

@@ -1,0 +1,19 @@
+---
+apiVersion: kaniop.rs/v1beta1
+kind: KanidmOAuth2Client
+metadata:
+  name: bazarr
+spec:
+  kanidmRef:
+    name: kanidm
+  displayname: Bazarr
+  origin: "https://bazarr.00o.sh"
+  allowInsecureClientDisablePkce: true
+  redirectUrl:
+    - "https://bazarr.00o.sh/oauth2/callback"
+  scopeMap:
+    - group: bazarr-users
+      scopes:
+        - openid
+        - email
+        - profile

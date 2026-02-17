@@ -1,0 +1,19 @@
+---
+apiVersion: kaniop.rs/v1beta1
+kind: KanidmOAuth2Client
+metadata:
+  name: prowlarr
+spec:
+  kanidmRef:
+    name: kanidm
+  displayname: Prowlarr
+  origin: "https://prowlarr.00o.sh"
+  allowInsecureClientDisablePkce: true
+  redirectUrl:
+    - "https://prowlarr.00o.sh/oauth2/callback"
+  scopeMap:
+    - group: prowlarr-users
+      scopes:
+        - openid
+        - email
+        - profile

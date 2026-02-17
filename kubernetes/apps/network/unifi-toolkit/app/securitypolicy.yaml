@@ -1,0 +1,18 @@
+---
+apiVersion: gateway.envoyproxy.io/v1alpha1
+kind: SecurityPolicy
+metadata:
+  name: unifi-toolkit-oidc
+spec:
+  targetRefs:
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      name: unifi-toolkit
+  oidc:
+    provider:
+      issuer: "https://auth.00o.sh/oauth2/openid/unifi-toolkit"
+    clientID: "unifi-toolkit"
+    clientSecret:
+      name: unifi-toolkit-oidc-secret
+    redirectURL: "https://unifi-toolkit.00o.sh/oauth2/callback"
+    logoutPath: "/oauth2/sign_out"

@@ -1,0 +1,18 @@
+---
+apiVersion: gateway.envoyproxy.io/v1alpha1
+kind: SecurityPolicy
+metadata:
+  name: n8n-oidc
+spec:
+  targetRefs:
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      name: n8n
+  oidc:
+    provider:
+      issuer: "https://auth.00o.sh/oauth2/openid/n8n"
+    clientID: "n8n"
+    clientSecret:
+      name: n8n-oidc-secret
+    redirectURL: "https://n8n.00o.sh/oauth2/callback"
+    logoutPath: "/oauth2/sign_out"

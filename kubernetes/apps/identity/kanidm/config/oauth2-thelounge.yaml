@@ -1,0 +1,19 @@
+---
+apiVersion: kaniop.rs/v1beta1
+kind: KanidmOAuth2Client
+metadata:
+  name: thelounge
+spec:
+  kanidmRef:
+    name: kanidm
+  displayname: TheLounge
+  origin: "https://thelounge.00o.sh"
+  allowInsecureClientDisablePkce: true
+  redirectUrl:
+    - "https://thelounge.00o.sh/oauth2/callback"
+  scopeMap:
+    - group: thelounge-users
+      scopes:
+        - openid
+        - email
+        - profile

@@ -1,0 +1,19 @@
+---
+apiVersion: kaniop.rs/v1beta1
+kind: KanidmOAuth2Client
+metadata:
+  name: sonarr
+spec:
+  kanidmRef:
+    name: kanidm
+  displayname: Sonarr
+  origin: "https://sonarr.00o.sh"
+  allowInsecureClientDisablePkce: true
+  redirectUrl:
+    - "https://sonarr.00o.sh/oauth2/callback"
+  scopeMap:
+    - group: sonarr-users
+      scopes:
+        - openid
+        - email
+        - profile

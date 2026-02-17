@@ -7,8 +7,21 @@ resources:
   - ./externalsecret-s3.yaml
   - ./persons.yaml
   - ./groups.yaml
+  - ./oauth2-autobrr.yaml
+  - ./oauth2-bazarr.yaml
   - ./oauth2-dbgate.yaml
   - ./oauth2-forgejo.yaml
+  - ./oauth2-grafana.yaml
+  - ./oauth2-kopia.yaml
   - ./oauth2-kubevirt-manager.yaml
+  - ./oauth2-n8n.yaml
   - ./oauth2-opencost.yaml
   - ./oauth2-penpot.yaml
+  - ./oauth2-prowlarr.yaml
+  - ./oauth2-qbittorrent.yaml
+  - ./oauth2-qui.yaml
+  - ./oauth2-radarr.yaml
+  - ./oauth2-sonarr.yaml
+  - ./oauth2-tautulli.yaml
+  - ./oauth2-thelounge.yaml
+  - ./oauth2-unifi-toolkit.yaml

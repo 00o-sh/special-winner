@@ -1,0 +1,18 @@
+---
+apiVersion: gateway.envoyproxy.io/v1alpha1
+kind: SecurityPolicy
+metadata:
+  name: grafana-oidc
+spec:
+  targetRefs:
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      name: grafana-route
+  oidc:
+    provider:
+      issuer: "https://auth.00o.sh/oauth2/openid/grafana"
+    clientID: "grafana"
+    clientSecret:
+      name: grafana-oidc-secret
+    redirectURL: "https://grafana.00o.sh/oauth2/callback"
+    logoutPath: "/oauth2/sign_out"

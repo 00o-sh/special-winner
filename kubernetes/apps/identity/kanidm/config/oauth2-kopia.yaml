@@ -1,0 +1,19 @@
+---
+apiVersion: kaniop.rs/v1beta1
+kind: KanidmOAuth2Client
+metadata:
+  name: kopia
+spec:
+  kanidmRef:
+    name: kanidm
+  displayname: Kopia
+  origin: "https://kopia.00o.sh"
+  allowInsecureClientDisablePkce: true
+  redirectUrl:
+    - "https://kopia.00o.sh/oauth2/callback"
+  scopeMap:
+    - group: kopia-users
+      scopes:
+        - openid
+        - email
+        - profile

@@ -1,0 +1,19 @@
+---
+apiVersion: kaniop.rs/v1beta1
+kind: KanidmOAuth2Client
+metadata:
+  name: n8n
+spec:
+  kanidmRef:
+    name: kanidm
+  displayname: n8n
+  origin: "https://n8n.00o.sh"
+  allowInsecureClientDisablePkce: true
+  redirectUrl:
+    - "https://n8n.00o.sh/oauth2/callback"
+  scopeMap:
+    - group: n8n-users
+      scopes:
+        - openid
+        - email
+        - profile
