@@ -1,0 +1,30 @@
+---
+# Validates Renovate configuration on pull requests.
+# Only triggers when .renovaterc.json5 or related config files are modified.
+name: "Renovate Config"
+
+on:
+  pull_request:
+    branches: ["main"]
+    paths:
+      - ".renovaterc.json5"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    name: Validate Renovate Config
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Setup Node.js
+        uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v6.2.0
+        with:
+          node-version: 22
+
+      - name: Validate Renovate Config
+        run: npx --yes --package renovate -- renovate-config-validator --strict
