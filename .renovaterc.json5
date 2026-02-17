@@ -60,7 +60,7 @@
       matchManagers: ["github-actions"],
       automerge: true,
       automergeType: "branch",
-      matchUpdateTypes: ["minor", "patch", "digest"],
+      matchUpdateTypes: ["minor", "patch", "digest", "pin"],
       minimumReleaseAge: "3 days",
       ignoreTests: true,
     },
@@ -100,6 +100,11 @@
       matchUpdateTypes: ["digest"],
       semanticCommitType: "chore",
       commitMessageExtra: "( {{currentDigestShort}} ➔ {{newDigestShort}} )",
+    },
+    {
+      matchUpdateTypes: ["pin"],
+      semanticCommitType: "chore",
+      commitMessageExtra: "",
     },
     {
       matchDatasources: ["docker"],
@@ -162,6 +167,10 @@
     {
       matchUpdateTypes: ["digest"],
       labels: ["type/digest"],
+    },
+    {
+      matchUpdateTypes: ["pin"],
+      labels: ["type/pin"],
     },
   ],
   customManagers: [
