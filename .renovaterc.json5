@@ -31,11 +31,6 @@
   },
   packageRules: [
     {
-      description: "Disable digest pinning for Flux OCIRepository charts (flux-local incompatibility)",
-      matchManagers: ["flux"],
-      pinDigests: false,
-    },
-    {
       description: "Override Helmfile Dependency Name",
       matchDatasources: ["docker"],
       matchManagers: ["helmfile"],
