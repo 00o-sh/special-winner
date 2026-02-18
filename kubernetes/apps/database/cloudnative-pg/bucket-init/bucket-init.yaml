@@ -11,7 +11,7 @@ spec:
       restartPolicy: OnFailure
       containers:
         - name: bucket-init
-          image: amazon/aws-cli:2.33.23
+          image: amazon/aws-cli:2.33.24@sha256:211d32cc6c64665ff5bcd0d3df1b169bdc106388e9451cfc115466da1f3c6099
           env:
             - name: AWS_ACCESS_KEY_ID
               valueFrom:
