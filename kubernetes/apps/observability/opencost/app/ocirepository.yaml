@@ -11,4 +11,5 @@ spec:
     operation: copy
   ref:
     tag: 2.5.8
+    digest: sha256:8ed99964cc47c6068021100c4ca7ad15efb1aecaff5e4a3984d331ffa7114723
   url: oci://ghcr.io/opencost/charts/opencost

@@ -11,4 +11,5 @@ spec:
     operation: copy
   ref:
     tag: 4.13.1
+    digest: sha256:4c7742f9661bb290c65a97701003e579129fa9d6d86f63283604131db2796ede
   url: oci://ghcr.io/home-operations/charts-mirror/csi-driver-nfs
