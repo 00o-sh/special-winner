@@ -13,7 +13,7 @@ spec:
     broker:
       image:
         repository: ghcr.io/kguardian-dev/kguardian/broker
-        tag: v1.6.0
+        tag: v1.6.1@sha256:9aeb2e3fe5a9255856105b0e0d6ce0e517e896a8fb635fa85af06b34dad0363b
     controller:
       image:
         repository: ghcr.io/kguardian-dev/kguardian/controller
