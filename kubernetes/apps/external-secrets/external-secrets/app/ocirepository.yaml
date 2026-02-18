@@ -11,5 +11,4 @@ spec:
     operation: copy
   ref:
     tag: 2.0.0
-    digest: sha256:e8b07ed1c78853d723f04e1d87f44eff68a2bd7f78e7d2bbfffeb0977158276f
   url: oci://ghcr.io/external-secrets/charts/external-secrets
