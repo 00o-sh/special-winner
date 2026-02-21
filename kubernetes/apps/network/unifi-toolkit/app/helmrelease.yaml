@@ -18,7 +18,7 @@ spec:
           app:
             image:
               repository: ghcr.io/crosstalk-solutions/unifi-toolkit
-              tag: 1.9.9@sha256:a73fbaa83431b988324143e509db2be6f402d9faee93b17f27c756a4662124f4
+              tag: 1.9.11@sha256:52594fe873e05c4543a04b8d8f37fd8d2e4a8e1a3b7861526d2d5df5952cbcb0
             env:
               DEPLOYMENT_TYPE: local
               LOG_LEVEL: INFO
