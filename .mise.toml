@@ -41,7 +41,7 @@ TALOSCONFIG = "{{config_root}}/talos/clusterconfig/talosconfig"
 "aqua:getsops/sops" = "3.11.0"               # Secret encryption in Git
 
 # Utilities
-"aqua:cli/cli" = "2.86.0"                     # GitHub CLI (gh)
+"aqua:cli/cli" = "2.87.2"                     # GitHub CLI (gh)
 "aqua:go-task/task" = "3.48.0"               # Task runner (Taskfile.yaml)
 "aqua:cue-lang/cue" = "0.15.4"              # CUE schema validation for config files
 "aqua:jqlang/jq" = "1.8.1"                  # JSON processor
