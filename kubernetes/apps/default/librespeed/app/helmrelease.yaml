@@ -116,6 +116,7 @@ spec:
         type: LoadBalancer
         controller: speed-lan
         annotations:
+          external-dns.alpha.kubernetes.io/hostname: speed-lan.${SECRET_DOMAIN}
           lbipam.cilium.io/ips: "10.0.6.16"
         ports:
           http:
@@ -133,7 +134,7 @@ spec:
               {"name": "Cloudflare", "server": "//speed-cf.${SECRET_DOMAIN}/", "dlURL": "garbage.php", "ulURL": "empty.php", "pingURL": "empty.php", "getIpURL": "getIP.php"},
               {"name": "Port Forwarded", "server": "//speed-portfwd.${SECRET_DOMAIN}/", "dlURL": "garbage.php", "ulURL": "empty.php", "pingURL": "empty.php", "getIpURL": "getIP.php"},
               {"name": "Direct (Envoy)", "server": "//speed-direct.${SECRET_DOMAIN}/", "dlURL": "garbage.php", "ulURL": "empty.php", "pingURL": "empty.php", "getIpURL": "getIP.php"},
-              {"name": "LAN Direct", "server": "http://10.0.6.16:8080/", "dlURL": "garbage.php", "ulURL": "empty.php", "pingURL": "empty.php", "getIpURL": "getIP.php"}
+              {"name": "LAN Direct", "server": "http://speed-lan.${SECRET_DOMAIN}:8080/", "dlURL": "garbage.php", "ulURL": "empty.php", "pingURL": "empty.php", "getIpURL": "getIP.php"}
             ]
     persistence:
       servers:
