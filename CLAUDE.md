@@ -734,6 +734,9 @@ talosctl logs --nodes <ip> --insecure
 - penpot (open-source design and prototyping platform)
 - smtp-relay (SMTP relay for outbound email using Maddy)
 
+**voip**: VoIP and telephony
+- freepbx (containerized FreePBX telephony platform with MariaDB backend)
+
 **volsync-system**: Backup and replication
 - garage (S3-compatible storage backend)
 - kopia (backup repository)
@@ -774,6 +777,7 @@ Check `.mise.toml` for exact versions of all tools.
 
 ## Recent Notable Changes
 
+- **2026-02-22**: Added containerized FreePBX telephony platform to voip namespace (MariaDB backend, ExternalSecrets, Envoy Gateway ingress)
 - **2026-02-22**: Added MariaDB Operator with MariaDB 11.7 Galera cluster (3 instances, 20Gi storage, S3 backups to Garage)
 - **2026-02-22**: Documentation audit: fixed SOPS version (3.11.0 → 3.12.1), added docs.yaml and renovate-config.yaml workflows, fixed database app listing, updated architecture namespace map
 - **2026-02-16**: Added error-pages service for Envoy Gateway with responseOverride redirects (403, 404, 500, 502, 503, 504)
