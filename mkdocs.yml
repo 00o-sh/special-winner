@@ -71,9 +71,8 @@ extra:
       link: https://github.com/00o-sh/special-winner
 
 nav:
-  - Home:
-      - Overview: index.md
-      - Architecture: architecture.md
+  - Home: index.md
+  - Architecture: architecture.md
   - Getting Started:
       - Overview: getting-started/index.md
       - Prerequisites: getting-started/prerequisites.md
