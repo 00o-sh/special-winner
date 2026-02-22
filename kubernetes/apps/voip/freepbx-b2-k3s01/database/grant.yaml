@@ -1,0 +1,36 @@
+---
+apiVersion: k8s.mariadb.com/v1alpha1
+kind: Grant
+metadata:
+  name: freepbx-b2-k3s01-asterisk
+spec:
+  mariaDbRef:
+    name: mariadb
+  privileges:
+    - "ALL PRIVILEGES"
+  database: b2_asterisk
+  table: "*"
+  username: freepbx_b2
+  host: "%"
+  grantOption: false
+  cleanupPolicy: Skip
+  requeueInterval: 30s
+  retryInterval: 5s
+---
+apiVersion: k8s.mariadb.com/v1alpha1
+kind: Grant
+metadata:
+  name: freepbx-b2-k3s01-asteriskcdrdb
+spec:
+  mariaDbRef:
+    name: mariadb
+  privileges:
+    - "ALL PRIVILEGES"
+  database: b2_asteriskcdrdb
+  table: "*"
+  username: freepbx_b2
+  host: "%"
+  grantOption: false
+  cleanupPolicy: Skip
+  requeueInterval: 30s
+  retryInterval: 5s
