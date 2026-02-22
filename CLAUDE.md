@@ -42,7 +42,9 @@ special-winner/
 │   └── vm/Taskfile.yaml             # Virtual machine operations
 │
 ├── clusters/                         # Per-cluster configuration
-│   └── 3226/                        # Cluster "3226" (default)
+│   ├── 3226/                        # Cluster "3226" (default)
+│   │   └── ...                      # (same structure as below)
+│   └── usny01/                      # Cluster "usny01" (US-NY-01, subnet 10.1.6.0/24)
 │       ├── cluster.yaml             # Cluster config (gitignored)
 │       ├── nodes.yaml               # Node definitions (gitignored)
 │       ├── age.key                  # Encryption key (gitignored)
@@ -625,7 +627,12 @@ The repository supports managing multiple Kubernetes clusters from a single git 
 - **Per-cluster config**: `clusters/<cluster-name>/` holds cluster-specific configuration and credentials
 - **Flux substitution**: Cluster-specific values (CIDRs, IPs, domains) are injected via `${VARIABLE}` substitution from `cluster-secrets`
 
-### Current Cluster: 3226
+### Clusters
+
+| Cluster | Location | Subnet | Status | Notes |
+|---------|----------|--------|--------|-------|
+| `3226` | Default | `10.0.6.0/24` | Active | Default cluster, all tasks default to this |
+| `usny01` | US-NY-01 | `10.1.6.0/24` | Prep | Infrastructure prepped, pending bootstrap |
 
 The default cluster is `3226`. All tasks default to this cluster if no `CLUSTER` parameter is provided.
 
@@ -857,6 +864,7 @@ Check `.mise.toml` for exact versions of all tools.
 ## Recent Notable Changes
 
 - **2026-02-22**: Documentation audit: fixed SOPS version (3.11.0 → 3.12.1), added docs.yaml and renovate-config.yaml workflows, fixed database app listing, updated architecture namespace map
+- **2026-02-22**: Added cluster usny01 (US-NY-01, subnet 10.1.6.0/24) - directory structure and Flux entry point
 - **2026-02-22**: Multi-cluster support prep: cluster 3226 named, per-cluster directory structure, Flux substitution for cluster-specific values, CLUSTER parameter for all tasks
 - **2026-02-16**: Added error-pages service for Envoy Gateway with responseOverride redirects (403, 404, 500, 502, 503, 504)
 - **2026-02-16**: Added n8n workflow automation platform to utils namespace (PostgreSQL backend, ExternalSecrets)
