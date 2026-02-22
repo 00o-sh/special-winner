@@ -52,6 +52,17 @@ spec:
               readiness: *probes
             securityContext: *securityContext
             resources: *resources
+      speed-lan:
+        strategy: RollingUpdate
+        containers:
+          app:
+            image: *image
+            env: *env
+            probes:
+              liveness: *probes
+              readiness: *probes
+            securityContext: *securityContext
+            resources: *resources
       speed-frontend:
         strategy: RollingUpdate
         containers:
@@ -85,6 +96,14 @@ spec:
         ports:
           http:
             port: *port
+      speed-lan:
+        type: LoadBalancer
+        controller: speed-lan
+        annotations:
+          lbipam.cilium.io/ips: "10.0.6.16"
+        ports:
+          http:
+            port: *port
       speed-frontend:
         controller: speed-frontend
         ports:
@@ -96,7 +115,8 @@ spec:
           servers.json: |-
             [
               {"name": "Cloudflare Proxied", "server": "//speed-cf.${SECRET_DOMAIN}/", "dlURL": "garbage.php", "ulURL": "empty.php", "pingURL": "empty.php", "getIpURL": "getIP.php"},
-              {"name": "Direct", "server": "//speed-direct.${SECRET_DOMAIN}/", "dlURL": "garbage.php", "ulURL": "empty.php", "pingURL": "empty.php", "getIpURL": "getIP.php"}
+              {"name": "Direct", "server": "//speed-direct.${SECRET_DOMAIN}/", "dlURL": "garbage.php", "ulURL": "empty.php", "pingURL": "empty.php", "getIpURL": "getIP.php"},
+              {"name": "LAN Direct", "server": "http://10.0.6.16:8080/", "dlURL": "garbage.php", "ulURL": "empty.php", "pingURL": "empty.php", "getIpURL": "getIP.php"}
             ]
     persistence:
       servers:
