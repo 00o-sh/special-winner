@@ -34,7 +34,7 @@ spec:
               readiness: *probes
             securityContext: &securityContext
               allowPrivilegeEscalation: false
-              capabilities: { drop: ["ALL"] }
+              capabilities: { drop: ["ALL"], add: ["CHOWN"] }
             resources: &resources
               requests:
                 cpu: 10m
