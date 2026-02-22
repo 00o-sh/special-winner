@@ -1,0 +1,129 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: librespeed
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: librespeed
+  interval: 1h
+  values:
+    controllers:
+      speed-cf:
+        strategy: RollingUpdate
+        containers:
+          app:
+            image: &image
+              repository: ghcr.io/librespeed/speedtest
+              tag: 5.5.1
+            env: &env
+              MODE: backend
+            probes:
+              liveness: &probes
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /backend/empty.php
+                    port: &port 8080
+                  initialDelaySeconds: 0
+                  periodSeconds: 10
+                  timeoutSeconds: 1
+                  failureThreshold: 3
+              readiness: *probes
+            securityContext: &securityContext
+              allowPrivilegeEscalation: false
+              capabilities: { drop: ["ALL"] }
+            resources: &resources
+              requests:
+                cpu: 10m
+                memory: 64Mi
+              limits:
+                memory: 256Mi
+      speed-direct:
+        strategy: RollingUpdate
+        containers:
+          app:
+            image: *image
+            env: *env
+            probes:
+              liveness: *probes
+              readiness: *probes
+            securityContext: *securityContext
+            resources: *resources
+      speed-frontend:
+        strategy: RollingUpdate
+        containers:
+          app:
+            image: *image
+            env:
+              MODE: frontend
+              SERVERS: >-
+                [
+                  {"name": "Cloudflare Proxied", "server": "//speed-cf.${SECRET_DOMAIN}/", "dlURL": "backend/garbage.php", "ulURL": "backend/empty.php", "pingURL": "backend/empty.php", "getIpURL": "backend/getIP.php"},
+                  {"name": "Direct", "server": "//speed-direct.${SECRET_DOMAIN}/", "dlURL": "backend/garbage.php", "ulURL": "backend/empty.php", "pingURL": "backend/empty.php", "getIpURL": "backend/getIP.php"}
+                ]
+            probes:
+              liveness: &frontend-probes
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /
+                    port: *port
+                  initialDelaySeconds: 0
+                  periodSeconds: 10
+                  timeoutSeconds: 1
+                  failureThreshold: 3
+              readiness: *frontend-probes
+            securityContext: *securityContext
+            resources: *resources
+    service:
+      speed-cf:
+        controller: speed-cf
+        ports:
+          http:
+            port: *port
+      speed-direct:
+        controller: speed-direct
+        ports:
+          http:
+            port: *port
+      speed-frontend:
+        controller: speed-frontend
+        ports:
+          http:
+            port: *port
+    route:
+      speed-cf:
+        hostnames: ["speed-cf.${SECRET_DOMAIN}"]
+        parentRefs:
+          - name: envoy-external
+            namespace: network
+            sectionName: https
+        rules:
+          - backendRefs:
+              - identifier: speed-cf
+                port: *port
+      speed-direct:
+        annotations:
+          external-dns.alpha.kubernetes.io/cloudflare-proxied: "false"
+        hostnames: ["speed-direct.${SECRET_DOMAIN}"]
+        parentRefs:
+          - name: envoy-external
+            namespace: network
+            sectionName: https
+        rules:
+          - backendRefs:
+              - identifier: speed-direct
+                port: *port
+      speed-frontend:
+        hostnames: ["speed.${SECRET_DOMAIN}"]
+        parentRefs:
+          - name: envoy-internal
+            namespace: network
+        rules:
+          - backendRefs:
+              - identifier: speed-frontend
+                port: *port
