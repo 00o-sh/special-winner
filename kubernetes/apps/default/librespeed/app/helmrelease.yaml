@@ -95,6 +95,13 @@ spec:
         ports:
           http:
             port: *port
+    persistence:
+      webroot:
+        type: emptyDir
+        advancedMounts:
+          speed-frontend:
+            app:
+              - path: /var/www/html
     route:
       speed-cf:
         hostnames: ["speed-cf.${SECRET_DOMAIN}"]
