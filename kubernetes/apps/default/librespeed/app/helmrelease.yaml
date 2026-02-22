@@ -25,7 +25,7 @@ spec:
                 custom: true
                 spec:
                   httpGet:
-                    path: /backend/empty.php
+                    path: /empty.php
                     port: &port 8080
                   initialDelaySeconds: 0
                   periodSeconds: 10
@@ -95,8 +95,8 @@ spec:
         data:
           servers.json: |-
             [
-              {"name": "Cloudflare Proxied", "server": "//speed-cf.${SECRET_DOMAIN}/", "dlURL": "backend/garbage.php", "ulURL": "backend/empty.php", "pingURL": "backend/empty.php", "getIpURL": "backend/getIP.php"},
-              {"name": "Direct", "server": "//speed-direct.${SECRET_DOMAIN}/", "dlURL": "backend/garbage.php", "ulURL": "backend/empty.php", "pingURL": "backend/empty.php", "getIpURL": "backend/getIP.php"}
+              {"name": "Cloudflare Proxied", "server": "//speed-cf.${SECRET_DOMAIN}/", "dlURL": "garbage.php", "ulURL": "empty.php", "pingURL": "empty.php", "getIpURL": "getIP.php"},
+              {"name": "Direct", "server": "//speed-direct.${SECRET_DOMAIN}/", "dlURL": "garbage.php", "ulURL": "empty.php", "pingURL": "empty.php", "getIpURL": "getIP.php"}
             ]
     persistence:
       servers:
