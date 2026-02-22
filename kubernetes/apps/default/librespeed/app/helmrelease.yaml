@@ -59,11 +59,6 @@ spec:
             image: *image
             env:
               MODE: frontend
-              SERVERS: >-
-                [
-                  {"name": "Cloudflare Proxied", "server": "//speed-cf.${SECRET_DOMAIN}/", "dlURL": "backend/garbage.php", "ulURL": "backend/empty.php", "pingURL": "backend/empty.php", "getIpURL": "backend/getIP.php"},
-                  {"name": "Direct", "server": "//speed-direct.${SECRET_DOMAIN}/", "dlURL": "backend/garbage.php", "ulURL": "backend/empty.php", "pingURL": "backend/empty.php", "getIpURL": "backend/getIP.php"}
-                ]
             probes:
               liveness: &frontend-probes
                 enabled: true
@@ -95,11 +90,27 @@ spec:
         ports:
           http:
             port: *port
+    configMaps:
+      servers:
+        data:
+          servers.json: |-
+            [
+              {"name": "Cloudflare Proxied", "server": "//speed-cf.${SECRET_DOMAIN}/", "dlURL": "backend/garbage.php", "ulURL": "backend/empty.php", "pingURL": "backend/empty.php", "getIpURL": "backend/getIP.php"},
+              {"name": "Direct", "server": "//speed-direct.${SECRET_DOMAIN}/", "dlURL": "backend/garbage.php", "ulURL": "backend/empty.php", "pingURL": "backend/empty.php", "getIpURL": "backend/getIP.php"}
+            ]
     persistence:
       webroot:
         type: emptyDir
         globalMounts:
           - path: /var/www/html
+      servers:
+        type: configMap
+        identifier: servers
+        advancedMounts:
+          speed-frontend:
+            app:
+              - path: /servers.json
+                subPath: servers.json
     route:
       speed-cf:
         hostnames: ["speed-cf.${SECRET_DOMAIN}"]
