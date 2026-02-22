@@ -1,0 +1,71 @@
+---
+apiVersion: k8s.mariadb.com/v1alpha1
+kind: MariaDB
+metadata:
+  name: mariadb-galera
+spec:
+  rootPasswordSecretKeyRef:
+    name: mariadb-secret
+    key: root-password
+
+  image: docker.io/library/mariadb:11.7
+
+  replicas: 3
+
+  galera:
+    enabled: true
+
+  storage:
+    size: 20Gi
+    storageClassName: openebs-hostpath
+
+  affinity:
+    antiAffinityEnabled: true
+
+  podDisruptionBudget:
+    maxUnavailable: 33%
+
+  updateStrategy:
+    type: ReplicasFirstPrimaryLast
+
+  myCnf: |
+    [mariadb]
+    bind-address=*
+    default_storage_engine=InnoDB
+    binlog_format=row
+    innodb_autoinc_lock_mode=2
+    innodb_buffer_pool_size=256MB
+    max_allowed_packet=256MB
+    max_connections=200
+
+  resources:
+    requests:
+      cpu: 100m
+      memory: 512Mi
+    limits:
+      memory: 2Gi
+
+  metrics:
+    enabled: true
+
+  livenessProbe:
+    periodSeconds: 10
+    timeoutSeconds: 5
+
+  readinessProbe:
+    periodSeconds: 10
+    timeoutSeconds: 5
+
+  startupProbe:
+    failureThreshold: 10
+    periodSeconds: 5
+    timeoutSeconds: 5
+
+  primaryService:
+    type: ClusterIP
+
+  secondaryService:
+    type: ClusterIP
+
+  service:
+    type: ClusterIP
