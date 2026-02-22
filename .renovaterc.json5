@@ -61,6 +61,15 @@
       },
     },
     {
+      description: "kGuardian Group",
+      groupName: "kguardian",
+      matchDatasources: ["docker"],
+      matchPackageNames: ["/kguardian-dev/"],
+      group: {
+        commitMessageTopic: "{{{groupName}}} group",
+      },
+    },
+    {
       description: "Group ghcr.io pin dependencies",
       matchUpdateTypes: ["pin"],
       matchDatasources: ["docker"],
