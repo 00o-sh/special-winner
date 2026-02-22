@@ -76,13 +76,13 @@ nav:
       - Overview: index.md
       - Architecture: architecture.md
   - Getting Started:
-      - getting-started/index.md
+      - Overview: getting-started/index.md
       - Prerequisites: getting-started/prerequisites.md
       - Configuration: getting-started/configuration.md
       - Bootstrap: getting-started/bootstrap.md
       - Post-Install: getting-started/post-install.md
   - Infrastructure:
-      - infrastructure/index.md
+      - Overview: infrastructure/index.md
       - Talos Linux: infrastructure/talos.md
       - Flux CD: infrastructure/flux.md
       - Cilium Networking: infrastructure/cilium.md
@@ -93,22 +93,22 @@ nav:
       - Secrets Management: infrastructure/secrets.md
       - Identity & SSO: infrastructure/identity.md
   - Applications:
-      - applications/index.md
+      - Overview: applications/index.md
       - Media Stack: applications/media.md
       - Virtualization: applications/virtualization.md
       - Observability: applications/observability.md
       - Utilities: applications/utilities.md
   - Operations:
-      - operations/index.md
+      - Overview: operations/index.md
       - Day-2 Operations: operations/day2.md
       - Backup & Recovery: operations/backup-recovery.md
       - VM Management: operations/vm-management.md
       - Troubleshooting: operations/troubleshooting.md
   - Development:
-      - development/index.md
+      - Overview: development/index.md
       - Template System: development/templates.md
       - CI/CD Pipelines: development/ci-cd.md
       - Contributing: development/contributing.md
   - Research:
-      - research/index.md
+      - Overview: research/index.md
       - SSO Providers: research/sso-providers.md
