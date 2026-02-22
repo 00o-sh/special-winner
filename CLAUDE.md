@@ -20,7 +20,7 @@ This document provides comprehensive guidance for AI assistants working with thi
 - **DNS**: k8s_gateway + CoreDNS + External-DNS
 - **Certificates**: cert-manager with Cloudflare integration
 - **Package Management**: Helm 4.1.1 (Helm v4 for chart management)
-- **Database**: CloudNative-PG (PostgreSQL 17.7) + Dragonfly (Redis-compatible)
+- **Database**: CloudNative-PG (PostgreSQL 17.7) + Dragonfly (Redis-compatible) + MariaDB Operator (MariaDB 11.7 Galera)
 - **Virtualization**: KubeVirt 1.7.0 (virtual machine management)
 - **External Secrets**: External Secrets Operator 2.0.0 + 1Password integration
 
@@ -647,6 +647,7 @@ talosctl logs --nodes <ip> --insecure
 - cloudnative-pg (PostgreSQL operator + PostgreSQL 17.7 HA cluster with 3 instances)
 - dbgate (database management web UI)
 - dragonfly (Redis-compatible in-memory datastore operator)
+- mariadb-operator (MariaDB operator + MariaDB 11.7 Galera cluster with 3 instances)
 
 **default**: Default namespace
 - echo (test application)
@@ -773,6 +774,7 @@ Check `.mise.toml` for exact versions of all tools.
 
 ## Recent Notable Changes
 
+- **2026-02-22**: Added MariaDB Operator with MariaDB 11.7 Galera cluster (3 instances, 20Gi storage, S3 backups to Garage)
 - **2026-02-22**: Documentation audit: fixed SOPS version (3.11.0 → 3.12.1), added docs.yaml and renovate-config.yaml workflows, fixed database app listing, updated architecture namespace map
 - **2026-02-16**: Added error-pages service for Envoy Gateway with responseOverride redirects (403, 404, 500, 502, 503, 504)
 - **2026-02-16**: Added n8n workflow automation platform to utils namespace (PostgreSQL backend, ExternalSecrets)
@@ -1008,7 +1010,36 @@ kubernetes/apps/database/cloudnative-pg/
 - Higher performance alternative to Redis/Valkey
 - Used by applications requiring fast caching or session storage
 
-**Usage**: Applications can connect to PostgreSQL via the `postgres-rw.database.svc.cluster.local` service.
+**MariaDB Operator (MariaDB Galera)**:
+- Kubernetes-native MariaDB operator with Galera multi-master replication
+- Runs MariaDB 11.7 with 3 instances for high availability
+- Uses OpenEBS hostpath storage (20Gi per instance)
+- Pod anti-affinity for distribution across hosts
+- Automated scheduled backups to Garage S3 storage (every 6 hours, 30-day retention)
+- Metrics and ServiceMonitor enabled
+- Tuned for performance: 200 max connections, 256MB innodb_buffer_pool_size
+- Resources: 100m CPU request, 512Mi memory request, 2Gi memory limit
+- CRDs and operator installed via separate HelmReleases from `helm.mariadb.com`
+
+**MariaDB Architecture**:
+```
+kubernetes/apps/database/mariadb-operator/
+├── app/                       # Operator deployment
+│   ├── helmrelease-crds.yaml  # CRDs HelmRelease
+│   ├── helmrelease.yaml       # Operator HelmRelease
+│   └── helmrepository.yaml    # Helm repo source
+├── cluster/                   # MariaDB Galera cluster
+│   ├── mariadb.yaml          # MariaDB CR (Galera)
+│   ├── backup.yaml           # Scheduled S3 backup
+│   └── externalsecret.yaml   # 1Password credentials
+└── ks.yaml                   # Flux Kustomizations
+```
+
+**Usage**:
+- Applications can connect to PostgreSQL via the `postgres-rw.database.svc.cluster.local` service.
+- Applications can connect to MariaDB via the `mariadb.database.svc.cluster.local` service.
+- Primary-only connections: `mariadb-primary.database.svc.cluster.local`
+- Read replicas: `mariadb-secondary.database.svc.cluster.local`
 
 ### Penpot Design Platform
 
