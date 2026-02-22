@@ -52,6 +52,9 @@ A route-specific `BackendTrafficPolicy` is applied to the speed test backend rou
 | Compression | Brotli + Gzip | **Disabled** | Speed test data is random; compression wastes CPU for 0% savings |
 | Response Override | Error page redirects | **Disabled** | Skip error page matching on every response |
 | Backend Buffer | 8Mi | **16Mi** | More buffer for high-throughput data transfers |
+| Circuit Breakers | 1024 (default) | **4096** | Remove connection/request concurrency limits |
+| Preconnect | Disabled | **1.5x ratio** | Proactively establish backend connections |
+| Backend Protocol | Client protocol | **HTTP/1.1** | Avoids HTTP/2 framing overhead to backend pods |
 
 The global `ClientTrafficPolicy` still applies (HTTP/2 windows, HTTP/3, TLS config).
 These settings affect all traffic through the same gateways:
