@@ -31,8 +31,8 @@
   },
   packageRules: [
     {
-      description: "Disable digest pinning for Flux OCIRepository (inline tag@sha256 format not supported by Flux CRD)",
-      matchManagers: ["flux"],
+      description: "Disable digest pinning for Flux, helmfile, and custom regex managers (Flux CRD uses separate ref.digest field; custom regex duplicates native kubernetes/github-actions managers)",
+      matchManagers: ["flux", "helmfile", "custom.regex"],
       pinDigests: false,
     },
     {
