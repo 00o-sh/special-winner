@@ -13,7 +13,7 @@ Built on the [onedr0p/cluster-template](https://github.com/onedr0p/cluster-templ
 | GitOps | Flux CD | 2.7.5 |
 | CNI | Cilium | 1.19.0 |
 | Ingress | Envoy Gateway | v1.6.3 |
-| Secrets | SOPS + Age | 3.11.0 / 1.3.1 |
+| Secrets | SOPS + Age | 3.12.1 / 1.3.1 |
 | Identity | Kanidm | SSO/OAuth2 |
 | Packages | Helm | 4.1.1 (v4) |
 | Database | CloudNative-PG | PostgreSQL 17.7 |

@@ -71,6 +71,14 @@ Documentation site publishing:
 - Publishes to Cloudflare Pages (`special-winner-docs` project)
 - Triggered on docs/ or mkdocs.yml changes
 
+### renovate-config.yaml
+
+Renovate configuration validation:
+
+- Validates `.renovaterc.json5` on pull requests
+- Runs `renovate-config-validator --strict`
+- Only triggers when `.renovaterc.json5` is modified
+
 ### release.yaml
 
 Repository release management.

@@ -73,7 +73,7 @@ extra:
 
 nav:
   - Home:
-      - index.md
+      - Overview: index.md
       - Architecture: architecture.md
   - Getting Started:
       - getting-started/index.md

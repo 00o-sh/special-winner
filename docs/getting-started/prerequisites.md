@@ -70,7 +70,7 @@ All tools are managed via `.mise.toml`:
 | Flux | 2.7.5 | GitOps CLI |
 | Talos CLI | 1.12.4 | Talos management |
 | Cilium CLI | 0.19.1 | Network management |
-| SOPS | 3.11.0 | Secret encryption |
+| SOPS | 3.12.1 | Secret encryption |
 | Age | 1.3.1 | Encryption backend |
 | virtctl | 1.7.0 | VM management |
 | k9s | 0.50.18 | Kubernetes TUI |
