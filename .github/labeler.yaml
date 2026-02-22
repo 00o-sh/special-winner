@@ -175,6 +175,11 @@ app/dragonfly:
       - any-glob-to-any-file:
           - kubernetes/apps/database/dragonfly/**/*
 
+app/mariadb-operator:
+  - changed-files:
+      - any-glob-to-any-file:
+          - kubernetes/apps/database/mariadb-operator/**/*
+
 app/echo:
   - changed-files:
       - any-glob-to-any-file:
@@ -470,10 +475,20 @@ app/smtp-relay:
       - any-glob-to-any-file:
           - kubernetes/apps/utils/smtp-relay/**/*
 
-app/freepbx:
+app/freepbx-b1-k3s01:
   - changed-files:
       - any-glob-to-any-file:
-          - kubernetes/apps/voip/freepbx/**/*
+          - kubernetes/apps/voip/freepbx-b1-k3s01/**/*
+
+app/freepbx-b2-k3s01:
+  - changed-files:
+      - any-glob-to-any-file:
+          - kubernetes/apps/voip/freepbx-b2-k3s01/**/*
+
+app/freepbx-b3-k3s01:
+  - changed-files:
+      - any-glob-to-any-file:
+          - kubernetes/apps/voip/freepbx-b3-k3s01/**/*
 
 app/garage:
   - changed-files:
