@@ -9,4 +9,4 @@ components:
 
 resources:
   - ./namespace.yaml
-  - ./freepbx/ks.yaml
+  - ./freepbx-b1-k3s01/ks.yaml

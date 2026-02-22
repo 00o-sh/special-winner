@@ -3,20 +3,20 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: freepbx-database
+  name: freepbx-b1-k3s01-database
   namespace: flux-system
 spec:
   targetNamespace: database
   commonMetadata:
     labels:
-      app.kubernetes.io/name: freepbx
+      app.kubernetes.io/name: freepbx-b1-k3s01
   dependsOn:
     - name: mariadb-cluster
       namespace: database
     - name: onepassword
       namespace: external-secrets
   interval: 1h
-  path: ./kubernetes/apps/voip/freepbx/database
+  path: ./kubernetes/apps/voip/freepbx-b1-k3s01/database
   prune: true
   sourceRef:
     kind: GitRepository
@@ -28,7 +28,7 @@ spec:
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: &app freepbx
+  name: &app freepbx-b1-k3s01
   namespace: flux-system
 spec:
   targetNamespace: voip
@@ -36,11 +36,11 @@ spec:
     labels:
       app.kubernetes.io/name: *app
   dependsOn:
-    - name: freepbx-database
+    - name: freepbx-b1-k3s01-database
     - name: onepassword
       namespace: external-secrets
   interval: 1h
-  path: ./kubernetes/apps/voip/freepbx/app
+  path: ./kubernetes/apps/voip/freepbx-b1-k3s01/app
   prune: true
   sourceRef:
     kind: GitRepository

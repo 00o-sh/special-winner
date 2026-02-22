@@ -3,7 +3,7 @@
 apiVersion: source.toolkit.fluxcd.io/v1
 kind: OCIRepository
 metadata:
-  name: freepbx
+  name: freepbx-b1-k3s01
 spec:
   interval: 15m
   layerSelector:
