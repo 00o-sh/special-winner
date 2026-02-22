@@ -7,6 +7,7 @@ graph LR
     PVC[PersistentVolumeClaims] -->|VolSync| Kopia[Kopia Repository]
     Kopia -->|S3 API| Garage[Garage S3]
     PG[PostgreSQL WAL] -->|barman-cloud| Garage
+    MDB[MariaDB Galera] -->|mysqldump| Garage
     Git[Git Repository] -->|GitOps| State[Cluster State]
 ```
 
@@ -16,6 +17,7 @@ The cluster uses a layered backup strategy:
 |-----------|--------------|-------------|----------|
 | Application config (PVCs) | VolSync + Kopia | Garage S3 | Daily at 2 AM |
 | PostgreSQL databases | barman-cloud (WAL + base backups) | Garage S3 | Continuous WAL + scheduled |
+| MariaDB databases | mysqldump (mariadb-operator Backup CR) | Garage S3 | Every 6 hours |
 | Cluster state | Git repository | GitHub | On every push |
 | Secrets | SOPS-encrypted in Git + 1Password | GitHub + 1Password | On every push |
 
@@ -143,6 +145,42 @@ kubectl -n database describe backup <backup-name>
 kubectl -n database get cluster postgres -o jsonpath='{.status.firstRecoverabilityPoint}'
 ```
 
+## MariaDB Backups
+
+The mariadb-operator handles MariaDB Galera backups via its `Backup` custom resource:
+
+- **Scheduled mysqldump backups** to Garage S3 every 6 hours
+- **Compression**: bzip2
+- **Retention**: 30 days
+- **S3 bucket**: `mariadb` (prefix `galera`)
+- Backup definition at `kubernetes/apps/database/mariadb-operator/cluster/backup.yaml`
+
+### Checking Backup Status
+
+```sh
+# List all MariaDB backups
+kubectl -n database get backups.k8s.mariadb.com
+
+# Check backup details
+kubectl -n database describe backup mariadb-galera-backup
+```
+
+### Restoring from a MariaDB Backup
+
+To restore from S3, create a new MariaDB CR with `bootstrapFrom` referencing the backup:
+
+```yaml
+apiVersion: k8s.mariadb.com/v1alpha1
+kind: MariaDB
+metadata:
+  name: mariadb-galera-recovery
+spec:
+  bootstrapFrom:
+    backupRef:
+      name: mariadb-galera-backup
+  # ... same spec as production cluster
+```
+
 ## Disaster Recovery
 
 ### Full Cluster Recovery
@@ -164,7 +202,9 @@ Since the cluster is GitOps-managed, a full recovery follows these steps:
 
 5. **PostgreSQL recovers from WAL archives** — Use the recovery cluster definition (see below)
 
-6. **Verify all services**:
+6. **MariaDB recovers from S3 backups** — Create a recovery MariaDB CR with `bootstrapFrom` (see above)
+
+7. **Verify all services**:
 
     ```sh
     flux get ks -A
@@ -222,8 +262,9 @@ The recovery cluster definition at `kubernetes/apps/database/cloudnative-pg/reco
 |-----------|--------------------------|
 | Application PVCs (via VolSync) | Active VM state (VMs restart from disk images) |
 | PostgreSQL databases (via WAL archiving) | In-memory caches (Dragonfly data) |
-| Cluster manifests (in Git) | Real-time metrics (Prometheus TSDB rebuilds) |
-| Secrets (SOPS in Git + 1Password) | Pod logs (Victoria Logs rebuilds from Fluent Bit) |
+| MariaDB databases (via scheduled mysqldump) | Real-time metrics (Prometheus TSDB rebuilds) |
+| Cluster manifests (in Git) | Pod logs (Victoria Logs rebuilds from Fluent Bit) |
+| Secrets (SOPS in Git + 1Password) | |
 
 ## Garage S3
 

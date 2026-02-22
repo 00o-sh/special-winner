@@ -52,6 +52,72 @@ postgres-rw.database.svc.cluster.local:5432
 
 A recovery cluster definition exists at `kubernetes/apps/database/cloudnative-pg/recovery/cluster.yaml` for disaster recovery scenarios.
 
+## MariaDB Operator (MariaDB Galera)
+
+[MariaDB Operator](https://github.com/mariadb-operator/mariadb-operator) runs a **MariaDB 11.7** high-availability Galera cluster with 3 instances.
+
+### Architecture
+
+```
+kubernetes/apps/database/mariadb-operator/
+├── app/                       # Operator deployment
+│   ├── helmrelease-crds.yaml  # CRDs HelmRelease
+│   ├── helmrelease.yaml       # Operator HelmRelease
+│   ├── helmrepository.yaml    # Helm repo source
+│   └── kustomization.yaml
+├── cluster/                   # MariaDB Galera cluster
+│   ├── mariadb.yaml          # MariaDB CR (Galera)
+│   ├── backup.yaml           # Scheduled S3 backup
+│   ├── externalsecret.yaml   # 1Password credentials
+│   └── kustomization.yaml
+└── ks.yaml                   # Flux Kustomizations
+```
+
+### Configuration
+
+| Setting | Value |
+|---------|-------|
+| Instances | 3 (Galera multi-master with pod anti-affinity) |
+| Storage | 20Gi per instance (openebs-hostpath) |
+| Max connections | 200 |
+| InnoDB buffer pool | 256MB |
+| Max allowed packet | 256MB |
+| CPU request | 100m |
+| Memory request | 512Mi |
+| Memory limit | 2Gi |
+
+### Backups
+
+- **Scheduled backups** to Garage S3 every 6 hours (`0 */6 * * *`)
+- **Retention**: 30 days
+- **Compression**: bzip2
+- **S3 bucket**: `mariadb` (prefix `galera`)
+- **Method**: `mysqldump` with `--single-transaction --all-databases`
+
+### Connecting
+
+Applications connect via internal services:
+
+```
+# All instances (load-balanced)
+mariadb-galera.database.svc.cluster.local:3306
+
+# Primary only
+mariadb-galera-primary.database.svc.cluster.local:3306
+
+# Read replicas
+mariadb-galera-secondary.database.svc.cluster.local:3306
+```
+
+### Operator Installation
+
+The operator is installed via two separate HelmReleases from the `helm.mariadb.com` Helm repository:
+
+1. **mariadb-operator-crds** — installs Custom Resource Definitions
+2. **mariadb-operator** — installs the controller (depends on CRDs)
+
+The operator includes Prometheus metrics via ServiceMonitor and cert-manager webhook integration.
+
 ## Dragonfly
 
 [Dragonfly](https://www.dragonflydb.io/) is a modern Redis-compatible in-memory datastore:

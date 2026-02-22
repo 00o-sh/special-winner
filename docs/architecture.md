@@ -27,6 +27,7 @@ graph TB
 
         subgraph Data["Data Layer"]
             PG[CloudNative-PG]
+            MDB[MariaDB Galera]
             Dragonfly[Dragonfly]
             OpenEBS[OpenEBS]
             NFS[NFS Storage]
@@ -56,6 +57,7 @@ graph TB
     Envoy --> Apps
     Kanidm --> Apps
     PG --> Apps
+    MDB --> Apps
     Cilium --> Envoy
     Multus --> VMs
 ```
@@ -121,7 +123,7 @@ kubernetes/apps/<namespace>/<app-name>/
 |-----------|---------|----------|
 | `actions-runner-system` | CI/CD runners | Actions Runner Controller |
 | `cert-manager` | TLS certificates | cert-manager |
-| `database` | Database services | CloudNative-PG, Dragonfly, DBGate |
+| `database` | Database services | CloudNative-PG, MariaDB Galera, Dragonfly, DBGate |
 | `default` | Test workloads | echo, LibreSpeed |
 | `external-secrets` | Secret management | External Secrets, 1Password |
 | `flux-system` | GitOps | Flux Operator, Flux Instance |
