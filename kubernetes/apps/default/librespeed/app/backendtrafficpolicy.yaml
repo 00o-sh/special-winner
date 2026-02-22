@@ -1,0 +1,22 @@
+---
+apiVersion: gateway.envoyproxy.io/v1alpha1
+kind: BackendTrafficPolicy
+metadata:
+  name: librespeed-speed
+spec:
+  targetRefs:
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      name: librespeed-speed-cf
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      name: librespeed-speed-direct
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      name: librespeed-speed-portfwd
+  connection:
+    bufferLimit: 16Mi
+  tcpKeepalive: {}
+  timeout:
+    http:
+      requestTimeout: 0s
