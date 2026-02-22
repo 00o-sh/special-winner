@@ -14,6 +14,14 @@ spec:
 
   galera:
     enabled: true
+    config:
+      volumeClaimTemplate:
+        storageClassName: openebs-hostpath
+        resources:
+          requests:
+            storage: 1Gi
+        accessModes:
+          - ReadWriteOnce
 
   storage:
     size: 20Gi
@@ -21,6 +29,11 @@ spec:
 
   affinity:
     antiAffinityEnabled: true
+    podAntiAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+        - weight: 1
+          podAffinityTerm:
+            topologyKey: kubernetes.io/hostname
 
   podDisruptionBudget:
     maxUnavailable: 33%
