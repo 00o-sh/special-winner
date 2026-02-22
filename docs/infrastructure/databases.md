@@ -100,13 +100,13 @@ Applications connect via internal services:
 
 ```
 # All instances (load-balanced)
-mariadb-galera.database.svc.cluster.local:3306
+mariadb.database.svc.cluster.local:3306
 
 # Primary only
-mariadb-galera-primary.database.svc.cluster.local:3306
+mariadb-primary.database.svc.cluster.local:3306
 
 # Read replicas
-mariadb-galera-secondary.database.svc.cluster.local:3306
+mariadb-secondary.database.svc.cluster.local:3306
 ```
 
 ### Operator Installation

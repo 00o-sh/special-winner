@@ -1037,9 +1037,9 @@ kubernetes/apps/database/mariadb-operator/
 
 **Usage**:
 - Applications can connect to PostgreSQL via the `postgres-rw.database.svc.cluster.local` service.
-- Applications can connect to MariaDB via the `mariadb-galera.database.svc.cluster.local` service.
-- Primary-only connections: `mariadb-galera-primary.database.svc.cluster.local`
-- Read replicas: `mariadb-galera-secondary.database.svc.cluster.local`
+- Applications can connect to MariaDB via the `mariadb.database.svc.cluster.local` service.
+- Primary-only connections: `mariadb-primary.database.svc.cluster.local`
+- Read replicas: `mariadb-secondary.database.svc.cluster.local`
 
 ### Penpot Design Platform
 

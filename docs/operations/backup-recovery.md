@@ -162,7 +162,7 @@ The mariadb-operator handles MariaDB Galera backups via its `Backup` custom reso
 kubectl -n database get backups.k8s.mariadb.com
 
 # Check backup details
-kubectl -n database describe backup mariadb-galera-backup
+kubectl -n database describe backup mariadb-backup
 ```
 
 ### Restoring from a MariaDB Backup
@@ -173,11 +173,11 @@ To restore from S3, create a new MariaDB CR with `bootstrapFrom` referencing the
 apiVersion: k8s.mariadb.com/v1alpha1
 kind: MariaDB
 metadata:
-  name: mariadb-galera-recovery
+  name: mariadb-recovery
 spec:
   bootstrapFrom:
     backupRef:
-      name: mariadb-galera-backup
+      name: mariadb-backup
   # ... same spec as production cluster
 ```
 
