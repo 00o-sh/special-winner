@@ -28,9 +28,9 @@
 | debian-server | Debian 13 headless | 1 | 1Gi | 50Gi NFS |
 | ubuntu-server | Ubuntu | 1 | 1Gi | varies |
 | windows-server | Windows Server 2022 | 2 | 2Gi | 60Gi NFS |
-| freepbx-b1-k3s01 | FreePBX | varies | varies | NFS |
-| freepbx-b2-k3s01 | FreePBX | varies | varies | NFS |
-| freepbx-b3-k3s01 | FreePBX | varies | varies | NFS |
+| freepbx-b1-k3s01 | Debian 12 + [FreePBX](freepbx.md) | 2 | 4Gi | 50Gi NFS |
+| freepbx-b2-k3s01 | Debian 12 + [FreePBX](freepbx.md) | 2 | 4Gi | 50Gi NFS |
+| freepbx-b3-k3s01 | Debian 12 + [FreePBX](freepbx.md) | 2 | 4Gi | 50Gi NFS |
 
 ## Storage
 

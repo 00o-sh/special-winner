@@ -118,6 +118,17 @@ The operator is installed via two separate HelmReleases from the `helm.mariadb.c
 
 The operator includes Prometheus metrics via ServiceMonitor and cert-manager webhook integration.
 
+### FreePBX Databases
+
+The MariaDB cluster hosts [FreePBX](../applications/freepbx.md) databases managed via operator CRs in `kubernetes/apps/voip/freepbx/database/`:
+
+| Resource | Name | Purpose |
+|----------|------|---------|
+| Database | `b1_asterisk` | Main Asterisk configuration |
+| Database | `b1_asteriskcdrdb` | Call Detail Records |
+| User | `freepbx` | Application user (max 100 connections) |
+| Grant | `ALL PRIVILEGES` | Full access on both databases |
+
 ## Dragonfly
 
 [Dragonfly](https://www.dragonflydb.io/) is a modern Redis-compatible in-memory datastore:
