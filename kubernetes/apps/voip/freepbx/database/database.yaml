@@ -1,0 +1,28 @@
+---
+apiVersion: k8s.mariadb.com/v1alpha1
+kind: Database
+metadata:
+  name: freepbx-asterisk
+spec:
+  mariaDbRef:
+    name: mariadb
+  name: asterisk
+  characterSet: utf8mb4
+  collate: utf8mb4_unicode_ci
+  cleanupPolicy: Skip
+  requeueInterval: 30s
+  retryInterval: 5s
+---
+apiVersion: k8s.mariadb.com/v1alpha1
+kind: Database
+metadata:
+  name: freepbx-asteriskcdrdb
+spec:
+  mariaDbRef:
+    name: mariadb
+  name: asteriskcdrdb
+  characterSet: utf8mb4
+  collate: utf8mb4_unicode_ci
+  cleanupPolicy: Skip
+  requeueInterval: 30s
+  retryInterval: 5s
