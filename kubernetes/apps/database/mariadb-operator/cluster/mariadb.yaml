@@ -28,11 +28,17 @@ spec:
     storageClassName: openebs-hostpath
 
   affinity:
-    antiAffinityEnabled: true
+    antiAffinityEnabled: false
     podAntiAffinity:
       preferredDuringSchedulingIgnoredDuringExecution:
         - weight: 1
           podAffinityTerm:
+            labelSelector:
+              matchExpressions:
+                - key: app.kubernetes.io/name
+                  operator: In
+                  values:
+                    - mariadb
             topologyKey: kubernetes.io/hostname
 
   podDisruptionBudget:
