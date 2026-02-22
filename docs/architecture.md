@@ -122,7 +122,7 @@ kubernetes/apps/<namespace>/<app-name>/
 | `actions-runner-system` | CI/CD runners | Actions Runner Controller |
 | `cert-manager` | TLS certificates | cert-manager |
 | `database` | Database services | CloudNative-PG, Dragonfly, DBGate |
-| `default` | Test workloads | echo |
+| `default` | Test workloads | echo, LibreSpeed |
 | `external-secrets` | Secret management | External Secrets, 1Password |
 | `flux-system` | GitOps | Flux Operator, Flux Instance |
 | `forgejo-runner-system` | Forgejo CI/CD | Forgejo Runner (ScaledJob) |

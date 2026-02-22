@@ -15,7 +15,7 @@ This document provides comprehensive guidance for AI assistants working with thi
 - **GitOps**: Flux CD 2.7.5 (declarative continuous delivery)
 - **CNI**: Cilium 1.19.0 (eBPF-based networking)
 - **Ingress**: Envoy Gateway v1.6.3 (HTTP routing)
-- **Secrets**: SOPS 3.11.0 + Age 1.3.1 encryption
+- **Secrets**: SOPS 3.12.1 + Age 1.3.1 encryption
 - **Identity**: Kanidm (SSO/OAuth2 identity provider)
 - **DNS**: k8s_gateway + CoreDNS + External-DNS
 - **Certificates**: cert-manager with Cloudflare integration
@@ -563,6 +563,19 @@ Generates label configuration from repository structure:
 - Automates `.github/labels.yaml` and `.github/labeler.yaml` updates
 - Ensures labels stay in sync with namespace and directory changes
 
+### docs.yaml
+Documentation site build and publish:
+- Builds MkDocs Material site from `docs/` directory
+- Publishes to Cloudflare Pages (`special-winner-docs` project)
+- Triggered on pushes to main when `docs/**` or `mkdocs.yml` change
+- Also supports manual workflow dispatch
+
+### renovate-config.yaml
+Renovate configuration validation:
+- Validates `.renovaterc.json5` on pull requests
+- Runs `renovate-config-validator --strict` to catch config errors
+- Only triggers when `.renovaterc.json5` is modified
+
 ## Template System Details
 
 ### Custom Jinja2 Filters
@@ -631,9 +644,8 @@ talosctl logs --nodes <ip> --insecure
 - cert-manager
 
 **database**: Database infrastructure
-- cloudnative-pg (PostgreSQL operator)
+- cloudnative-pg (PostgreSQL operator + PostgreSQL 17.7 HA cluster with 3 instances)
 - dbgate (database management web UI)
-- postgres-cluster (PostgreSQL 17.7 HA cluster with 3 instances)
 - dragonfly (Redis-compatible in-memory datastore operator)
 
 **default**: Default namespace
@@ -761,6 +773,7 @@ Check `.mise.toml` for exact versions of all tools.
 
 ## Recent Notable Changes
 
+- **2026-02-22**: Documentation audit: fixed SOPS version (3.11.0 → 3.12.1), added docs.yaml and renovate-config.yaml workflows, fixed database app listing, updated architecture namespace map
 - **2026-02-16**: Added error-pages service for Envoy Gateway with responseOverride redirects (403, 404, 500, 502, 503, 504)
 - **2026-02-16**: Added n8n workflow automation platform to utils namespace (PostgreSQL backend, ExternalSecrets)
 - **2026-02-14**: Added Kanidm identity provider with OAuth2 SSO for dbgate, forgejo, kubevirt-manager, opencost, penpot
@@ -1086,5 +1099,5 @@ Located in `kubernetes/apps/utils/homepage/`, Homepage provides a unified dashbo
 
 ---
 
-**Last Updated**: 2026-02-16
+**Last Updated**: 2026-02-22
 **Template Source**: [onedr0p/cluster-template](https://github.com/onedr0p/cluster-template)

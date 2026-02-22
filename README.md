@@ -43,7 +43,7 @@ A Kubernetes cluster deployed with [Talos Linux](https://github.com/siderolabs/t
 - [cert-manager](https://github.com/cert-manager/cert-manager) - TLS certificate automation
 - [External Secrets Operator](https://external-secrets.io/) - External secret management
 - [1Password](https://1password.com/) - Secret storage backend
-- [SOPS](https://github.com/getsops/sops) 3.11.0 - Encrypted secrets in Git
+- [SOPS](https://github.com/getsops/sops) 3.12.1 - Encrypted secrets in Git
 
 **Storage:**
 - [OpenEBS](https://github.com/openebs/openebs) - Cloud-native storage
@@ -669,7 +669,7 @@ If this repo is too hot to handle or too cold to hold check out these following 
 | **Template Source** | [onedr0p/cluster-template](https://github.com/onedr0p/cluster-template) |
 | **Infrastructure** | GitOps with Flux CD + Talos Linux |
 | **Documentation** | [docs.00o.sh](https://docs.00o.sh) |
-| **Last Updated** | 2026-02-16 |
+| **Last Updated** | 2026-02-22 |
 
 ---
 
