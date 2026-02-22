@@ -31,9 +31,8 @@
   },
   packageRules: [
     {
-      description: "Disable digest pinning for quay.io Flux charts (unsupported tag@sha256 format)",
+      description: "Disable digest pinning for Flux OCIRepository (inline tag@sha256 format not supported by Flux CRD)",
       matchManagers: ["flux"],
-      matchPackageNames: ["/^quay\\.io\\//"],
       pinDigests: false,
     },
     {
