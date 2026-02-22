@@ -19,8 +19,6 @@ spec:
   # No responseOverride — skip error page redirect matching per response
   connection:
     bufferLimit: 16Mi
-    preconnect:
-      predictivePreconnectRatio: 1.5
   circuitBreaker:
     maxConnections: 4096
     maxPendingRequests: 4096

@@ -638,6 +638,7 @@ talosctl logs --nodes <ip> --insecure
 
 **default**: Default namespace
 - echo (test application)
+- librespeed (multi-path speed test with per-route Envoy tuning)
 
 **external-secrets**: Secret management
 - discord-webhook (Discord integration)

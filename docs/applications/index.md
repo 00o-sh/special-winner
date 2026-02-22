@@ -22,6 +22,12 @@ All applications are deployed via Flux CD from manifests in `kubernetes/apps/`.
 | [FlareSolverr](https://github.com/FlareSolverr/FlareSolverr) | Cloudflare bypass | media |
 | [TheLounge](https://thelounge.chat/) | IRC client | media |
 
+### Networking & Testing
+
+| App | Description | Namespace |
+|-----|-------------|-----------|
+| [LibreSpeed](https://librespeed.org/) | Multi-path speed test | default |
+
 ### Infrastructure & Utilities
 
 | App | Description | Namespace |
@@ -66,3 +72,4 @@ See the detailed pages for more on each category:
 - [Virtualization](virtualization.md)
 - [Observability](observability.md)
 - [Utilities](utilities.md)
+- [LibreSpeed](librespeed.md)
