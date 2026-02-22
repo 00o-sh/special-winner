@@ -152,7 +152,7 @@ The mariadb-operator handles MariaDB Galera backups via its `Backup` custom reso
 - **Scheduled mysqldump backups** to Garage S3 every 6 hours
 - **Compression**: bzip2
 - **Retention**: 30 days
-- **S3 bucket**: `mariadb` (prefix `galera`)
+- **S3 bucket**: `mariadb-backups` (prefix `galera`)
 - Backup definition at `kubernetes/apps/database/mariadb-operator/cluster/backup.yaml`
 
 ### Checking Backup Status
