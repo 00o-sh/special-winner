@@ -7,7 +7,7 @@ spec:
   mariaDbRef:
     name: mariadb
   schedule:
-    cron: "33 */1 * * *"
+    cron: "* */6 * * *"
     suspend: false
   maxRetention: 720h # 30 days
   compression: bzip2
