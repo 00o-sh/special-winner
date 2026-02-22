@@ -68,10 +68,11 @@ spec:
         containers:
           app:
             image: *image
-            env: *env
+            env:
+              MODE: standalone
             probes:
-              liveness: *probes
-              readiness: *probes
+              liveness: *frontend-probes
+              readiness: *frontend-probes
             securityContext: *securityContext
             resources: *resources
       speed-frontend:
@@ -133,8 +134,7 @@ spec:
             [
               {"name": "Cloudflare", "server": "//speed-cf.${SECRET_DOMAIN}/", "dlURL": "garbage.php", "ulURL": "empty.php", "pingURL": "empty.php", "getIpURL": "getIP.php"},
               {"name": "Port Forwarded", "server": "//speed-portfwd.${SECRET_DOMAIN}/", "dlURL": "garbage.php", "ulURL": "empty.php", "pingURL": "empty.php", "getIpURL": "getIP.php"},
-              {"name": "Direct (Envoy)", "server": "//speed-direct.${SECRET_DOMAIN}/", "dlURL": "garbage.php", "ulURL": "empty.php", "pingURL": "empty.php", "getIpURL": "getIP.php"},
-              {"name": "LAN Direct", "server": "http://speed-lan.${SECRET_DOMAIN}:8080/", "dlURL": "garbage.php", "ulURL": "empty.php", "pingURL": "empty.php", "getIpURL": "getIP.php"}
+              {"name": "Direct (Envoy)", "server": "//speed-direct.${SECRET_DOMAIN}/", "dlURL": "garbage.php", "ulURL": "empty.php", "pingURL": "empty.php", "getIpURL": "getIP.php"}
             ]
     persistence:
       servers:
@@ -180,8 +180,9 @@ spec:
       speed-frontend:
         hostnames: ["speed.${SECRET_DOMAIN}"]
         parentRefs:
-          - name: envoy-internal
+          - name: envoy-external
             namespace: network
+            sectionName: https
         rules:
           - backendRefs:
               - identifier: speed-frontend
