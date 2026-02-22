@@ -23,8 +23,8 @@ spec:
               DB_HOST: mariadb-primary.database.svc.cluster.local
               DB_PORT: "3306"
               DB_USER: freepbx
-              DB_NAME: asterisk
-              DB_CDR_NAME: asteriskcdrdb
+              DB_NAME: b1_asterisk
+              DB_CDR_NAME: b1_asteriskcdrdb
               DB_PASS:
                 valueFrom:
                   secretKeyRef:

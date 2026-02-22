@@ -2,11 +2,11 @@
 apiVersion: k8s.mariadb.com/v1alpha1
 kind: Database
 metadata:
-  name: freepbx-asterisk
+  name: freepbx-b1-asterisk
 spec:
   mariaDbRef:
     name: mariadb
-  name: asterisk
+  name: b1_asterisk
   characterSet: utf8mb4
   collate: utf8mb4_unicode_ci
   cleanupPolicy: Skip
@@ -16,11 +16,11 @@ spec:
 apiVersion: k8s.mariadb.com/v1alpha1
 kind: Database
 metadata:
-  name: freepbx-asteriskcdrdb
+  name: freepbx-b1-asteriskcdrdb
 spec:
   mariaDbRef:
     name: mariadb
-  name: asteriskcdrdb
+  name: b1_asteriskcdrdb
   characterSet: utf8mb4
   collate: utf8mb4_unicode_ci
   cleanupPolicy: Skip
