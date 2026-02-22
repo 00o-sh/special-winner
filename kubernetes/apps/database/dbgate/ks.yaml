@@ -7,6 +7,7 @@ metadata:
 spec:
   dependsOn:
     - name: cloudnative-pg
+    - name: mariadb-operator
     - name: kanidm-config
       namespace: identity
     - name: onepassword
