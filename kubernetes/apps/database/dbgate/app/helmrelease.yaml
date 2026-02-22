@@ -19,7 +19,7 @@ spec:
               repository: dbgate/dbgate
               tag: 7.0.6-alpine
             env:
-              CONNECTIONS: postgres-cluster
+              CONNECTIONS: postgres-cluster,mariadb-cluster
               LABEL_postgres-cluster: Postgres Cluster
               SERVER_postgres-cluster: postgres-rw.database.svc.cluster.local
               USER_postgres-cluster: postgres
@@ -30,6 +30,16 @@ spec:
                     key: password
               PORT_postgres-cluster: "5432"
               ENGINE_postgres-cluster: postgres@dbgate-plugin-postgres
+              LABEL_mariadb-cluster: MariaDB Cluster
+              SERVER_mariadb-cluster: mariadb.database.svc.cluster.local
+              USER_mariadb-cluster: root
+              PASSWORD_mariadb-cluster:
+                valueFrom:
+                  secretKeyRef:
+                    name: mariadb-secret
+                    key: root-password
+              PORT_mariadb-cluster: "3306"
+              ENGINE_mariadb-cluster: mysql@dbgate-plugin-mysql
             probes:
               liveness: &probes
                 enabled: true
