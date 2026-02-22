@@ -41,6 +41,16 @@ special-winner/
 │   ├── template/Taskfile.yaml       # Template rendering
 │   └── vm/Taskfile.yaml             # Virtual machine operations
 │
+├── clusters/                         # Per-cluster configuration
+│   └── 3226/                        # Cluster "3226" (default)
+│       ├── cluster.yaml             # Cluster config (gitignored)
+│       ├── nodes.yaml               # Node definitions (gitignored)
+│       ├── age.key                  # Encryption key (gitignored)
+│       ├── kubeconfig               # Cluster kubeconfig (gitignored)
+│       ├── cloudflare-tunnel.json   # Tunnel config (gitignored)
+│       ├── github-deploy.key        # Deploy key (gitignored)
+│       └── github-push-token.txt    # Push token (gitignored)
+│
 ├── bootstrap/                        # Initial cluster bootstrap
 │   ├── helmfile.d/                  # Helm releases
 │   │   ├── 00-crds.yaml            # CRD extraction
@@ -70,8 +80,8 @@ special-winner/
 │   │   ├── nfs-scaler/            # KEDA-based NFS scaling
 │   │   ├── sops/                  # SOPS integration
 │   │   └── volsync/               # Backup config
-│   └── flux/                        # Flux configuration
-│       └── cluster/ks.yaml         # Root Kustomization
+│   └── flux/                        # Flux configuration (per-cluster entry points)
+│       └── 3226/ks.yaml            # Root Kustomization for cluster 3226
 │
 ├── talos/                           # Talos Linux config
 │   ├── clusterconfig/              # Generated configs (gitignored)
@@ -145,14 +155,14 @@ import_paths = ["./templates/scripts"]
    mise install
    ```
 
-2. **Initialize configuration**:
+2. **Initialize configuration** (default cluster: 3226):
    ```bash
-   task init  # Creates cluster.yaml, nodes.yaml, age.key, etc.
+   task init CLUSTER=3226  # Creates clusters/3226/{cluster.yaml, nodes.yaml, age.key, ...}
    ```
 
 3. **Configure and validate**:
    ```bash
-   task configure  # Renders templates and validates configs
+   task configure CLUSTER=3226  # Renders templates and validates configs
    ```
 
 4. **Bootstrap cluster**:
@@ -468,20 +478,20 @@ When adding a new Kubernetes application:
 → Edit: `bootstrap/helmfile.d/*.yaml`
 
 **Need to change cluster-wide settings?**
-→ Edit: `cluster.yaml` (if it exists)
-→ Then run: `task configure`
+→ Edit: `clusters/<cluster-name>/cluster.yaml`
+→ Then run: `task configure CLUSTER=<cluster-name>`
 
 **Need to add/modify nodes?**
-→ Edit: `nodes.yaml` (if it exists)
-→ Then run: `task configure`
+→ Edit: `clusters/<cluster-name>/nodes.yaml`
+→ Then run: `task configure CLUSTER=<cluster-name>`
 
 ## Important Commands Reference
 
 | Task | Command |
 |------|---------|
 | List all tasks | `task --list` |
-| Initialize config | `task init` |
-| Validate & render | `task configure` |
+| Initialize config | `task init CLUSTER=3226` |
+| Validate & render | `task configure CLUSTER=3226` |
 | Bootstrap Talos | `task bootstrap:talos` |
 | Bootstrap apps | `task bootstrap:apps` |
 | Force Flux sync | `task reconcile` |
@@ -602,6 +612,79 @@ Templates read from:
 - `nodes.yaml` - Node definitions
 
 These files are generated from samples via `task init` and are gitignored.
+They now live under `clusters/<cluster-name>/` (e.g., `clusters/3226/cluster.yaml`).
+
+## Multi-Cluster Support
+
+The repository supports managing multiple Kubernetes clusters from a single git repository.
+
+### Architecture
+
+- **Shared apps**: `kubernetes/apps/` contains all application manifests shared across clusters
+- **Per-cluster entry points**: `kubernetes/flux/<cluster-name>/ks.yaml` defines each cluster's Flux root Kustomization
+- **Per-cluster config**: `clusters/<cluster-name>/` holds cluster-specific configuration and credentials
+- **Flux substitution**: Cluster-specific values (CIDRs, IPs, domains) are injected via `${VARIABLE}` substitution from `cluster-secrets`
+
+### Current Cluster: 3226
+
+The default cluster is `3226`. All tasks default to this cluster if no `CLUSTER` parameter is provided.
+
+### Cluster-Specific Variables (via cluster-secrets)
+
+These variables are available for Flux `${VARIABLE}` substitution in all Kustomizations that reference `cluster-secrets`:
+
+| Variable | Description | Example |
+|----------|-------------|---------|
+| `CLUSTER_NAME` | Cluster identifier | `3226` |
+| `SECRET_DOMAIN` | Primary domain | `example.com` |
+| `CLUSTER_POD_CIDR` | Pod network CIDR | `172.30.0.0/16` |
+| `CLUSTER_SVC_CIDR` | Service network CIDR | `172.31.0.0/16` |
+| `CLUSTER_DNS_ADDR` | CoreDNS cluster IP | `172.31.0.10` |
+| `CLUSTER_API_ADDR` | Kubernetes API VIP | `10.x.x.x` |
+| `CLUSTER_GATEWAY_ADDR` | Internal gateway LB IP | `10.0.6.12` |
+| `CLUSTER_DNS_GATEWAY_ADDR` | k8s-gateway LB IP | `10.0.6.11` |
+| `CLOUDFLARE_GATEWAY_ADDR` | External gateway LB IP | `10.0.6.13` |
+| `CLOUDFLARE_TOKEN` | Cloudflare API token | (secret) |
+| `CLOUDFLARE_TUNNEL_ID` | Cloudflare tunnel UUID | (secret) |
+| `NODE_CIDR` | Node network CIDR | `10.x.x.0/24` |
+| `CILIUM_LB_MODE` | Cilium LB mode | `dsr` |
+
+### Adding a New Cluster
+
+1. **Create cluster directory**:
+   ```bash
+   task init CLUSTER=<new-name>
+   ```
+
+2. **Edit cluster config**: `clusters/<new-name>/cluster.yaml` and `clusters/<new-name>/nodes.yaml`
+
+3. **Create Flux entry point**:
+   ```bash
+   cp kubernetes/flux/3226/ks.yaml kubernetes/flux/<new-name>/ks.yaml
+   ```
+
+4. **Render and validate**:
+   ```bash
+   task configure CLUSTER=<new-name>
+   ```
+
+5. **Bootstrap the cluster**:
+   ```bash
+   task bootstrap:talos CLUSTER=<new-name>
+   task bootstrap:apps CLUSTER=<new-name>
+   ```
+
+### Task System
+
+All tasks accept a `CLUSTER` parameter (default: `3226`):
+```bash
+task init CLUSTER=3226
+task configure CLUSTER=3226
+task bootstrap:talos CLUSTER=3226
+task bootstrap:apps CLUSTER=3226
+task template:debug CLUSTER=3226
+task reconcile  # Uses KUBECONFIG from active cluster
+```
 
 ## Troubleshooting
 
@@ -774,6 +857,7 @@ Check `.mise.toml` for exact versions of all tools.
 ## Recent Notable Changes
 
 - **2026-02-22**: Documentation audit: fixed SOPS version (3.11.0 → 3.12.1), added docs.yaml and renovate-config.yaml workflows, fixed database app listing, updated architecture namespace map
+- **2026-02-22**: Multi-cluster support prep: cluster 3226 named, per-cluster directory structure, Flux substitution for cluster-specific values, CLUSTER parameter for all tasks
 - **2026-02-16**: Added error-pages service for Envoy Gateway with responseOverride redirects (403, 404, 500, 502, 503, 504)
 - **2026-02-16**: Added n8n workflow automation platform to utils namespace (PostgreSQL backend, ExternalSecrets)
 - **2026-02-14**: Added Kanidm identity provider with OAuth2 SSO for dbgate, forgejo, kubevirt-manager, opencost, penpot

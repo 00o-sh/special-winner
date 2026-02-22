@@ -8,6 +8,9 @@ set: [pipefail]
 shopt: [globstar]
 
 vars:
+  # Cluster name for multi-cluster support (override with: task <cmd> CLUSTER=<name>)
+  CLUSTER: '{{.CLUSTER | default "3226"}}'
+  CLUSTER_DIR: '{{.ROOT_DIR}}/clusters/{{.CLUSTER}}'
   BOOTSTRAP_DIR: '{{.ROOT_DIR}}/bootstrap'
   KUBERNETES_DIR: '{{.ROOT_DIR}}/kubernetes'
   SCRIPTS_DIR: '{{.ROOT_DIR}}/scripts'
@@ -16,8 +19,8 @@ vars:
   TALOSCONFIG: '{{.ROOT_DIR}}/talos/clusterconfig/talosconfig'
 
 env:
-  KUBECONFIG: '{{.ROOT_DIR}}/kubeconfig'
-  SOPS_AGE_KEY_FILE: '{{.ROOT_DIR}}/age.key'
+  KUBECONFIG: '{{.CLUSTER_DIR}}/kubeconfig'
+  SOPS_AGE_KEY_FILE: '{{.CLUSTER_DIR}}/age.key'
   TALOSCONFIG: '{{.TALOSCONFIG}}'
 
 includes:

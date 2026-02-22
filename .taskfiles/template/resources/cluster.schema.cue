@@ -5,6 +5,7 @@ import (
 )
 
 #Config: {
+	cluster_name: string & =~"^[a-z0-9][a-z0-9-]*[a-z0-9]$"
 	node_cidr: net.IPCIDR & !=cluster_pod_cidr & !=cluster_svc_cidr
 	node_dns_servers?: [...net.IPv4]
 	node_ntp_servers?: [...net.IPv4]

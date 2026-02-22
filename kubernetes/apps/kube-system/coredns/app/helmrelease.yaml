@@ -17,7 +17,7 @@ spec:
       create: true
     service:
       name: kube-dns
-      clusterIP: "172.31.0.10"
+      clusterIP: "${CLUSTER_DNS_ADDR}"
     replicaCount: 3
     servers:
       - zones:
