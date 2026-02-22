@@ -63,6 +63,16 @@ CRD schema extraction and publishing:
 - Runs on self-hosted runner
 - Enables IDE autocompletion for custom resources
 
+### failover.yaml
+
+Cluster failover automation:
+
+- Triggered on pushes to main when `active-cluster` file changes
+- Reads the active cluster name from `active-cluster`
+- Updates `SUSPEND_DEFAULT` in each cluster's root `ks.yaml` (`kubernetes/flux/<cluster>/ks.yaml`)
+- Active cluster gets `SUSPEND_DEFAULT: "false"`, standby clusters get `"true"`
+- Commits and pushes the changes so Flux picks them up
+
 ### docs.yaml
 
 Documentation site publishing:

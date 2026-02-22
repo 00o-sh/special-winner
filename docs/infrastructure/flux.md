@@ -108,3 +108,38 @@ flux logs --all-namespaces
 flux suspend hr <name> -n <namespace>
 flux resume hr <name> -n <namespace>
 ```
+
+## Multi-Cluster Support
+
+Flux manages multiple clusters from a single Git repository. Each cluster has its own root Kustomization entry point.
+
+### Per-Cluster Entry Points
+
+```
+kubernetes/flux/
+├── 3226/ks.yaml       # Root Kustomization for cluster 3226 (active)
+└── usny01/ks.yaml     # Root Kustomization for cluster usny01 (standby)
+```
+
+Each `ks.yaml` defines `SUSPEND_DEFAULT` in `postBuild.substitute`, which controls whether workloads are suspended on that cluster.
+
+### Cluster-Specific Variable Substitution
+
+All Kustomizations reference `cluster-secrets` for variable substitution. Key variables include:
+
+| Variable | Description |
+|----------|-------------|
+| `CLUSTER_NAME` | Cluster identifier (e.g. `3226`) |
+| `CLUSTER_POD_CIDR` | Pod network CIDR |
+| `CLUSTER_SVC_CIDR` | Service network CIDR |
+| `CLUSTER_DNS_ADDR` | CoreDNS cluster IP |
+| `CLUSTER_GATEWAY_ADDR` | Internal gateway LB IP |
+| `SUSPEND_DEFAULT` | `"false"` (active) or `"true"` (standby) |
+
+### Infra vs Workload Kustomizations
+
+Infra apps are labeled with `cluster.home/role: infra` and are **never suspended**, even on standby clusters. A Flux patch injects `suspend: ${SUSPEND_DEFAULT}` into all Kustomizations that lack this label.
+
+**Infra namespaces**: cert-manager, flux-system, kube-system, openebs-system, external-secrets
+
+See [Cluster Failover](../operations/day2.md#cluster-failover) for failover operations.

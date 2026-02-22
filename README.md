@@ -2,12 +2,14 @@
 
 > _GitHub's random name generator really outdid itself this time!_
 
-A Kubernetes homelab cluster deployed with [Talos Linux](https://github.com/siderolabs/talos) and [Flux CD](https://github.com/fluxcd/flux2) for GitOps. This repository is based on the [onedr0p/cluster-template](https://github.com/onedr0p/cluster-template) and uses [makejinja](https://github.com/mirkolenz/makejinja) for configuration templating.
+A multi-cluster Kubernetes homelab deployed with [Talos Linux](https://github.com/siderolabs/talos) and [Flux CD](https://github.com/fluxcd/flux2) for GitOps with active/standby failover. This repository is based on the [onedr0p/cluster-template](https://github.com/onedr0p/cluster-template) and uses [makejinja](https://github.com/mirkolenz/makejinja) for configuration templating.
 
 > **📖 Full Documentation:** [docs.00o.sh](https://docs.00o.sh) — Comprehensive guides covering architecture, infrastructure, applications, operations, and development.
 
-At its core, this project leverages [makejinja](https://github.com/mirkolenz/makejinja), a powerful tool for rendering templates. By reading configuration files—`cluster.yaml` and `nodes.yaml`—Makejinja generates the necessary configurations to deploy a Kubernetes cluster with the following features:
+At its core, this project manages **multiple Kubernetes clusters** from a single Git repository. It leverages [makejinja](https://github.com/mirkolenz/makejinja) for rendering templates and Flux CD variable substitution for cluster-specific configuration. By reading per-cluster configuration files—`clusters/<name>/cluster.yaml` and `clusters/<name>/nodes.yaml`—Makejinja generates the necessary configurations to deploy each cluster with the following features:
 
+- **Multi-cluster management** from a single Git repository
+- **Active/standby failover** with one-command cluster switching
 - Easy configuration through YAML files
 - GitOps-based cluster management with Flux CD
 - Automated secret encryption with SOPS
@@ -205,15 +207,17 @@ There are **5 stages** outlined below for completing this project, make sure you
 1. Generate the config files from the sample files:
 
     ```sh
-    task init
+    task init CLUSTER=3226
     ```
 
-2. Fill out `cluster.yaml` and `nodes.yaml` configuration files using the comments in those file as a guide.
+    📍 _All tasks accept a `CLUSTER` parameter (default: `3226`). Config files are created under `clusters/<name>/`._
+
+2. Fill out `clusters/3226/cluster.yaml` and `clusters/3226/nodes.yaml` configuration files using the comments in those file as a guide.
 
 3. Template out the kubernetes and talos configuration files, if any issues come up be sure to read the error and adjust your config files accordingly.
 
     ```sh
-    task configure
+    task configure CLUSTER=3226
     ```
 
 4. Push your changes to git:
@@ -504,6 +508,7 @@ This cluster already includes several advanced features beyond the base template
 - **✅ Security Monitoring** - kGuardian eBPF-based security toolkit for runtime policy generation
 - **✅ Cost Analysis** - OpenCost for Kubernetes cost monitoring and allocation
 - **✅ Database Management** - DBGate web UI for database administration
+- **✅ Multi-Cluster Support** - Active/standby failover with per-cluster Flux entry points and one-command failover
 
 ### Additional Enhancements to Consider
 
@@ -666,6 +671,7 @@ If this repo is too hot to handle or too cold to hold check out these following 
 | Metric | Value |
 |--------|-------|
 | **Deployed Components** | 65+ applications across 17 namespaces |
+| **Clusters** | 2 (active/standby with failover) |
 | **Template Source** | [onedr0p/cluster-template](https://github.com/onedr0p/cluster-template) |
 | **Infrastructure** | GitOps with Flux CD + Talos Linux |
 | **Documentation** | [docs.00o.sh](https://docs.00o.sh) |

@@ -109,4 +109,5 @@ nav:
       - Contributing: development/contributing.md
   - Research:
       - Overview: research/index.md
+      - Multi-Cluster Architecture: research/multi-cluster.md
       - SSO Providers: research/sso-providers.md
