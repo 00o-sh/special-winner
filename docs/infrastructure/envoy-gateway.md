@@ -117,6 +117,36 @@ This applies globally to all routes behind `envoy-internal` and `envoy-external`
 
 **Template:** The error-pages service uses the "hacker-terminal" template with `SHOW_DETAILS=true`.
 
+## Per-Route BackendTrafficPolicy
+
+The global `BackendTrafficPolicy` (compression, error page redirects) targets all Gateways. Individual applications can override this by attaching a `BackendTrafficPolicy` to their `HTTPRoute`:
+
+```yaml
+apiVersion: gateway.envoyproxy.io/v1alpha1
+kind: BackendTrafficPolicy
+metadata:
+  name: my-app-backend
+spec:
+  targetRefs:
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      name: my-app
+  # Override specific settings — omitted fields use defaults, NOT the gateway policy
+  connection:
+    bufferLimit: 16Mi
+  timeout:
+    http:
+      requestTimeout: 0s
+```
+
+When a route-level policy exists alongside a gateway-level policy, the **route-level policy wins** for that route. All other routes continue using the gateway-level policy.
+
+!!! example "LibreSpeed speed test"
+    The [LibreSpeed](../applications/librespeed.md) deployment uses this pattern to disable compression and error page redirects on speed test routes, since compressing random data wastes CPU and error page matching adds overhead.
+
+!!! note "ClientTrafficPolicy is gateway-only"
+    Unlike `BackendTrafficPolicy`, `ClientTrafficPolicy` **cannot** target `HTTPRoute` — only `Gateway` (optionally scoped to a listener via `sectionName`). Client-side settings (HTTP/2 windows, TLS, HTTP/3) always apply to all routes on a listener.
+
 ## Monitoring
 
 - Grafana dashboard enabled via GrafanaOperator

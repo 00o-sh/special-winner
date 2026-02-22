@@ -31,6 +31,7 @@ Built on the [onedr0p/cluster-template](https://github.com/onedr0p/cluster-templ
 - **Networking** -- Cilium, Envoy Gateway, Cloudflare Tunnel, Multus
 - **Storage** -- OpenEBS, VolSync, Garage S3, NFS
 - **CI/CD** -- GitHub Actions runners, Forgejo with CI runners
+- **Networking** -- LibreSpeed multi-path speed test
 - **Utilities** -- Penpot, Homepage, SMTP relay, and more
 
 ## Quick Links
