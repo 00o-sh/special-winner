@@ -29,7 +29,6 @@ theme:
     - navigation.sections
     - navigation.expand
     - navigation.top
-    - navigation.indexes
     - search.suggest
     - search.highlight
     - toc.follow
