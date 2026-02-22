@@ -2,13 +2,13 @@
 apiVersion: k8s.mariadb.com/v1alpha1
 kind: User
 metadata:
-  name: freepbx
+  name: freepbx-b1-k3s01
 spec:
   mariaDbRef:
     name: mariadb
-  name: freepbx
+  name: freepbx_b1
   passwordSecretKeyRef:
-    name: freepbx-db-secret
+    name: freepbx-b1-k3s01-db-secret
     key: password
   maxUserConnections: 100
   host: "%"

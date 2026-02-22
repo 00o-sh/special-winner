@@ -2,7 +2,7 @@
 apiVersion: k8s.mariadb.com/v1alpha1
 kind: Grant
 metadata:
-  name: freepbx-b1-asterisk
+  name: freepbx-b1-k3s01-asterisk
 spec:
   mariaDbRef:
     name: mariadb
@@ -10,7 +10,7 @@ spec:
     - "ALL PRIVILEGES"
   database: b1_asterisk
   table: "*"
-  username: freepbx
+  username: freepbx_b1
   host: "%"
   grantOption: false
   cleanupPolicy: Skip
@@ -20,7 +20,7 @@ spec:
 apiVersion: k8s.mariadb.com/v1alpha1
 kind: Grant
 metadata:
-  name: freepbx-b1-asteriskcdrdb
+  name: freepbx-b1-k3s01-asteriskcdrdb
 spec:
   mariaDbRef:
     name: mariadb
@@ -28,7 +28,7 @@ spec:
     - "ALL PRIVILEGES"
   database: b1_asteriskcdrdb
   table: "*"
-  username: freepbx
+  username: freepbx_b1
   host: "%"
   grantOption: false
   cleanupPolicy: Skip

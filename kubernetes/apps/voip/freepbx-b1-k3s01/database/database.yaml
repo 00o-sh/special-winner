@@ -2,7 +2,7 @@
 apiVersion: k8s.mariadb.com/v1alpha1
 kind: Database
 metadata:
-  name: freepbx-b1-asterisk
+  name: freepbx-b1-k3s01-asterisk
 spec:
   mariaDbRef:
     name: mariadb
@@ -16,7 +16,7 @@ spec:
 apiVersion: k8s.mariadb.com/v1alpha1
 kind: Database
 metadata:
-  name: freepbx-b1-asteriskcdrdb
+  name: freepbx-b1-k3s01-asteriskcdrdb
 spec:
   mariaDbRef:
     name: mariadb

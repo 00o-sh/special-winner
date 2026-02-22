@@ -735,7 +735,7 @@ talosctl logs --nodes <ip> --insecure
 - smtp-relay (SMTP relay for outbound email using Maddy)
 
 **voip**: VoIP and telephony
-- freepbx (containerized FreePBX telephony platform with MariaDB backend)
+- freepbx-b1-k3s01 (containerized FreePBX telephony platform with MariaDB backend)
 
 **volsync-system**: Backup and replication
 - garage (S3-compatible storage backend)
