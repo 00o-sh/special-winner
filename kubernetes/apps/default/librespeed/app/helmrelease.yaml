@@ -52,6 +52,17 @@ spec:
               readiness: *probes
             securityContext: *securityContext
             resources: *resources
+      speed-portfwd:
+        strategy: RollingUpdate
+        containers:
+          app:
+            image: *image
+            env: *env
+            probes:
+              liveness: *probes
+              readiness: *probes
+            securityContext: *securityContext
+            resources: *resources
       speed-lan:
         strategy: RollingUpdate
         containers:
@@ -96,6 +107,11 @@ spec:
         ports:
           http:
             port: *port
+      speed-portfwd:
+        controller: speed-portfwd
+        ports:
+          http:
+            port: *port
       speed-lan:
         type: LoadBalancer
         controller: speed-lan
@@ -114,8 +130,9 @@ spec:
         data:
           servers.json: |-
             [
-              {"name": "Cloudflare Proxied", "server": "//speed-cf.${SECRET_DOMAIN}/", "dlURL": "garbage.php", "ulURL": "empty.php", "pingURL": "empty.php", "getIpURL": "getIP.php"},
-              {"name": "Direct", "server": "//speed-direct.${SECRET_DOMAIN}/", "dlURL": "garbage.php", "ulURL": "empty.php", "pingURL": "empty.php", "getIpURL": "getIP.php"},
+              {"name": "Cloudflare", "server": "//speed-cf.${SECRET_DOMAIN}/", "dlURL": "garbage.php", "ulURL": "empty.php", "pingURL": "empty.php", "getIpURL": "getIP.php"},
+              {"name": "Port Forwarded", "server": "//speed-portfwd.${SECRET_DOMAIN}/", "dlURL": "garbage.php", "ulURL": "empty.php", "pingURL": "empty.php", "getIpURL": "getIP.php"},
+              {"name": "Direct (Envoy)", "server": "//speed-direct.${SECRET_DOMAIN}/", "dlURL": "garbage.php", "ulURL": "empty.php", "pingURL": "empty.php", "getIpURL": "getIP.php"},
               {"name": "LAN Direct", "server": "http://10.0.6.16:8080/", "dlURL": "garbage.php", "ulURL": "empty.php", "pingURL": "empty.php", "getIpURL": "getIP.php"}
             ]
     persistence:
@@ -139,16 +156,25 @@ spec:
               - identifier: speed-cf
                 port: *port
       speed-direct:
+        hostnames: ["speed-direct.${SECRET_DOMAIN}"]
+        parentRefs:
+          - name: envoy-internal
+            namespace: network
+        rules:
+          - backendRefs:
+              - identifier: speed-direct
+                port: *port
+      speed-portfwd:
         annotations:
           external-dns.alpha.kubernetes.io/cloudflare-proxied: "false"
-        hostnames: ["speed-direct.${SECRET_DOMAIN}"]
+        hostnames: ["speed-portfwd.${SECRET_DOMAIN}"]
         parentRefs:
           - name: envoy-external
             namespace: network
             sectionName: https
         rules:
           - backendRefs:
-              - identifier: speed-direct
+              - identifier: speed-portfwd
                 port: *port
       speed-frontend:
         hostnames: ["speed.${SECRET_DOMAIN}"]
