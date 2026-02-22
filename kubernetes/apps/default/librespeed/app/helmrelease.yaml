@@ -70,9 +70,20 @@ spec:
             image: *image
             env:
               MODE: standalone
+            command: ["bash", "-c", "a2enmod ssl && exec bash /entrypoint.sh"]
             probes:
-              liveness: *frontend-probes
-              readiness: *frontend-probes
+              liveness: &lan-probes
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /
+                    port: *port
+                  initialDelaySeconds: 0
+                  periodSeconds: 10
+                  timeoutSeconds: 1
+                  failureThreshold: 3
+              readiness: *lan-probes
             securityContext: *securityContext
             resources: *resources
       speed-frontend:
@@ -120,21 +131,33 @@ spec:
           external-dns.alpha.kubernetes.io/hostname: speed-lan.${SECRET_DOMAIN}
           lbipam.cilium.io/ips: "10.0.6.16"
         ports:
-          http:
-            port: *port
+          https:
+            port: 443
+            targetPort: 8443
       speed-frontend:
         controller: speed-frontend
         ports:
           http:
             port: *port
     configMaps:
+      ssl-config:
+        data:
+          ssl-speedtest.conf: |-
+            Listen 8443
+            <VirtualHost *:8443>
+              SSLEngine on
+              SSLCertificateFile /etc/ssl/speedtest/tls.crt
+              SSLCertificateKeyFile /etc/ssl/speedtest/tls.key
+              DocumentRoot /var/www/html
+            </VirtualHost>
       servers:
         data:
           servers.json: |-
             [
               {"name": "Cloudflare", "server": "//speed-cf.${SECRET_DOMAIN}/", "dlURL": "garbage.php", "ulURL": "empty.php", "pingURL": "empty.php", "getIpURL": "getIP.php"},
               {"name": "Port Forwarded", "server": "//speed-portfwd.${SECRET_DOMAIN}/", "dlURL": "garbage.php", "ulURL": "empty.php", "pingURL": "empty.php", "getIpURL": "getIP.php"},
-              {"name": "Direct (Envoy)", "server": "//speed-direct.${SECRET_DOMAIN}/", "dlURL": "garbage.php", "ulURL": "empty.php", "pingURL": "empty.php", "getIpURL": "getIP.php"}
+              {"name": "Direct (Envoy)", "server": "//speed-direct.${SECRET_DOMAIN}/", "dlURL": "garbage.php", "ulURL": "empty.php", "pingURL": "empty.php", "getIpURL": "getIP.php"},
+              {"name": "LAN Direct", "server": "//speed-lan.${SECRET_DOMAIN}/", "dlURL": "backend/garbage.php", "ulURL": "backend/empty.php", "pingURL": "backend/empty.php", "getIpURL": "backend/getIP.php"}
             ]
     persistence:
       servers:
@@ -145,6 +168,21 @@ spec:
             app:
               - path: /servers.json
                 subPath: servers.json
+      ssl-config:
+        type: configMap
+        identifier: ssl-config
+        advancedMounts:
+          speed-lan:
+            app:
+              - path: /etc/apache2/sites-enabled/ssl-speedtest.conf
+                subPath: ssl-speedtest.conf
+      ssl-cert:
+        type: secret
+        name: speed-lan-tls
+        advancedMounts:
+          speed-lan:
+            app:
+              - path: /etc/ssl/speedtest
     route:
       speed-cf:
         hostnames: ["speed-cf.${SECRET_DOMAIN}"]

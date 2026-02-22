@@ -1,0 +1,17 @@
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: speed-lan-tls
+spec:
+  dnsNames:
+    - "speed-lan.${SECRET_DOMAIN}"
+  duration: 160h
+  issuerRef:
+    name: letsencrypt-production
+    kind: ClusterIssuer
+  privateKey:
+    algorithm: ECDSA
+  secretName: speed-lan-tls
+  usages:
+    - digital signature
