@@ -91,7 +91,7 @@ kubernetes/apps/database/mariadb-operator/
 - **Scheduled backups** to Garage S3 every 6 hours (`0 */6 * * *`)
 - **Retention**: 30 days
 - **Compression**: bzip2
-- **S3 bucket**: `mariadb` (prefix `galera`)
+- **S3 bucket**: `mariadb-backups` (prefix `galera`)
 - **Method**: `mysqldump` with `--single-transaction --all-databases`
 
 ### Connecting

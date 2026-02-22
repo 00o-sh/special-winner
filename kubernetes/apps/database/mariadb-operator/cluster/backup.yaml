@@ -13,7 +13,7 @@ spec:
   compression: bzip2
   storage:
     s3:
-      bucket: mariadb
+      bucket: mariadb-backups
       prefix: galera
       endpoint: garage.volsync-system.svc.cluster.local:3900
       region: USTX01
