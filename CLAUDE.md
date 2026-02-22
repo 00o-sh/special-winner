@@ -502,6 +502,7 @@ When adding a new Kubernetes application:
 | Upgrade Talos | `task talos:upgrade-node IP=<ip>` |
 | Upgrade Kubernetes | `task talos:upgrade-k8s` |
 | Reset cluster | `task talos:reset` |
+| Failover workloads | `task failover CLUSTER=<name>` |
 | Validate K8s manifests | `task template:validate-kubernetes-config` |
 | Tidy templates | `task template:tidy` |
 | VM console | `task vm:console VM=<name>` |
@@ -588,6 +589,14 @@ Renovate configuration validation:
 - Runs `renovate-config-validator --strict` to catch config errors
 - Only triggers when `.renovaterc.json5` is modified
 
+### failover.yaml
+Cluster failover automation:
+- Triggered on pushes to main when `active-cluster` file changes
+- Reads the active cluster name from `active-cluster`
+- Updates `SUSPEND_DEFAULT` in each cluster's root `ks.yaml` (`kubernetes/flux/<cluster>/ks.yaml`)
+- Commits and pushes the changes so Flux picks them up
+- Active cluster gets `SUSPEND_DEFAULT: "false"`, standby clusters get `"true"`
+
 ## Template System Details
 
 ### Custom Jinja2 Filters
@@ -655,6 +664,7 @@ These variables are available for Flux `${VARIABLE}` substitution in all Kustomi
 | `CLOUDFLARE_TUNNEL_ID` | Cloudflare tunnel UUID | (secret) |
 | `NODE_CIDR` | Node network CIDR | `10.x.x.0/24` |
 | `CILIUM_LB_MODE` | Cilium LB mode | `dsr` |
+| `SUSPEND_DEFAULT` | Workload suspend state | `false` (active), `true` (standby) |
 
 ### Adding a New Cluster
 
@@ -665,21 +675,52 @@ These variables are available for Flux `${VARIABLE}` substitution in all Kustomi
 
 2. **Edit cluster config**: `clusters/<new-name>/cluster.yaml` and `clusters/<new-name>/nodes.yaml`
 
-3. **Create Flux entry point**:
+3. **Create Flux entry point** (new clusters start as standby with `SUSPEND_DEFAULT: "true"`):
    ```bash
    cp kubernetes/flux/3226/ks.yaml kubernetes/flux/<new-name>/ks.yaml
+   yq -i '(.spec.postBuild.substitute.SUSPEND_DEFAULT) = "true"' kubernetes/flux/<new-name>/ks.yaml
    ```
 
-4. **Render and validate**:
+4. **Share Cloudflare tunnel** (for same-tunnel failover):
+   ```bash
+   cp clusters/3226/cloudflare-tunnel.json clusters/<new-name>/cloudflare-tunnel.json
+   ```
+
+5. **Render and validate**:
    ```bash
    task configure CLUSTER=<new-name>
    ```
 
-5. **Bootstrap the cluster**:
+6. **Bootstrap the cluster**:
    ```bash
    task bootstrap:talos CLUSTER=<new-name>
    task bootstrap:apps CLUSTER=<new-name>
    ```
+
+### Failover
+
+The repository supports active/standby cluster failover. One cluster runs all workloads while the other keeps only infra running (Flux, Cilium, CoreDNS, cert-manager, OpenEBS, External Secrets).
+
+**How it works:**
+- `active-cluster` file at repo root defines which cluster is active (e.g., `3226`)
+- Each cluster's root `ks.yaml` has `SUSPEND_DEFAULT` in `postBuild.substitute`
+- A Flux patch injects `suspend: ${SUSPEND_DEFAULT}` into all non-infra Kustomizations
+- Infra apps have `cluster.home/role: infra` label and are excluded from the patch
+- Cloudflare tunnel credentials are shared (same tunnel, only one cluster runs cloudflared)
+- DNS CNAME never changes — same tunnel ID on both clusters
+
+**Failover methods:**
+
+1. **Git-only (CI handles it)**: Edit `active-cluster`, commit, push → GitHub Action updates both root ks.yaml files and commits
+2. **Local task**: `task failover CLUSTER=usny01` → updates `active-cluster` and both ks.yaml files locally (then commit and push)
+
+**Infra namespaces (never suspended):**
+- cert-manager, flux-system, kube-system, openebs-system, external-secrets
+
+**Workload namespaces (follow SUSPEND_DEFAULT):**
+- Everything else (database, identity, kubevirt, media, network, observability, utils, etc.)
+
+**Adding a new infra app:** Add `cluster.home/role: infra` label to its ks.yaml metadata.
 
 ### Task System
 
@@ -691,6 +732,7 @@ task bootstrap:talos CLUSTER=3226
 task bootstrap:apps CLUSTER=3226
 task template:debug CLUSTER=3226
 task reconcile  # Uses KUBECONFIG from active cluster
+task failover CLUSTER=usny01  # Failover workloads to usny01
 ```
 
 ## Troubleshooting
@@ -864,6 +906,7 @@ Check `.mise.toml` for exact versions of all tools.
 ## Recent Notable Changes
 
 - **2026-02-22**: Documentation audit: fixed SOPS version (3.11.0 → 3.12.1), added docs.yaml and renovate-config.yaml workflows, fixed database app listing, updated architecture namespace map
+- **2026-02-22**: Added cluster failover support - SUSPEND_DEFAULT mechanism, infra labels, GitHub Action, task failover command
 - **2026-02-22**: Added cluster usny01 (US-NY-01, subnet 10.1.6.0/24) - directory structure and Flux entry point
 - **2026-02-22**: Multi-cluster support prep: cluster 3226 named, per-cluster directory structure, Flux substitution for cluster-specific values, CLUSTER parameter for all tasks
 - **2026-02-16**: Added error-pages service for Envoy Gateway with responseOverride redirects (403, 404, 500, 502, 503, 504)

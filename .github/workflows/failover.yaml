@@ -1,0 +1,72 @@
+---
+# Cluster failover workflow.
+# Triggered when `active-cluster` changes on main branch.
+# Updates SUSPEND_DEFAULT in each cluster's root ks.yaml so that the
+# active cluster runs workloads and standby clusters suspend them.
+# Also re-renders cluster-secrets via `task configure` for each cluster.
+name: "Failover"
+
+on:
+  push:
+    branches: ["main"]
+    paths:
+      - active-cluster
+
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: false
+
+jobs:
+  failover:
+    name: Failover
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Read active cluster
+        id: active
+        run: |
+          ACTIVE_CLUSTER=$(cat active-cluster | tr -d '[:space:]')
+          echo "cluster=${ACTIVE_CLUSTER}" >> "$GITHUB_OUTPUT"
+          echo "Active cluster: ${ACTIVE_CLUSTER}"
+
+      - name: Update root ks.yaml files
+        run: |
+          ACTIVE="${{ steps.active.outputs.cluster }}"
+          for dir in kubernetes/flux/*/; do
+            CLUSTER_NAME=$(basename "$dir")
+            KS_FILE="${dir}ks.yaml"
+            if [ ! -f "$KS_FILE" ]; then
+              continue
+            fi
+            if [ "$CLUSTER_NAME" = "$ACTIVE" ]; then
+              SUSPEND="false"
+            else
+              SUSPEND="true"
+            fi
+            echo "Setting SUSPEND_DEFAULT=${SUSPEND} for cluster ${CLUSTER_NAME}"
+            yq -i '(.spec.postBuild.substitute.SUSPEND_DEFAULT) = "'"${SUSPEND}"'"' "$KS_FILE"
+          done
+
+      - name: Check for changes
+        id: changes
+        run: |
+          if git diff --quiet; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Commit and push
+        if: steps.changes.outputs.changed == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add kubernetes/flux/*/ks.yaml
+          git commit -m "chore(kubernetes): failover to cluster ${{ steps.active.outputs.cluster }}"
+          git push

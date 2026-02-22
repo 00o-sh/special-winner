@@ -39,3 +39,24 @@ tasks:
     preconditions:
       - test -f {{.KUBECONFIG}}
       - which flux
+
+  failover:
+    desc: Failover workloads to a cluster [CLUSTER=usny01]
+    prompt: This will failover all workloads to cluster {{.CLUSTER}}... continue?
+    cmds:
+      - echo "{{.CLUSTER}}" > {{.ROOT_DIR}}/active-cluster
+      - |
+        for dir in {{.ROOT_DIR}}/kubernetes/flux/*/; do
+          CLUSTER_NAME=$(basename "$dir")
+          KS_FILE="${dir}ks.yaml"
+          [ -f "$KS_FILE" ] || continue
+          if [ "$CLUSTER_NAME" = "{{.CLUSTER}}" ]; then
+            SUSPEND="false"
+          else
+            SUSPEND="true"
+          fi
+          echo "Setting SUSPEND_DEFAULT=${SUSPEND} for cluster ${CLUSTER_NAME}"
+          yq -i '(.spec.postBuild.substitute.SUSPEND_DEFAULT) = "'"${SUSPEND}"'"' "$KS_FILE"
+        done
+    preconditions:
+      - which yq

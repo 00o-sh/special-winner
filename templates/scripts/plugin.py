@@ -125,6 +125,16 @@ def github_push_token(file_path: str = None) -> str:
         raise RuntimeError(f"Unexpected error while reading {file_path}: {e}")
 
 
+# Read active-cluster file and determine if this cluster's workloads should be suspended
+def is_cluster_suspended(cluster_name: str, file_path: str = 'active-cluster') -> bool:
+    try:
+        with open(file_path, 'r') as file:
+            active_cluster = file.read().strip()
+        return cluster_name != active_cluster
+    except FileNotFoundError:
+        return False
+
+
 # Return a list of files in the talos patches directory
 def talos_patches(value: str) -> list[str]:
     path = Path(f'templates/config/talos/patches/{value}')
@@ -165,6 +175,9 @@ class Plugin(makejinja.plugin.Plugin):
         # If there is more than one node, enable spegel
         spegel_enabled = len(data.get('nodes')) > 1
         data.setdefault('spegel_enabled', spegel_enabled)
+
+        # Determine if workloads should be suspended (active-cluster failover)
+        data['suspend_default'] = str(is_cluster_suspended(cluster_name)).lower()
 
         return data
 
