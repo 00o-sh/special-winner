@@ -175,6 +175,11 @@ app/echo:
       - any-glob-to-any-file:
           - kubernetes/apps/default/echo/**/*
 
+app/librespeed:
+  - changed-files:
+      - any-glob-to-any-file:
+          - kubernetes/apps/default/librespeed/**/*
+
 app/discord-webhook:
   - changed-files:
       - any-glob-to-any-file:

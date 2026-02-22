@@ -107,6 +107,9 @@
 - name: app/echo
   color: "6f42c1"
   description: "echo in default"
+- name: app/librespeed
+  color: "6f42c1"
+  description: "librespeed in default"
 - name: app/discord-webhook
   color: "6f42c1"
   description: "discord-webhook in external-secrets"
