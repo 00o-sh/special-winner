@@ -139,6 +139,11 @@ area/utils:
       - any-glob-to-any-file:
           - kubernetes/apps/utils/**/*
 
+area/voip:
+  - changed-files:
+      - any-glob-to-any-file:
+          - kubernetes/apps/voip/**/*
+
 area/volsync-system:
   - changed-files:
       - any-glob-to-any-file:
@@ -464,6 +469,11 @@ app/smtp-relay:
   - changed-files:
       - any-glob-to-any-file:
           - kubernetes/apps/utils/smtp-relay/**/*
+
+app/freepbx:
+  - changed-files:
+      - any-glob-to-any-file:
+          - kubernetes/apps/voip/freepbx/**/*
 
 app/garage:
   - changed-files:
