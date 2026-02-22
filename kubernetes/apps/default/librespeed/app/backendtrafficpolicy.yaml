@@ -1,0 +1,35 @@
+---
+apiVersion: gateway.envoyproxy.io/v1alpha1
+kind: BackendTrafficPolicy
+metadata:
+  name: librespeed-speed
+spec:
+  targetRefs:
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      name: librespeed-speed-cf
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      name: librespeed-speed-direct
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      name: librespeed-speed-portfwd
+  # No compression — global policy has Brotli+Gzip which burns CPU on
+  # random speed test data for zero compression ratio
+  # No responseOverride — skip error page redirect matching per response
+  connection:
+    bufferLimit: 16Mi
+    preconnect:
+      predictivePreconnectRatio: 1.5
+  circuitBreaker:
+    maxConnections: 4096
+    maxPendingRequests: 4096
+    maxParallelRequests: 4096
+  useClientProtocol: false
+  tcpKeepalive:
+    idleTime: 60s
+    interval: 30s
+    probes: 3
+  timeout:
+    http:
+      requestTimeout: 0s
