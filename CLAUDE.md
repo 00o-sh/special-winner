@@ -645,6 +645,16 @@ The repository supports managing multiple Kubernetes clusters from a single git 
 
 The default cluster is `3226`. All tasks default to this cluster if no `CLUSTER` parameter is provided.
 
+### Talos Schematic IDs
+
+Schematic IDs encode Talos system extensions and are generated at [factory.talos.dev](https://factory.talos.dev).
+
+| Cluster | Schematic ID | Extensions |
+|---------|-------------|------------|
+| `usny01` | `e79a9d131cdea20926c227d04481eecae598c6cdbccf1c6231bcabdb1bd624d2` | gpio-pinctrl, i915, intel-ice-firmware, intel-ucode, iscsi-tools, mei, mellanox-mstflint, multipath-tools, nfs-utils, nfsd, util-linux-tools, xe |
+
+These IDs go in each node's `schematic_id` field in `clusters/<cluster>/nodes.yaml`.
+
 ### Cluster-Specific Variables (via cluster-secrets)
 
 These variables are available for Flux `${VARIABLE}` substitution in all Kustomizations that reference `cluster-secrets`:
