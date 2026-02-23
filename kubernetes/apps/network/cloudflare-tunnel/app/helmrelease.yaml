@@ -71,12 +71,6 @@ spec:
         data:
           config.yaml: |-
             ingress:
-              - hostname: "freepbx-b1-k3s01.${SECRET_DOMAIN}"
-                service: http://freepbx-b1-k3s01-app.voip.svc.cluster.local:80
-              - hostname: "freepbx-b2-k3s01.${SECRET_DOMAIN}"
-                service: http://freepbx-b2-k3s01-app.voip.svc.cluster.local:80
-              - hostname: "freepbx-b3-k3s01.${SECRET_DOMAIN}"
-                service: http://freepbx-b3-k3s01-app.voip.svc.cluster.local:80
               - hostname: "*.${SECRET_DOMAIN}"
                 originRequest:
                   http2Origin: true
