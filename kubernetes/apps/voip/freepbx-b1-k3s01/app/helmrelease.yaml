@@ -65,46 +65,31 @@ spec:
               limits:
                 memory: 2Gi
 
+    defaultPodOptions:
+      annotations:
+        k8s.v1.cni.cncf.io/networks: |-
+          [{
+            "name": "vm",
+            "namespace": "network",
+            "ips": ["192.168.57.14/24"],
+            "mac": "52:54:00:57:00:14"
+          }]
+
     service:
       app:
-        type: LoadBalancer
         controller: freepbx-b1-k3s01
         annotations:
           external-dns.alpha.kubernetes.io/hostname: freepbx-b1-k3s01.00o.sh
-          external-dns.alpha.kubernetes.io/target: 10.0.6.21
-          lbipam.cilium.io/ips: 10.0.6.21
+          external-dns.alpha.kubernetes.io/target: 192.168.57.14
           gethomepage.dev/enabled: "true"
           gethomepage.dev/group: VoIP
           gethomepage.dev/name: FreePBX B1
           gethomepage.dev/icon: freepbx.png
           gethomepage.dev/description: Telephony Platform
           gethomepage.dev/href: "https://freepbx-b1-k3s01.00o.sh"
-        externalTrafficPolicy: Local
         ports:
           http:
             port: 80
-          https:
-            port: 443
-          ucp:
-            port: 8001
-          admin:
-            port: 8003
-          sip-tcp:
-            port: 5060
-            protocol: TCP
-          sip-tls:
-            port: 5061
-            protocol: TCP
-      sip-udp:
-        type: LoadBalancer
-        controller: freepbx-b1-k3s01
-        annotations:
-          lbipam.cilium.io/ips: 10.0.6.21
-        externalTrafficPolicy: Local
-        ports:
-          sip-udp:
-            port: 5060
-            protocol: UDP
 
     persistence:
       asterisk-etc:
