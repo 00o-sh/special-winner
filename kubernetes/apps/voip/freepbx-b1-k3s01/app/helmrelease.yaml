@@ -18,7 +18,7 @@ spec:
           app:
             image:
               repository: ghcr.io/00o-sh/fpbx-docker
-              tag: 17@sha256:8b743f0e7cb3d6dfb1856ba6068fdb54a8e1160bc8bfa02ef483a6a7cf357fef
+              tag: 17@sha256:809e32d0aa6ab3a3264b5df159d8767ce5973f354c9686432071e0fd3949da81
             env:
               DB_HOST: mariadb-primary.database.svc.cluster.local
               DB_PORT: "3306"
