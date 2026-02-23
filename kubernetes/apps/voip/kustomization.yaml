@@ -1,0 +1,14 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/kustomization
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: voip
+
+components:
+  - ../../components/alerts
+
+resources:
+  - ./namespace.yaml
+  - ./freepbx-b1-k3s01/ks.yaml
+  - ./freepbx-b2-k3s01/ks.yaml
+  - ./freepbx-b3-k3s01/ks.yaml

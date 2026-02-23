@@ -1,0 +1,36 @@
+---
+apiVersion: k8s.mariadb.com/v1alpha1
+kind: Backup
+metadata:
+  name: mariadb-backup
+spec:
+  mariaDbRef:
+    name: mariadb
+  schedule:
+    cron: "* */6 * * *"
+    suspend: false
+  maxRetention: 720h # 30 days
+  compression: bzip2
+  storage:
+    s3:
+      bucket: mariadb-backups
+      prefix: galera
+      endpoint: garage.volsync-system.svc.cluster.local:3900
+      region: USTX01
+      accessKeyIdSecretKeyRef:
+        name: mariadb-secret
+        key: AWS_ACCESS_KEY_ID
+      secretAccessKeySecretKeyRef:
+        name: mariadb-secret
+        key: AWS_SECRET_ACCESS_KEY
+      tls:
+        enabled: false
+  args:
+    - --single-transaction
+    - --all-databases
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      memory: 512Mi

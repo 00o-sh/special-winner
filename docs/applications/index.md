@@ -22,6 +22,12 @@ All applications are deployed via Flux CD from manifests in `kubernetes/apps/`.
 | [FlareSolverr](https://github.com/FlareSolverr/FlareSolverr) | Cloudflare bypass | media |
 | [TheLounge](https://thelounge.chat/) | IRC client | media |
 
+### VoIP & Telephony
+
+| App | Description | Namespace |
+|-----|-------------|-----------|
+| [FreePBX](https://www.freepbx.org/) | Telephony platform (container + VMs) | voip |
+
 ### Networking & Testing
 
 | App | Description | Namespace |
@@ -69,6 +75,7 @@ All applications are deployed via Flux CD from manifests in `kubernetes/apps/`.
 See the detailed pages for more on each category:
 
 - [Media Stack](media.md)
+- [FreePBX](freepbx.md)
 - [Virtualization](virtualization.md)
 - [Observability](observability.md)
 - [Utilities](utilities.md)

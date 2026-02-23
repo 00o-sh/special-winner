@@ -16,6 +16,7 @@ graph LR
     end
     subgraph Data["Data"]
         PG[PostgreSQL 17.7]
+        MDB[MariaDB 11.7 Galera]
         DF[Dragonfly]
         OEBS[OpenEBS]
     end
@@ -44,7 +45,7 @@ graph LR
 | [Cilium](cilium.md) | eBPF-based container networking |
 | [Envoy Gateway](envoy-gateway.md) | HTTP routing and ingress |
 | [Storage](storage.md) | OpenEBS, NFS, and backup systems |
-| [Databases](databases.md) | PostgreSQL HA cluster and Dragonfly |
+| [Databases](databases.md) | PostgreSQL HA, MariaDB Galera, and Dragonfly |
 | [Certificates & DNS](certificates-dns.md) | TLS automation and DNS management |
 | [Secrets](secrets.md) | SOPS, Age, and External Secrets |
 | [Identity & SSO](identity.md) | Kanidm identity provider |

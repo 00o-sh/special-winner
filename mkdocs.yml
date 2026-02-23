@@ -93,6 +93,7 @@ nav:
   - Applications:
       - Overview: applications/index.md
       - Media Stack: applications/media.md
+      - FreePBX: applications/freepbx.md
       - Virtualization: applications/virtualization.md
       - Observability: applications/observability.md
       - Utilities: applications/utilities.md

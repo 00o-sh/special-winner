@@ -12,3 +12,4 @@ resources:
   - ./cloudnative-pg/ks.yaml
   - ./dbgate/ks.yaml
   - ./dragonfly/ks.yaml
+  - ./mariadb-operator/ks.yaml

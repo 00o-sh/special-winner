@@ -84,6 +84,9 @@
 - name: area/utils
   color: "1d76db"
   description: "utils namespace"
+- name: area/voip
+  color: "1d76db"
+  description: "voip namespace"
 - name: area/volsync-system
   color: "1d76db"
   description: "volsync-system namespace"
@@ -104,6 +107,9 @@
 - name: app/dragonfly
   color: "6f42c1"
   description: "dragonfly in database"
+- name: app/mariadb-operator
+  color: "6f42c1"
+  description: "mariadb-operator in database"
 - name: app/echo
   color: "6f42c1"
   description: "echo in default"
@@ -281,6 +287,15 @@
 - name: app/smtp-relay
   color: "6f42c1"
   description: "smtp-relay in utils"
+- name: app/freepbx-b1-k3s01
+  color: "6f42c1"
+  description: "freepbx-b1-k3s01 in voip"
+- name: app/freepbx-b2-k3s01
+  color: "6f42c1"
+  description: "freepbx-b2-k3s01 in voip"
+- name: app/freepbx-b3-k3s01
+  color: "6f42c1"
+  description: "freepbx-b3-k3s01 in voip"
 - name: app/garage
   color: "6f42c1"
   description: "garage in volsync-system"

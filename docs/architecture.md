@@ -22,12 +22,33 @@ graph TB
             Cilium1[Cilium CNI]
             Envoy1[Envoy Gateway]
             DNS1[CoreDNS + k8s_gateway]
+            Multus1[Multus]
+        end
+
+        subgraph Identity1["Identity Layer"]
+            Kanidm1[Kanidm SSO]
+        end
+
+        subgraph Data1["Data Layer"]
+            PG1[CloudNative-PG]
+            MDB1[MariaDB Galera]
+            Dragonfly1[Dragonfly]
+            OpenEBS1[OpenEBS]
+            NFS1[NFS Storage]
         end
 
         subgraph Apps1["Application Layer"]
             Media1[Media Stack]
             VMs1[KubeVirt VMs]
             Utils1[Utilities]
+            Obs1[Observability]
+        end
+
+        subgraph Security1["Security Layer"]
+            SOPS1[SOPS + Age]
+            ExtSec1[External Secrets]
+            CertMgr1[cert-manager]
+            kGuardian1[kGuardian]
         end
     end
 
@@ -48,6 +69,16 @@ graph TB
     GitRepo --> Flux2
     ActiveCluster -->|controls| Flux1
     ActiveCluster -->|controls| Flux2
+    Flux1 --> Apps1
+    Flux1 --> Networking1
+    Flux1 --> Data1
+    Flux1 --> Security1
+    Envoy1 --> Apps1
+    Kanidm1 --> Apps1
+    PG1 --> Apps1
+    MDB1 --> Apps1
+    Cilium1 --> Envoy1
+    Multus1 --> VMs1
 ```
 
 ## Multi-Cluster Architecture
@@ -145,7 +176,7 @@ kubernetes/apps/<namespace>/<app-name>/
 |-----------|---------|----------|
 | `actions-runner-system` | CI/CD runners | Actions Runner Controller |
 | `cert-manager` | TLS certificates | cert-manager |
-| `database` | Database services | CloudNative-PG, Dragonfly, DBGate |
+| `database` | Database services | CloudNative-PG, MariaDB Galera, Dragonfly, DBGate |
 | `default` | Test workloads | echo, LibreSpeed |
 | `external-secrets` | Secret management | External Secrets, 1Password |
 | `flux-system` | GitOps | Flux Operator, Flux Instance |
