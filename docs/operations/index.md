@@ -13,13 +13,9 @@ Guides for managing the cluster day-to-day.
 | Upgrade Talos | `task talos:upgrade-node IP=<ip>` |
 | Upgrade Kubernetes | `task talos:upgrade-k8s` |
 | Reset cluster | `task talos:reset` |
-| Failover workloads | `task failover CLUSTER=<name>` |
 | Validate K8s manifests | `task template:validate-kubernetes-config` |
 | VM console | `task vm:console VM=<name>` |
 | VM start/stop | `task vm:start VM=<name>` / `task vm:stop VM=<name>` |
-
-!!! tip
-    All tasks accept a `CLUSTER` parameter (default: `3226`).
 
 ## Pages
 

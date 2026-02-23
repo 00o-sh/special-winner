@@ -38,22 +38,17 @@ jobs:
           cache: false
 
       - name: Run init task
-        run: task init CLUSTER=test
+        run: task init
 
       - name: Prepare files
         run: |
-          cp ./.github/tests/${{ matrix.config-files }}.yaml clusters/test/cluster.yaml
-          cp ./.github/tests/nodes.yaml clusters/test/nodes.yaml
-          echo '{"AccountTag":"fake","TunnelSecret":"fake","TunnelID":"fake"}' > clusters/test/cloudflare-tunnel.json
-          mkdir -p clusters/test && touch clusters/test/kubeconfig
-          mkdir -p kubernetes/flux/test
-
-      - name: Create test Flux entry point
-        run: |
-          cp kubernetes/flux/3226/ks.yaml kubernetes/flux/test/ks.yaml
+          cp ./.github/tests/${{ matrix.config-files }}.yaml cluster.yaml
+          cp ./.github/tests/nodes.yaml nodes.yaml
+          echo '{"AccountTag":"fake","TunnelSecret":"fake","TunnelID":"fake"}' > cloudflare-tunnel.json
+          touch kubeconfig
 
       - name: Run configure task
-        run: task configure CLUSTER=test --yes
+        run: task configure --yes
 
       - name: Run generate talconfig task
         run: |
@@ -64,13 +59,13 @@ jobs:
       - name: Run flux-local test
         uses: docker://ghcr.io/allenporter/flux-local:v8.1.0@sha256:37c3c4309a351830b04f93c323adfcb0e28c368001818cd819cbce3e08828261
         with:
-          args: test --enable-helm --all-namespaces --path /github/workspace/kubernetes/flux/test -v
+          args: test --enable-helm --all-namespaces --path /github/workspace/kubernetes/flux/cluster -v
 
       - name: Dry run bootstrap talos task
         run: task bootstrap:talos --dry
 
       - name: Dry run bootstrap apps task
-        run: task bootstrap:apps CLUSTER=test --dry
+        run: task bootstrap:apps --dry
 
       - name: Run reset task
         run: task template:reset --yes

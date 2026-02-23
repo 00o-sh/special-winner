@@ -3,22 +3,20 @@
 # Handles: init (generate config from samples), configure (render + validate),
 #          tidy (archive templates after bootstrap), debug, reset.
 # Uses makejinja for Jinja2 rendering and CUE/kubeconform for validation.
-# Multi-cluster: pass CLUSTER=<name> to target a specific cluster (default: 3226).
 version: '3'
 
 vars:
   MAKEJINJA_CONFIG_FILE: '{{.ROOT_DIR}}/makejinja.toml'
   TEMPLATE_DIR: '{{.ROOT_DIR}}/templates'
   TEMPLATE_RESOURCES_DIR: '{{.ROOT_DIR}}/.taskfiles/template/resources'
-  TEMPLATE_CONFIG_FILE: '{{.CLUSTER_DIR}}/cluster.yaml'
-  TEMPLATE_NODE_CONFIG_FILE: '{{.CLUSTER_DIR}}/nodes.yaml'
+  TEMPLATE_CONFIG_FILE: '{{.ROOT_DIR}}/cluster.yaml'
+  TEMPLATE_NODE_CONFIG_FILE: '{{.ROOT_DIR}}/nodes.yaml'
 
 tasks:
 
   :init:
-    desc: Initialize configuration files [CLUSTER=3226]
+    desc: Initialize configuration files
     cmds:
-      - mkdir -p {{.CLUSTER_DIR}}
       - task: generate-template-config
       - task: generate-age-key
       - task: generate-deploy-key
@@ -27,14 +25,8 @@ tasks:
   generate-template-config:
     internal: true
     cmds:
-      - |
-        if [ -f "{{.ROOT_DIR}}/cluster.sample.yaml" ]; then
-          mv {{.ROOT_DIR}}/cluster.sample.yaml {{.TEMPLATE_CONFIG_FILE}}
-        fi
-      - |
-        if [ -f "{{.ROOT_DIR}}/nodes.sample.yaml" ]; then
-          mv {{.ROOT_DIR}}/nodes.sample.yaml {{.TEMPLATE_NODE_CONFIG_FILE}}
-        fi
+      - mv {{.TEMPLATE_CONFIG_FILE | replace ".yaml" ".sample.yaml"}} {{.TEMPLATE_CONFIG_FILE}}
+      - mv {{.TEMPLATE_NODE_CONFIG_FILE | replace ".yaml" ".sample.yaml"}} {{.TEMPLATE_NODE_CONFIG_FILE}}
     status:
       - test -f {{.TEMPLATE_CONFIG_FILE}}
       - test -f {{.TEMPLATE_NODE_CONFIG_FILE}}
@@ -49,49 +41,36 @@ tasks:
 
   generate-deploy-key:
     internal: true
-    cmd: ssh-keygen -t ed25519 -C "deploy-key" -f {{.CLUSTER_DIR}}/github-deploy.key -q -P ""
+    cmd: ssh-keygen -t ed25519 -C "deploy-key" -f {{.ROOT_DIR}}/github-deploy.key -q -P ""
     status:
-      - test -f {{.CLUSTER_DIR}}/github-deploy.key
+      - test -f {{.ROOT_DIR}}/github-deploy.key
     preconditions:
       - which ssh-keygen
 
   generate-push-token:
     internal: true
-    cmd: python -c "import secrets; print(secrets.token_hex(16))" > {{.CLUSTER_DIR}}/github-push-token.txt
+    cmd: python -c "import secrets; print(secrets.token_hex(16))" > {{.ROOT_DIR}}/github-push-token.txt
     status:
-      - test -f {{.CLUSTER_DIR}}/github-push-token.txt
+      - test -f {{.ROOT_DIR}}/github-push-token.txt
 
   :configure:
-    desc: Render and validate configuration files [CLUSTER=3226]
+    desc: Render and validate configuration files
     prompt: Any conflicting files in the kubernetes directory will be overwritten... continue?
     cmds:
       - task: validate-schemas
-      - task: symlink-cluster-config
       - task: render-configs
-      - task: cleanup-symlinks
       - task: encrypt-secrets
       - task: validate-kubernetes-config
       - task: validate-talos-config
     preconditions:
       - msg: An existing Age key interferes with the age key in this repository, rename or delete ~/.config/sops/age/keys.txt
         sh: '! test -f ~/.config/sops/age/keys.txt'
-      - msg: "File {{.TEMPLATE_CONFIG_FILE}} not found, did you run `task init CLUSTER={{.CLUSTER}}`?"
+      - msg: File cluster.yaml not found, did you run `task init`?
         sh: test -f {{.TEMPLATE_CONFIG_FILE}}
-      - msg: "File {{.TEMPLATE_NODE_CONFIG_FILE}} not found, did you run `task init CLUSTER={{.CLUSTER}}`?"
+      - msg: File nodes.yaml not found, did you run `task init`?
         sh: test -f {{.TEMPLATE_NODE_CONFIG_FILE}}
-      - msg: "File {{.CLUSTER_DIR}}/cloudflare-tunnel.json not found, see the README for information on creating it."
-        sh: test -f {{.CLUSTER_DIR}}/cloudflare-tunnel.json
-
-  symlink-cluster-config:
-    internal: true
-    cmds:
-      - ln -sf {{.TEMPLATE_CONFIG_FILE}} {{.ROOT_DIR}}/cluster.yaml
-      - ln -sf {{.TEMPLATE_NODE_CONFIG_FILE}} {{.ROOT_DIR}}/nodes.yaml
-
-  cleanup-symlinks:
-    internal: true
-    cmds:
-      - rm -f {{.ROOT_DIR}}/cluster.yaml {{.ROOT_DIR}}/nodes.yaml
+      - msg: File cloudflare-tunnel.json not found, see the README for information on creating it.
+        sh: test -f {{.ROOT_DIR}}/cloudflare-tunnel.json
 
   validate-schemas:
     internal: true
@@ -145,7 +124,7 @@ tasks:
       - which talhelper
 
   debug:
-    desc: Gather common resources in your cluster [CLUSTER=3226]
+    desc: Gather common resources in your cluster
     cmds:
       - for:
           matrix:

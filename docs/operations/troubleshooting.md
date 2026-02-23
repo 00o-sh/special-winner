@@ -254,48 +254,18 @@ kubectl -n cert-manager logs -l app.kubernetes.io/name=cert-manager --tail=50
 2. **Rate limited by Let's Encrypt**: Wait and retry (check `kubectl describe certificate`)
 3. **Secret not found**: Verify the certificate secret name matches the TLS secret reference in your Gateway
 
-## Multi-Cluster Issues
-
-### Workloads Not Starting on Standby Cluster
-
-If you've failed over to a new cluster but workloads aren't starting:
-
-1. Check `SUSPEND_DEFAULT` in the cluster's root `ks.yaml`:
-
-    ```sh
-    cat kubernetes/flux/<cluster>/ks.yaml | grep SUSPEND_DEFAULT
-    ```
-
-    The active cluster should have `SUSPEND_DEFAULT: "false"`.
-
-2. Check the `active-cluster` file matches:
-
-    ```sh
-    cat active-cluster
-    ```
-
-3. If using CI failover, check the `failover.yaml` workflow ran successfully.
-
-### Both Clusters Running Workloads
-
-If both clusters are running workloads (split-brain):
-
-1. Verify only one cluster has `SUSPEND_DEFAULT: "false"`
-2. Run `task failover CLUSTER=<desired-active>` to fix
-3. Commit and push the changes
-
 ## Reset Cluster
 
 !!! danger
     This destroys everything. Use as last resort.
 
 ```sh
-task talos:reset CLUSTER=3226
+task talos:reset
 ```
 
 After reset, re-bootstrap:
 
 ```sh
-task bootstrap:talos CLUSTER=3226
-task bootstrap:apps CLUSTER=3226
+task bootstrap:talos
+task bootstrap:apps
 ```

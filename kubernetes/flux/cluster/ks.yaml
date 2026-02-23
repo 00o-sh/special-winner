@@ -10,9 +10,6 @@ spec:
   deletionPolicy: WaitForTermination
   interval: 1h
   path: ./kubernetes/apps
-  postBuild:
-    substitute:
-      SUSPEND_DEFAULT: "false"
   prune: true
   sourceRef:
     kind: GitRepository
@@ -58,15 +55,3 @@ spec:
       target:
         group: kustomize.toolkit.fluxcd.io
         kind: Kustomization
-    - # Suspend workload Kustomizations on standby clusters
-      patch: |-
-        apiVersion: kustomize.toolkit.fluxcd.io/v1
-        kind: Kustomization
-        metadata:
-          name: _
-        spec:
-          suspend: ${SUSPEND_DEFAULT:=false}
-      target:
-        group: kustomize.toolkit.fluxcd.io
-        kind: Kustomization
-        labelSelector: "cluster.home/role notin (infra)"
