@@ -53,6 +53,11 @@ spec:
                   periodSeconds: 10
                   timeoutSeconds: 10
                   failureThreshold: 5
+            securityContext:
+              capabilities:
+                add:
+                  - NET_ADMIN
+                  - NET_RAW
             resources:
               requests:
                 cpu: 100m
@@ -62,7 +67,18 @@ spec:
 
     service:
       app:
+        type: LoadBalancer
         controller: freepbx-b1-k3s01
+        annotations:
+          external-dns.alpha.kubernetes.io/hostname: freepbx-b1-k3s01.00o.sh
+          lbipam.cilium.io/ips: 10.0.6.21
+          gethomepage.dev/enabled: "true"
+          gethomepage.dev/group: VoIP
+          gethomepage.dev/name: FreePBX B1
+          gethomepage.dev/icon: freepbx.png
+          gethomepage.dev/description: Telephony Platform
+          gethomepage.dev/href: "https://freepbx-b1-k3s01.00o.sh"
+        externalTrafficPolicy: Local
         ports:
           http:
             port: 80
@@ -72,25 +88,15 @@ spec:
             port: 8001
           admin:
             port: 8003
-
-    route:
-      app:
-        annotations:
-          gethomepage.dev/enabled: "true"
-          gethomepage.dev/group: VoIP
-          gethomepage.dev/name: FreePBX B1
-          gethomepage.dev/icon: freepbx.png
-          gethomepage.dev/description: Telephony Platform
-          gethomepage.dev/href: "https://freepbx-b1-k3s01.00o.sh"
-        hostnames:
-          - freepbx-b1-k3s01.00o.sh
-        parentRefs:
-          - name: envoy-external
-            namespace: network
-        rules:
-          - backendRefs:
-              - identifier: app
-                port: 80
+          sip-tcp:
+            port: 5060
+            protocol: TCP
+          sip-udp:
+            port: 5060
+            protocol: UDP
+          sip-tls:
+            port: 5061
+            protocol: TCP
 
     persistence:
       asterisk-etc:
