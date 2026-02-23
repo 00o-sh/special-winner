@@ -92,12 +92,19 @@ spec:
           sip-tcp:
             port: 5060
             protocol: TCP
-          sip-udp:
-            port: 5060
-            protocol: UDP
           sip-tls:
             port: 5061
             protocol: TCP
+      sip-udp:
+        type: LoadBalancer
+        controller: freepbx-b2-k3s01
+        annotations:
+          lbipam.cilium.io/ips: 10.0.6.22
+        externalTrafficPolicy: Local
+        ports:
+          sip-udp:
+            port: 5060
+            protocol: UDP
 
     persistence:
       asterisk-etc:
