@@ -9,6 +9,7 @@ spec:
     kind: OCIRepository
     name: freepbx-b3-k3s01
   interval: 1h
+  timeout: 15m
   values:
     controllers:
       freepbx-b3-k3s01:
