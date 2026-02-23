@@ -10,6 +10,15 @@
 # Template config files
 /cluster.yaml
 /nodes.yaml
+# Per-cluster config and credentials (clusters/<name>/)
+clusters/*/cluster.yaml
+clusters/*/nodes.yaml
+clusters/*/age.key
+clusters/*/kubeconfig
+clusters/*/cloudflare-tunnel.json
+clusters/*/github-deploy.key
+clusters/*/github-deploy.key.pub
+clusters/*/github-push-token.txt
 # Kubernetes
 kubeconfig
 talosconfig

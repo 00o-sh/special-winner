@@ -24,7 +24,7 @@ spec:
         kind: GitRepository
         url: "https://github.com/00o-sh/special-winner.git"
         ref: "refs/heads/main"
-        path: kubernetes/flux/cluster
+        path: kubernetes/flux/3226
       commonMetadata:
         labels:
           app.kubernetes.io/name: flux

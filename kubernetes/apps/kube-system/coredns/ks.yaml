@@ -3,6 +3,8 @@ apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
   name: coredns
+  labels:
+    cluster.home/role: infra
 spec:
   interval: 1h
   path: ./kubernetes/apps/kube-system/coredns/app
