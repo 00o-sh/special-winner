@@ -71,6 +71,7 @@ spec:
         controller: freepbx-b3-k3s01
         annotations:
           external-dns.alpha.kubernetes.io/hostname: freepbx-b3-k3s01.00o.sh
+          external-dns.alpha.kubernetes.io/target: 10.0.6.23
           lbipam.cilium.io/ips: 10.0.6.23
           gethomepage.dev/enabled: "true"
           gethomepage.dev/group: VoIP
@@ -91,12 +92,19 @@ spec:
           sip-tcp:
             port: 5060
             protocol: TCP
-          sip-udp:
-            port: 5060
-            protocol: UDP
           sip-tls:
             port: 5061
             protocol: TCP
+      sip-udp:
+        type: LoadBalancer
+        controller: freepbx-b3-k3s01
+        annotations:
+          lbipam.cilium.io/ips: 10.0.6.23
+        externalTrafficPolicy: Local
+        ports:
+          sip-udp:
+            port: 5060
+            protocol: UDP
 
     persistence:
       asterisk-etc:
