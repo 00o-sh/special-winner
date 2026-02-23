@@ -36,7 +36,7 @@ spec:
     devices: bond+
     ipam:
       mode: kubernetes
-    ipv4NativeRoutingCIDR: "${CLUSTER_POD_CIDR}"
+    ipv4NativeRoutingCIDR: "172.30.0.0/16"
     k8sServiceHost: 127.0.0.1
     k8sServicePort: 7445
     kubeProxyReplacement: true
@@ -45,7 +45,7 @@ spec:
       enabled: true
     loadBalancer:
       algorithm: maglev
-      mode: "${CILIUM_LB_MODE}"
+      mode: "dsr"
     localRedirectPolicy: true
     operator:
       dashboards:

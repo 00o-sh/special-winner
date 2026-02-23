@@ -1,3 +1,0 @@
-# Cluster 3226 configuration directory
-# Per-cluster files (gitignored): cluster.yaml, nodes.yaml, age.key, kubeconfig,
-# cloudflare-tunnel.json, github-deploy.key, github-push-token.txt

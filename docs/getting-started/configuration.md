@@ -3,25 +3,22 @@
 ## Generate Config Files
 
 ```sh
-task init CLUSTER=3226
+task init
 ```
 
-This creates `clusters/3226/cluster.yaml`, `clusters/3226/nodes.yaml`, `clusters/3226/age.key`, and other configuration files from samples. All per-cluster files live under `clusters/<cluster-name>/`.
-
-!!! tip
-    All tasks accept a `CLUSTER` parameter. The default is `3226` if omitted.
+This creates `cluster.yaml`, `nodes.yaml`, `age.key`, and other configuration files from samples.
 
 ## Edit Configuration
 
 Fill out the generated files using the comments as guidance:
 
-- **`clusters/<cluster>/cluster.yaml`** -- Cluster-wide settings (domain, network CIDRs, feature flags)
-- **`clusters/<cluster>/nodes.yaml`** -- Node definitions (hostnames, IPs, roles, disk paths)
+- **`cluster.yaml`** -- Cluster-wide settings (domain, network CIDRs, feature flags)
+- **`nodes.yaml`** -- Node definitions (hostnames, IPs, roles, disk paths)
 
 ## Render and Validate
 
 ```sh
-task configure CLUSTER=3226
+task configure
 ```
 
 This runs makejinja to render Jinja2 templates and validates the output.

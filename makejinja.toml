@@ -1,7 +1,7 @@
 # makejinja configuration (https://github.com/mirkolenz/makejinja)
 # Renders Jinja2 templates from templates/ into the repository root.
-# Data sources: cluster.yaml and nodes.yaml symlinked from clusters/<CLUSTER>/ by the task system.
-# Run via: task configure CLUSTER=3226
+# Data sources: cluster.yaml (cluster-wide settings) and nodes.yaml (node definitions).
+# Run via: task configure
 
 [makejinja]
 inputs = ["./templates/overrides","./templates/config"]

@@ -1,8 +1,8 @@
 # Special Winner
 
-A multi-cluster Kubernetes homelab deployed with [Talos Linux](https://www.talos.dev/) and [Flux CD](https://fluxcd.io/) for GitOps-driven infrastructure management with active/standby failover.
+A Kubernetes homelab cluster deployed with [Talos Linux](https://www.talos.dev/) and [Flux CD](https://fluxcd.io/) for GitOps-driven infrastructure management.
 
-Built on the [onedr0p/cluster-template](https://github.com/onedr0p/cluster-template), this repository manages multiple clusters from a single Git source using [makejinja](https://github.com/mirkolenz/makejinja) for configuration templating and delivers fully declarative, Git-managed infrastructure.
+Built on the [onedr0p/cluster-template](https://github.com/onedr0p/cluster-template), this cluster uses [makejinja](https://github.com/mirkolenz/makejinja) for configuration templating and delivers a fully declarative, Git-managed infrastructure.
 
 ## At a Glance
 
@@ -21,7 +21,7 @@ Built on the [onedr0p/cluster-template](https://github.com/onedr0p/cluster-templ
 
 ## What's Deployed
 
-**65+ applications** across **17 namespaces** and **2 clusters** (active/standby) covering:
+**65+ applications** across **17 namespaces** covering:
 
 - **Media** -- Plex, Radarr, Sonarr, Prowlarr, Bazarr, qBittorrent, and more
 - **Virtualization** -- KubeVirt with Debian, Ubuntu, Windows, and FreePBX VMs

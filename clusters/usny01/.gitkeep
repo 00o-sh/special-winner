@@ -1,4 +1,0 @@
-# Cluster usny01 (US-NY-01) configuration directory
-# Subnet: 10.1.6.0/24
-# Per-cluster files (gitignored): cluster.yaml, nodes.yaml, age.key, kubeconfig,
-# cloudflare-tunnel.json, github-deploy.key, github-push-token.txt

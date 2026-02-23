@@ -7,9 +7,6 @@ import makejinja
 import re
 import json
 
-# Per-cluster credential directory, set by Plugin.data() based on cluster_name
-_cluster_dir = '.'
-
 
 # Return the filename of a path without the j2 extension
 def basename(value: str) -> str:
@@ -28,9 +25,7 @@ def nthhost(value: str, query: int) -> str:
 
 
 # Return the age public or private key from age.key
-def age_key(key_type: str, file_path: str = None) -> str:
-    if file_path is None:
-        file_path = f'{_cluster_dir}/age.key'
+def age_key(key_type: str, file_path: str = 'age.key') -> str:
     try:
         with open(file_path, 'r') as file:
             file_content = file.read().strip()
@@ -53,9 +48,7 @@ def age_key(key_type: str, file_path: str = None) -> str:
 
 
 # Return cloudflare tunnel fields from cloudflare-tunnel.json
-def cloudflare_tunnel_id(file_path: str = None) -> str:
-    if file_path is None:
-        file_path = f'{_cluster_dir}/cloudflare-tunnel.json'
+def cloudflare_tunnel_id(file_path: str = 'cloudflare-tunnel.json') -> str:
     try:
         with open(file_path, 'r') as file:
             data = json.load(file)
@@ -75,9 +68,7 @@ def cloudflare_tunnel_id(file_path: str = None) -> str:
 
 
 # Return cloudflare tunnel fields from cloudflare-tunnel.json in TUNNEL_TOKEN format
-def cloudflare_tunnel_secret(file_path: str = None) -> str:
-    if file_path is None:
-        file_path = f'{_cluster_dir}/cloudflare-tunnel.json'
+def cloudflare_tunnel_secret(file_path: str = 'cloudflare-tunnel.json') -> str:
     try:
         with open(file_path, 'r') as file:
             data = json.load(file)
@@ -100,9 +91,7 @@ def cloudflare_tunnel_secret(file_path: str = None) -> str:
 
 
 # Return the GitHub deploy key from github-deploy.key
-def github_deploy_key(file_path: str = None) -> str:
-    if file_path is None:
-        file_path = f'{_cluster_dir}/github-deploy.key'
+def github_deploy_key(file_path: str = 'github-deploy.key') -> str:
     try:
         with open(file_path, 'r') as file:
             return file.read().strip()
@@ -113,9 +102,7 @@ def github_deploy_key(file_path: str = None) -> str:
 
 
 # Return the Flux / GitHub push token from github-push-token.txt
-def github_push_token(file_path: str = None) -> str:
-    if file_path is None:
-        file_path = f'{_cluster_dir}/github-push-token.txt'
+def github_push_token(file_path: str = 'github-push-token.txt') -> str:
     try:
         with open(file_path, 'r') as file:
             return file.read().strip()
@@ -123,16 +110,6 @@ def github_push_token(file_path: str = None) -> str:
         raise FileNotFoundError(f"File not found: {file_path}")
     except Exception as e:
         raise RuntimeError(f"Unexpected error while reading {file_path}: {e}")
-
-
-# Read active-cluster file and determine if this cluster's workloads should be suspended
-def is_cluster_suspended(cluster_name: str, file_path: str = 'active-cluster') -> bool:
-    try:
-        with open(file_path, 'r') as file:
-            active_cluster = file.read().strip()
-        return cluster_name != active_cluster
-    except FileNotFoundError:
-        return False
 
 
 # Return a list of files in the talos patches directory
@@ -149,13 +126,7 @@ class Plugin(makejinja.plugin.Plugin):
 
 
     def data(self) -> makejinja.plugin.Data:
-        global _cluster_dir
         data = self._data
-
-        # Set per-cluster credential directory based on cluster_name
-        cluster_name = data.get('cluster_name', '')
-        if cluster_name:
-            _cluster_dir = f'clusters/{cluster_name}'
 
         # Set default values for optional fields
         data.setdefault('node_default_gateway', nthhost(data.get('node_cidr'), 1))
@@ -175,9 +146,6 @@ class Plugin(makejinja.plugin.Plugin):
         # If there is more than one node, enable spegel
         spegel_enabled = len(data.get('nodes')) > 1
         data.setdefault('spegel_enabled', spegel_enabled)
-
-        # Determine if workloads should be suspended (active-cluster failover)
-        data['suspend_default'] = str(is_cluster_suspended(cluster_name)).lower()
 
         return data
 
