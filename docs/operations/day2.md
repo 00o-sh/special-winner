@@ -76,6 +76,52 @@ helm history <release-name> -n <namespace>
 helm rollback <release-name> <revision> -n <namespace>
 ```
 
+## Cluster Failover
+
+The repository supports active/standby cluster failover. One cluster runs all workloads while the other keeps only infra running (Flux, Cilium, CoreDNS, cert-manager, OpenEBS, External Secrets).
+
+### How It Works
+
+- The `active-cluster` file at repo root defines which cluster is active (e.g. `3226`)
+- Each cluster's root `ks.yaml` (`kubernetes/flux/<cluster>/ks.yaml`) has `SUSPEND_DEFAULT` in `postBuild.substitute`
+- A Flux patch injects `suspend: ${SUSPEND_DEFAULT}` into all non-infra Kustomizations
+- Infra apps have `cluster.home/role: infra` label and are excluded from the patch
+- Cloudflare tunnel credentials are shared between clusters (same tunnel ID, seamless DNS)
+
+### Failover Methods
+
+**Local task** (recommended):
+
+```sh
+task failover CLUSTER=usny01
+```
+
+This updates the `active-cluster` file and both root `ks.yaml` files locally. Then commit and push.
+
+**Git-only (CI handles it)**:
+
+Edit the `active-cluster` file, commit, and push. The `failover.yaml` GitHub Action automatically updates both root `ks.yaml` files and commits the changes.
+
+### What Stays Running on Standby
+
+These infra namespaces are never suspended:
+
+- `cert-manager`
+- `flux-system`
+- `kube-system` (Cilium, CoreDNS, etc.)
+- `openebs-system`
+- `external-secrets`
+
+### Adding a New Infra App
+
+To mark an app as infra (never suspended during failover), add the `cluster.home/role: infra` label to its `ks.yaml`:
+
+```yaml
+metadata:
+  labels:
+    cluster.home/role: infra
+```
+
 ## Renovate
 
 Renovate runs on a weekend schedule and creates PRs for dependency updates:

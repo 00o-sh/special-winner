@@ -52,7 +52,7 @@ spec:
   infrastructure:
     annotations:
       external-dns.alpha.kubernetes.io/hostname: external.${SECRET_DOMAIN}
-      lbipam.cilium.io/ips: "10.0.6.13"
+      lbipam.cilium.io/ips: "${CLOUDFLARE_GATEWAY_ADDR}"
   listeners:
     - name: http
       protocol: HTTP
@@ -82,7 +82,7 @@ spec:
   infrastructure:
     annotations:
       external-dns.alpha.kubernetes.io/hostname: internal.${SECRET_DOMAIN}
-      lbipam.cilium.io/ips: "10.0.6.12"
+      lbipam.cilium.io/ips: "${CLUSTER_GATEWAY_ADDR}"
   listeners:
     - name: http
       protocol: HTTP

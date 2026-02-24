@@ -6,8 +6,11 @@
 ## Stage 1: Install Talos
 
 ```sh
-task bootstrap:talos
+task bootstrap:talos CLUSTER=3226
 ```
+
+!!! tip
+    All tasks accept a `CLUSTER` parameter. The default is `3226` if omitted.
 
 Push the generated secrets:
 
@@ -22,7 +25,7 @@ git push
 This installs Cilium (CNI), CoreDNS (DNS), Flux (GitOps), and syncs the cluster to Git:
 
 ```sh
-task bootstrap:apps
+task bootstrap:apps CLUSTER=3226
 ```
 
 !!! note
@@ -46,3 +49,38 @@ The `scripts/bootstrap-apps.sh` script runs these steps:
 6. **Apply ClusterSecretStore** -- Configures 1Password integration
 
 After bootstrap, Flux takes over and continuously reconciles the cluster state from Git.
+
+## Bootstrapping Additional Clusters
+
+The repository supports managing multiple clusters. To add a new cluster:
+
+1. **Initialize** the cluster config:
+
+    ```sh
+    task init CLUSTER=<new-name>
+    ```
+
+2. **Edit** `clusters/<new-name>/cluster.yaml` and `clusters/<new-name>/nodes.yaml`
+
+3. **Create a Flux entry point** (new clusters start as standby):
+
+    ```sh
+    cp kubernetes/flux/3226/ks.yaml kubernetes/flux/<new-name>/ks.yaml
+    ```
+
+    Set `SUSPEND_DEFAULT: "true"` in the new `ks.yaml` so workloads start suspended.
+
+4. **Render and validate**:
+
+    ```sh
+    task configure CLUSTER=<new-name>
+    ```
+
+5. **Bootstrap**:
+
+    ```sh
+    task bootstrap:talos CLUSTER=<new-name>
+    task bootstrap:apps CLUSTER=<new-name>
+    ```
+
+See [Failover](../operations/day2.md#cluster-failover) for activating the new cluster.

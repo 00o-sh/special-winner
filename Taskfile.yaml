@@ -8,16 +8,21 @@ set: [pipefail]
 shopt: [globstar]
 
 vars:
+  # Cluster name for multi-cluster support (override with: task <cmd> CLUSTER=<name>)
+  CLUSTER: '{{.CLUSTER | default .cluster | default "3226"}}'
+  CLUSTER_DIR: '{{.ROOT_DIR}}/clusters/{{.CLUSTER}}'
   BOOTSTRAP_DIR: '{{.ROOT_DIR}}/bootstrap'
   KUBERNETES_DIR: '{{.ROOT_DIR}}/kubernetes'
   SCRIPTS_DIR: '{{.ROOT_DIR}}/scripts'
   TALOS_DIR: '{{.ROOT_DIR}}/talos'
   PRIVATE_DIR: '{{.ROOT_DIR}}/.private'
   TALOSCONFIG: '{{.ROOT_DIR}}/talos/clusterconfig/talosconfig'
+  KUBECONFIG: '{{.CLUSTER_DIR}}/kubeconfig'
+  SOPS_AGE_KEY_FILE: '{{.CLUSTER_DIR}}/age.key'
 
 env:
-  KUBECONFIG: '{{.ROOT_DIR}}/kubeconfig'
-  SOPS_AGE_KEY_FILE: '{{.ROOT_DIR}}/age.key'
+  KUBECONFIG: '{{.KUBECONFIG}}'
+  SOPS_AGE_KEY_FILE: '{{.SOPS_AGE_KEY_FILE}}'
   TALOSCONFIG: '{{.TALOSCONFIG}}'
 
 includes:
@@ -36,3 +41,24 @@ tasks:
     preconditions:
       - test -f {{.KUBECONFIG}}
       - which flux
+
+  failover:
+    desc: Failover workloads to a cluster [CLUSTER=usny01]
+    prompt: This will failover all workloads to cluster {{.CLUSTER}}... continue?
+    cmds:
+      - echo "{{.CLUSTER}}" > {{.ROOT_DIR}}/active-cluster
+      - |
+        for dir in {{.ROOT_DIR}}/kubernetes/flux/*/; do
+          CLUSTER_NAME=$(basename "$dir")
+          KS_FILE="${dir}ks.yaml"
+          [ -f "$KS_FILE" ] || continue
+          if [ "$CLUSTER_NAME" = "{{.CLUSTER}}" ]; then
+            SUSPEND="false"
+          else
+            SUSPEND="true"
+          fi
+          echo "Setting SUSPEND_DEFAULT=${SUSPEND} for cluster ${CLUSTER_NAME}"
+          yq -i '(.spec.postBuild.substitute.SUSPEND_DEFAULT) = "'"${SUSPEND}"'"' "$KS_FILE"
+        done
+    preconditions:
+      - which yq

@@ -1,0 +1,12 @@
+---
+apiVersion: externaldns.k8s.io/v1alpha1
+kind: DNSEndpoint
+metadata:
+  name: envoy-internal-cluster
+spec:
+  endpoints:
+    - dnsName: internal-${CLUSTER_NAME}.${SECRET_DOMAIN}
+      recordTTL: 300
+      recordType: A
+      targets:
+        - ${CLUSTER_GATEWAY_ADDR}
