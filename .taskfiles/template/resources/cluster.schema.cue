@@ -26,6 +26,10 @@ import (
 	cilium_bgp_router_asn?: string & !=""
 	cilium_bgp_node_asn?: string & !=""
 	cilium_loadbalancer_mode?: *"dsr" | "snat"
+	nas_hostname: string & !=""
+	nas_storage_path?: *"/mnt/Speed" | string & !=""
+	nas_media_path?: *"/mnt/Rust/Media" | string & !=""
+	unifi_host: string & !=""
 }
 
 #Config

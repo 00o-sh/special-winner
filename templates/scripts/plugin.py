@@ -137,6 +137,10 @@ class Plugin(makejinja.plugin.Plugin):
         data.setdefault('repository_branch', 'main')
         data.setdefault('repository_visibility', 'public')
         data.setdefault('cilium_loadbalancer_mode', 'dsr')
+        data.setdefault('nas_hostname', '')
+        data.setdefault('nas_storage_path', '/mnt/Speed')
+        data.setdefault('nas_media_path', '/mnt/Rust/Media')
+        data.setdefault('unifi_host', '')
 
         # If all BGP keys are set, enable BGP
         bgp_keys = ['cilium_bgp_router_addr', 'cilium_bgp_router_asn', 'cilium_bgp_node_asn']

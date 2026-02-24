@@ -127,6 +127,19 @@ import_paths = ["./templates/scripts"]
 - Blocks: `#% if condition %# ... #% endif %#`
 - Comments: `#| comment #|`
 
+### Cluster-Specific Variables
+
+These variables are set in `cluster.yaml` and rendered into `kubernetes/components/sops/cluster-secrets.sops.yaml` (the `cluster-secrets` Secret used by Flux postBuild substitution).
+
+| Variable | Required | Default | Description |
+|----------|----------|---------|-------------|
+| `NAS_HOSTNAME` | Yes | — | Hostname or IP of your NAS, used for NFS mounts |
+| `NAS_STORAGE_PATH` | No | `/mnt/Speed` | NFS path on the NAS for general storage |
+| `NAS_MEDIA_PATH` | No | `/mnt/Rust/Media` | NFS path on the NAS for media files |
+| `UNIFI_HOST` | Yes | — | Base URL of your Unifi controller (e.g. `https://10.10.10.1`) |
+
+These are in addition to the existing `SECRET_DOMAIN` variable (sourced from `cloudflare_domain`).
+
 ### Secret Management
 
 **`.sops.yaml`** - Encryption configuration

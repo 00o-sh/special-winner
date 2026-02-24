@@ -1,0 +1,43 @@
+---
+# Node networking
+node_cidr: "10.10.10.0/24"
+# node_default_gateway: ""   # Defaults to first host in node_cidr
+# node_vlan_tag: ""
+# node_dns_servers: ["1.1.1.1"]
+# node_ntp_servers: ["162.159.200.123"]
+
+# Cluster networking
+# cluster_pod_cidr: "10.42.0.0/16"
+# cluster_svc_cidr: "10.43.0.0/16"
+cluster_api_addr: "10.10.10.254"
+# cluster_api_tls_sans: []
+cluster_gateway_addr: "10.10.10.252"
+cluster_dns_gateway_addr: "10.10.10.253"
+
+# Git repository
+repository_name: "youruser/your-repo"
+# repository_branch: "main"
+repository_visibility: "private"
+
+# Cloudflare
+cloudflare_domain: "example.com"
+cloudflare_token: ""
+cloudflare_gateway_addr: "10.10.10.251"
+
+# Cilium BGP (optional)
+# cilium_bgp_router_addr: ""
+# cilium_bgp_router_asn: ""
+# cilium_bgp_node_asn: ""
+# cilium_loadbalancer_mode: "dsr"  # "dsr" or "snat"
+
+# NAS (Network Attached Storage)
+# Hostname or IP of your NAS, used for NFS mounts across the cluster
+nas_hostname: ""
+# Path on the NAS for general storage (default: /mnt/Speed)
+# nas_storage_path: "/mnt/Speed"
+# Path on the NAS for media files (default: /mnt/Rust/Media)
+# nas_media_path: "/mnt/Rust/Media"
+
+# Unifi
+# Base URL of your Unifi controller, used for DNS and network automation
+unifi_host: ""
