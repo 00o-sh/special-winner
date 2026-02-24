@@ -5,11 +5,11 @@ kind: ScrapeConfig
 metadata:
   name: node-exporter
 spec:
-  # Note: Requires node_exporter running on NAS at nas.3226texas.com:9100
+  # Note: Requires node_exporter running on NAS at ${NAS_HOSTNAME}:9100
   # Install: https://github.com/prometheus/node_exporter
   staticConfigs:
     - targets:
-        - nas.3226texas.com:9100
+        - ${NAS_HOSTNAME}:9100
   metricsPath: /metrics
   relabelings:
     - action: replace
@@ -22,12 +22,12 @@ kind: ScrapeConfig
 metadata:
   name: smartctl-exporter
 spec:
-  # Note: Requires smartctl_exporter running on NAS at nas.3226texas.com:9633
+  # Note: Requires smartctl_exporter running on NAS at ${NAS_HOSTNAME}:9633
   # Install: https://github.com/prometheus-community/smartctl_exporter
   # Monitors disk health (SMART data)
   staticConfigs:
     - targets:
-        - nas.3226texas.com:9633
+        - ${NAS_HOSTNAME}:9633
   metricsPath: /metrics
   relabelings:
     - action: replace

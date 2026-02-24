@@ -18,6 +18,9 @@ spec:
   interval: 1h
   path: ./kubernetes/apps/media/qbittorrent/app
   postBuild:
+    substituteFrom:
+      - name: cluster-secrets
+        kind: Secret
     substitute:
       APP: qbittorrent
       VOLSYNC_CAPACITY: 2Gi

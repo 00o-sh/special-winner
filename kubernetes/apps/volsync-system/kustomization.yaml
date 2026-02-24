@@ -19,8 +19,8 @@ patches:
         value:
           name: repository
           nfs:
-            server: nas.3226texas.com
-            path: /mnt/Speed/VolsyncKopia
+            server: ${NAS_HOSTNAME}
+            path: ${NAS_STORAGE_PATH}/VolsyncKopia
       - op: add
         path: /spec/jobTemplate/spec/template/spec/containers/0/volumeMounts/-
         value:
@@ -52,8 +52,8 @@ patches:
         value:
           name: repository
           nfs:
-            server: nas.3226texas.com
-            path: /mnt/Speed/VolsyncKopia
+            server: ${NAS_HOSTNAME}
+            path: ${NAS_STORAGE_PATH}/VolsyncKopia
       - op: add
         path: /spec/template/spec/containers/0/volumeMounts/-
         value:

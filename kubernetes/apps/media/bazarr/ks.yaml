@@ -18,6 +18,9 @@ spec:
   interval: 1h
   path: ./kubernetes/apps/media/bazarr/app
   postBuild:
+    substituteFrom:
+      - name: cluster-secrets
+        kind: Secret
     substitute:
       APP: bazarr
       VOLSYNC_CAPACITY: 5Gi

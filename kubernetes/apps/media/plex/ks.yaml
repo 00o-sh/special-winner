@@ -18,6 +18,9 @@ spec:
   interval: 1h
   path: ./kubernetes/apps/media/plex/app
   postBuild:
+    substituteFrom:
+      - name: cluster-secrets
+        kind: Secret
     substitute:
       APP: plex
       VOLSYNC_CAPACITY: 50Gi

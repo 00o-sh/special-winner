@@ -11,7 +11,7 @@ spec:
   targets:
     staticConfig:
       static:
-        - nas.3226texas.com
+        - ${NAS_HOSTNAME}
         # Add your internal hosts here
         # - router.local
         # - switch.local
@@ -33,7 +33,7 @@ spec:
   targets:
     staticConfig:
       static:
-        - nas.3226texas.com:2049  # NFS port
+        - ${NAS_HOSTNAME}:2049  # NFS port
         # Add other TCP probes here
         # - router.local:443
         # - switch.local:80

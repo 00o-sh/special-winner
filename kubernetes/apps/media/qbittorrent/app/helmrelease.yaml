@@ -111,8 +111,8 @@ spec:
             subPath: .qbt.toml
       media:
         type: nfs
-        server: nas.3226texas.com
-        path: /mnt/Rust/Media
+        server: ${NAS_HOSTNAME}
+        path: ${NAS_MEDIA_PATH}
         globalMounts:
           - path: /media/Downloads/qbittorrent
             subPath: Downloads/qbittorrent

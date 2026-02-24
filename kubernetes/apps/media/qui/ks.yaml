@@ -18,6 +18,9 @@ spec:
   interval: 1h
   path: ./kubernetes/apps/media/qui/app
   postBuild:
+    substituteFrom:
+      - name: cluster-secrets
+        kind: Secret
     substitute:
       APP: qui
       VOLSYNC_CAPACITY: 2Gi

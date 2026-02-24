@@ -112,8 +112,8 @@ spec:
             subPath: repository.config
       repository:
         type: nfs
-        server: nas.3226texas.com
-        path: /mnt/Speed/VolsyncKopia
+        server: ${NAS_HOSTNAME}
+        path: ${NAS_STORAGE_PATH}/VolsyncKopia
         globalMounts:
           - path: /repository
       tmpfs:
