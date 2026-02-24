@@ -99,10 +99,14 @@ Also: `grep -r "10.0.6.1" kubernetes/apps/network/unifi-dns/`
 
 Every match should be addressed by this PR.
 
+**IMPORTANT**: Search both `kubernetes/` (committed manifests for running clusters) and `templates/` (Jinja2 templates for new clusters). Changes must be made in the actual manifest files under `kubernetes/`, not just in templates. Flux reads the committed manifests directly — templates are only used during `task configure` to generate files like `.sops.yaml` and talos configs.
+
 ## Validation
 
-After making changes, verify with: `task configure CLUSTER=3226`
-The rendered output should have the actual hostnames substituted in.
+After making changes:
+1. Run `task configure CLUSTER=3226` to verify template-rendered files still work
+2. Re-run the grep searches above — there should be zero matches for hardcoded values
+3. Verify `${VARIABLE}` substitution syntax is correct in all modified files (Flux will substitute at reconciliation time from `cluster-secrets`)
 
 ## Commit
 

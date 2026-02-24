@@ -15,6 +15,20 @@ PR 1 (add variables)
 
 PR 6 is the most impactful — without it, failover doesn't actually work for active→standby transitions. It can be started in parallel with PRs 3-5 once PR 2 lands.
 
+## Key principle: update existing cluster files, not just templates
+
+This repo has two layers:
+
+- **Templates** (`templates/`): Jinja2 `.j2` files rendered by `task configure` — used to generate `.sops.yaml`, talos configs, and a few Kubernetes manifests.
+- **Committed manifests** (`kubernetes/`): The actual YAML files Flux reads. Most app manifests here are NOT generated from templates — they are committed directly.
+- **Cluster configs** (`clusters/<name>/cluster.yaml`): Gitignored, local-only files that hold per-cluster values. These are the source of truth for template rendering.
+
+When making changes, always update:
+1. The committed manifests in `kubernetes/` (what the running cluster uses)
+2. Any `.j2` templates in `templates/` that render related files
+3. The existing `clusters/<name>/cluster.yaml` files for every deployed cluster (not just the sample)
+4. Test configs in `.github/tests/` (for CI)
+
 ## Prompts
 
 | PR | File | Description |

@@ -90,6 +90,12 @@ Steps after deploying:
 3. Update 1Password with new access keys if they changed
 4. Volsync begins backing up to the new empty repository
 
+## Important: check both manifests and templates
+
+The Garage HelmRelease is a committed manifest under `kubernetes/apps/`. Also check `templates/` for any `.j2` files that might reference Garage NFS paths — both must be updated together.
+
+Run: `grep -r "nas\.\|garage/data\|garage/meta" kubernetes/apps/volsync-system/garage/ templates/`
+
 ## Validation
 
 1. Verify Garage pod starts and is healthy (check `garage-api.00o.sh/health`)

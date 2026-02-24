@@ -63,9 +63,29 @@ unifi_host: "https://10.10.10.1"
 # nas_media_path: ""
 ```
 
-### 5. Add to cluster sample config
+### 5. Update existing cluster config files
 
-Edit `templates/config/cluster.sample.yaml` (or wherever the sample cluster.yaml lives). Add the new fields with comments explaining them.
+**IMPORTANT**: The `clusters/<name>/cluster.yaml` files are gitignored but are the actual source of truth for each deployed cluster. Templates and test configs only matter for new clusters and CI — existing clusters won't pick up new variables unless their `cluster.yaml` is updated.
+
+Update each existing cluster's config file with the real values for that site:
+
+**`clusters/3226/cluster.yaml`** — add:
+```yaml
+nas_hostname: "nas.3226texas.com"
+nas_storage_path: "/mnt/Speed"
+nas_media_path: "/mnt/Rust/Media"
+unifi_host: "https://10.0.6.1"
+```
+
+**`clusters/usny01/cluster.yaml`** — add with usny01's actual values:
+```yaml
+nas_hostname: "<usny01-nas-hostname>"
+nas_storage_path: "<usny01-storage-path>"
+nas_media_path: "<usny01-media-path>"
+unifi_host: "<usny01-unifi-host>"
+```
+
+If you don't know usny01's values yet, use placeholder values and leave a comment — but the fields MUST exist or `task configure CLUSTER=usny01` will fail CUE validation (since `nas_hostname` and `unifi_host` are required).
 
 ### 6. Update CLAUDE.md
 
@@ -73,7 +93,9 @@ In the "Cluster-Specific Variables" table in CLAUDE.md, add rows for `NAS_HOSTNA
 
 ## Validation
 
-Run `task configure` (it will use the test configs in CI). The new variables should appear in the rendered `kubernetes/components/sops/cluster-secrets.sops.yaml` output.
+Run `task configure CLUSTER=3226` to verify the new variables render correctly for the existing cluster. The new variables should appear in the rendered `kubernetes/components/sops/cluster-secrets.sops.yaml` output.
+
+If usny01's `cluster.yaml` exists, also run `task configure CLUSTER=usny01` to verify it passes CUE validation.
 
 ## Commit
 

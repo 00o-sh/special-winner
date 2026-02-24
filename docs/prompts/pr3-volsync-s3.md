@@ -151,6 +151,12 @@ garage bucket allow volsync --read --write --owner --key volsync-key
 
 Existing backups on NFS will NOT be accessible after this change. This is a clean start for the S3-backed repository. If the user wants to migrate existing snapshots, they can use `kopia repository sync-to` before cutting over, but that's a manual step outside this PR.
 
+## Important: check both manifests and templates
+
+All files listed above are committed manifests under `kubernetes/` — these are the files Flux reads directly. But also search `templates/` for any `.j2` template files that render NFS-related config (e.g., if PR2 converted MutatingAdmissionPolicy files to Jinja2 templates). Both must be updated together.
+
+Run: `grep -r "nas\.\|VolsyncKopia\|/repository" kubernetes/apps/volsync-system/ templates/`
+
 ## Validation
 
 1. After deploying, verify Volsync mover jobs start without NFS mount errors
