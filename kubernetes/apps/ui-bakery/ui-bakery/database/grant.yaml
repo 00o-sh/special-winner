@@ -8,9 +8,9 @@ spec:
     name: mariadb
   privileges:
     - "ALL PRIVILEGES"
-  database: ui_bakery
+  database: bakery
   table: "*"
-  username: ui_bakery
+  username: bakery
   host: "%"
   grantOption: false
   cleanupPolicy: Skip

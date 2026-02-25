@@ -6,7 +6,7 @@ metadata:
 spec:
   mariaDbRef:
     name: mariadb
-  name: ui_bakery
+  name: bakery
   characterSet: utf8mb4
   collate: utf8mb4_unicode_ci
   cleanupPolicy: Skip
