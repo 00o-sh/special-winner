@@ -6,7 +6,7 @@ metadata:
 spec:
   mariaDbRef:
     name: mariadb
-  name: ui_bakery
+  name: bakery
   passwordSecretKeyRef:
     name: ui-bakery-db-secret
     key: password
