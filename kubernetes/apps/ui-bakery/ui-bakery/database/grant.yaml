@@ -2,7 +2,7 @@
 apiVersion: k8s.mariadb.com/v1alpha1
 kind: Grant
 metadata:
-  name: ui-bakery
+  name: ui-bakery-bakery
 spec:
   mariaDbRef:
     name: mariadb
