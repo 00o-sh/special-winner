@@ -1,0 +1,18 @@
+---
+apiVersion: k8s.mariadb.com/v1alpha1
+kind: Grant
+metadata:
+  name: ui-bakery
+spec:
+  mariaDbRef:
+    name: mariadb
+  privileges:
+    - "ALL PRIVILEGES"
+  database: ui_bakery
+  table: "*"
+  username: ui_bakery
+  host: "%"
+  grantOption: false
+  cleanupPolicy: Skip
+  requeueInterval: 30s
+  retryInterval: 5s
