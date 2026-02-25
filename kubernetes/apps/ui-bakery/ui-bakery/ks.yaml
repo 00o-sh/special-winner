@@ -1,0 +1,52 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/kustomize.toolkit.fluxcd.io/kustomization_v1.json
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: ui-bakery-database
+  namespace: flux-system
+spec:
+  targetNamespace: database
+  commonMetadata:
+    labels:
+      app.kubernetes.io/name: ui-bakery
+  dependsOn:
+    - name: mariadb-cluster
+      namespace: database
+    - name: onepassword
+      namespace: external-secrets
+  interval: 1h
+  path: ./kubernetes/apps/ui-bakery/ui-bakery/database
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+    namespace: flux-system
+  wait: true
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/kustomize.toolkit.fluxcd.io/kustomization_v1.json
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: &app ui-bakery
+  namespace: flux-system
+spec:
+  targetNamespace: ui-bakery
+  commonMetadata:
+    labels:
+      app.kubernetes.io/name: *app
+  dependsOn:
+    - name: ui-bakery-database
+    - name: onepassword
+      namespace: external-secrets
+  interval: 1h
+  path: ./kubernetes/apps/ui-bakery/ui-bakery/app
+  postBuild:
+    substitute:
+      APP: *app
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+    namespace: flux-system
+  wait: false
