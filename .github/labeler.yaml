@@ -134,6 +134,11 @@ area/system-upgrade:
       - any-glob-to-any-file:
           - kubernetes/apps/system-upgrade/**/*
 
+area/ui-bakery:
+  - changed-files:
+      - any-glob-to-any-file:
+          - kubernetes/apps/ui-bakery/**/*
+
 area/utils:
   - changed-files:
       - any-glob-to-any-file:
@@ -449,6 +454,11 @@ app/tuppr:
   - changed-files:
       - any-glob-to-any-file:
           - kubernetes/apps/system-upgrade/tuppr/**/*
+
+app/ui-bakery:
+  - changed-files:
+      - any-glob-to-any-file:
+          - kubernetes/apps/ui-bakery/ui-bakery/**/*
 
 app/forgejo:
   - changed-files:
