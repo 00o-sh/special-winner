@@ -30,7 +30,7 @@ TALOSCONFIG = "{{config_root}}/talos/clusterconfig/talosconfig"
 "aqua:kubernetes-sigs/kustomize" = "5.7.1"    # Kustomize for manifest composition
 "aqua:yannh/kubeconform" = "0.7.0"            # Kubernetes manifest validation
 "aqua:derailed/k9s" = "0.50.18"               # Terminal-based Kubernetes dashboard
-"aqua:kubevirt/kubevirt/virtctl" = "1.7.0"    # KubeVirt VM management CLI
+"aqua:kubevirt/kubevirt/virtctl" = "1.7.1"    # KubeVirt VM management CLI
 
 # Networking
 "aqua:cilium/cilium-cli" = "0.19.2"           # Cilium CNI management and connectivity testing
