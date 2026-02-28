@@ -22,7 +22,11 @@ spec:
             env:
               UI_BAKERY_APP_SERVER_NAME: https://uibakery.00o.sh
               UI_BAKERY_DB_HOST: mariadb-primary.database.svc.cluster.local
+              UI_BAKERY_DB_PORT: "3306"
+              UI_BAKERY_DB_DATABASE: bakery
+              UI_BAKERY_DB_USERNAME: bakery
               UI_BAKERY_INTERNAL_API_URL: http://bakery-back:8080
+              UI_BAKERY_INTERNAL_DATABASE_ENABLED: "false"
             envFrom:
               - secretRef:
                   name: ui-bakery-secret
@@ -45,6 +49,8 @@ spec:
                 memory: 256Mi
 
       backend:
+        annotations:
+          reloader.stakater.com/auto: "true"
         containers:
           app:
             image:
@@ -53,7 +59,11 @@ spec:
             env:
               UI_BAKERY_APP_SERVER_NAME: https://uibakery.00o.sh
               UI_BAKERY_DB_HOST: mariadb-primary.database.svc.cluster.local
+              UI_BAKERY_DB_PORT: "3306"
+              UI_BAKERY_DB_DATABASE: bakery
+              UI_BAKERY_DB_USERNAME: bakery
               UI_BAKERY_INTERNAL_API_URL: http://bakery-back:8080
+              UI_BAKERY_INTERNAL_DATABASE_ENABLED: "false"
             envFrom:
               - secretRef:
                   name: ui-bakery-secret
@@ -85,6 +95,8 @@ spec:
                 memory: 2048Mi
 
       automation:
+        annotations:
+          reloader.stakater.com/auto: "true"
         containers:
           app:
             image:
@@ -93,7 +105,11 @@ spec:
             env:
               UI_BAKERY_APP_SERVER_NAME: https://uibakery.00o.sh
               UI_BAKERY_DB_HOST: mariadb-primary.database.svc.cluster.local
+              UI_BAKERY_DB_PORT: "3306"
+              UI_BAKERY_DB_DATABASE: bakery
+              UI_BAKERY_DB_USERNAME: bakery
               UI_BAKERY_INTERNAL_API_URL: http://bakery-back:8080
+              UI_BAKERY_INTERNAL_DATABASE_ENABLED: "false"
             envFrom:
               - secretRef:
                   name: ui-bakery-secret
@@ -125,6 +141,8 @@ spec:
                 memory: 1024Mi
 
       bakery-front:
+        annotations:
+          reloader.stakater.com/auto: "true"
         containers:
           app:
             image:
@@ -133,7 +151,11 @@ spec:
             env:
               UI_BAKERY_APP_SERVER_NAME: https://uibakery.00o.sh
               UI_BAKERY_DB_HOST: mariadb-primary.database.svc.cluster.local
+              UI_BAKERY_DB_PORT: "3306"
+              UI_BAKERY_DB_DATABASE: bakery
+              UI_BAKERY_DB_USERNAME: bakery
               UI_BAKERY_INTERNAL_API_URL: http://bakery-back:8080
+              UI_BAKERY_INTERNAL_DATABASE_ENABLED: "false"
             envFrom:
               - secretRef:
                   name: ui-bakery-secret
@@ -156,6 +178,8 @@ spec:
                 memory: 256Mi
 
       datasource:
+        annotations:
+          reloader.stakater.com/auto: "true"
         containers:
           app:
             image:
@@ -164,7 +188,11 @@ spec:
             env:
               UI_BAKERY_APP_SERVER_NAME: https://uibakery.00o.sh
               UI_BAKERY_DB_HOST: mariadb-primary.database.svc.cluster.local
+              UI_BAKERY_DB_PORT: "3306"
+              UI_BAKERY_DB_DATABASE: bakery
+              UI_BAKERY_DB_USERNAME: bakery
               UI_BAKERY_INTERNAL_API_URL: http://bakery-back:8080
+              UI_BAKERY_INTERNAL_DATABASE_ENABLED: "false"
             envFrom:
               - secretRef:
                   name: ui-bakery-secret
@@ -196,6 +224,8 @@ spec:
                 memory: 1024Mi
 
       python-runtime:
+        annotations:
+          reloader.stakater.com/auto: "true"
         containers:
           app:
             image:
@@ -204,7 +234,11 @@ spec:
             env:
               UI_BAKERY_APP_SERVER_NAME: https://uibakery.00o.sh
               UI_BAKERY_DB_HOST: mariadb-primary.database.svc.cluster.local
+              UI_BAKERY_DB_PORT: "3306"
+              UI_BAKERY_DB_DATABASE: bakery
+              UI_BAKERY_DB_USERNAME: bakery
               UI_BAKERY_INTERNAL_API_URL: http://bakery-back:8080
+              UI_BAKERY_INTERNAL_DATABASE_ENABLED: "false"
             envFrom:
               - secretRef:
                   name: ui-bakery-secret
@@ -227,6 +261,8 @@ spec:
                 memory: 512Mi
 
       workbench-front:
+        annotations:
+          reloader.stakater.com/auto: "true"
         containers:
           app:
             image:
@@ -235,7 +271,11 @@ spec:
             env:
               UI_BAKERY_APP_SERVER_NAME: https://uibakery.00o.sh
               UI_BAKERY_DB_HOST: mariadb-primary.database.svc.cluster.local
+              UI_BAKERY_DB_PORT: "3306"
+              UI_BAKERY_DB_DATABASE: bakery
+              UI_BAKERY_DB_USERNAME: bakery
               UI_BAKERY_INTERNAL_API_URL: http://bakery-back:8080
+              UI_BAKERY_INTERNAL_DATABASE_ENABLED: "false"
             envFrom:
               - secretRef:
                   name: ui-bakery-secret
