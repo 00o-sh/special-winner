@@ -81,6 +81,9 @@
 - name: area/system-upgrade
   color: "1d76db"
   description: "system-upgrade namespace"
+- name: area/ui-bakery
+  color: "1d76db"
+  description: "ui-bakery namespace"
 - name: area/utils
   color: "1d76db"
   description: "utils namespace"
@@ -272,6 +275,9 @@
 - name: app/tuppr
   color: "6f42c1"
   description: "tuppr in system-upgrade"
+- name: app/ui-bakery
+  color: "6f42c1"
+  description: "ui-bakery in ui-bakery"
 - name: app/forgejo
   color: "6f42c1"
   description: "forgejo in utils"
