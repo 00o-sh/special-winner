@@ -64,6 +64,7 @@ spec:
               UI_BAKERY_DB_USERNAME: bakery
               UI_BAKERY_INTERNAL_API_URL: http://bakery-back:8080
               UI_BAKERY_INTERNAL_DATABASE_ENABLED: "false"
+              SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT: org.hibernate.dialect.MySQLDialect
             envFrom:
               - secretRef:
                   name: ui-bakery-secret
@@ -247,8 +248,7 @@ spec:
                 enabled: true
                 custom: true
                 spec:
-                  httpGet:
-                    path: /
+                  tcpSocket:
                     port: &pythonPort 5050
                   initialDelaySeconds: 5
                   periodSeconds: 30
