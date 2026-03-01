@@ -22,7 +22,7 @@ This document provides comprehensive guidance for AI assistants working with thi
 - **Package Management**: Helm 4.1.1 (Helm v4 for chart management)
 - **Database**: CloudNative-PG (PostgreSQL 17.7) + Dragonfly (Redis-compatible) + MariaDB Operator (MariaDB 11.7 Galera)
 - **Virtualization**: KubeVirt 1.7.0 (virtual machine management)
-- **External Secrets**: External Secrets Operator 2.0.0 + 1Password SDK integration
+- **External Secrets**: External Secrets Operator 2.0.0 + 1Password Connect (reads) + 1Password SDK (writes)
 
 ## Directory Structure
 
@@ -46,7 +46,8 @@ special-winner/
 │   │   ├── 00-crds.yaml            # CRD extraction
 │   │   └── 01-apps.yaml            # Bootstrap apps
 │   ├── github-deploy-key.sops.yaml  # Encrypted deploy key
-│   ├── onepassword-secret.sops.yaml # 1Password credentials
+│   ├── onepassword-connect-secret.sops.yaml # 1Password Connect credentials
+│   ├── onepassword-secret.sops.yaml # 1Password SDK service account token
 │   └── sops-age.sops.yaml          # Age encryption key
 │
 ├── kubernetes/                       # Kubernetes manifests
@@ -656,7 +657,7 @@ talosctl logs --nodes <ip> --insecure
 **external-secrets**: Secret management
 - discord-webhook (Discord integration)
 - external-secrets (operator)
-- onepassword (1Password SDK integration)
+- onepassword (1Password Connect Server for reads + SDK for writes)
 
 **flux-system**: GitOps
 - flux-instance
@@ -780,6 +781,7 @@ Check `.mise.toml` for exact versions of all tools.
 
 ## Recent Notable Changes
 
+- **2026-03-01**: Restored 1Password Connect Server for reads, added 1Password SDK ClusterSecretStore (`onepassword-sdk`) for write access via PushSecret
 - **2026-03-01**: Migrated External Secrets from 1Password Connect Server to 1Password SDK (removed connect-api/connect-sync deployment, uses service account token directly)
 - **2026-02-25**: Added UI Bakery low-code internal tool builder to ui-bakery namespace (7 microservices, MariaDB backend, ExternalSecrets, Envoy Gateway ingress at uibakery.00o.sh)
 - **2026-02-22**: Added containerized FreePBX telephony platform to voip namespace (MariaDB backend, ExternalSecrets, Envoy Gateway ingress)

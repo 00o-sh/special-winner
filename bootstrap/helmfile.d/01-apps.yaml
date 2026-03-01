@@ -34,12 +34,19 @@ releases:
     values: ['./templates/values.yaml.gotmpl']
     needs: ['cert-manager/cert-manager']
 
+  - name: onepassword
+    namespace: external-secrets
+    chart: oci://ghcr.io/bjw-s-labs/helm/app-template
+    version: 4.6.2
+    values: ['./templates/values.yaml.gotmpl']
+    needs: ['external-secrets/external-secrets']
+
   - name: flux-operator
     namespace: flux-system
     chart: oci://ghcr.io/controlplaneio-fluxcd/charts/flux-operator
     version: 0.43.0
     values: ['./templates/values.yaml.gotmpl']
-    needs: ['external-secrets/external-secrets']
+    needs: ['external-secrets/onepassword']
 
   - name: flux-instance
     namespace: flux-system

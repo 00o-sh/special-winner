@@ -83,23 +83,34 @@ function apply_sops_secrets() {
         fi
     done
 
-    # Apply onepassword secret to external-secrets namespace
-    local -r onepassword_secret="${ROOT_DIR}/bootstrap/onepassword-secret.sops.yaml"
-    if [ -f "${onepassword_secret}" ]; then
-        # Check if the secret is up-to-date
-        if ! sops exec-file "${onepassword_secret}" "kubectl diff --filename {}" &>/dev/null; then
-            # Apply secret resource
-            if sops exec-file "${onepassword_secret}" "kubectl apply --server-side --filename {}" &>/dev/null; then
-                log info "Secret resource applied successfully" "resource=onepassword-secret"
-            else
-                log error "Failed to apply secret resource" "resource=onepassword-secret"
-            fi
-        else
-            log info "Secret resource is up-to-date" "resource=onepassword-secret"
+    # Apply onepassword secrets to external-secrets namespace
+    local -r onepassword_secrets=(
+        "${ROOT_DIR}/bootstrap/onepassword-connect-secret.sops.yaml"
+        "${ROOT_DIR}/bootstrap/onepassword-secret.sops.yaml"
+    )
+
+    for onepassword_secret in "${onepassword_secrets[@]}"; do
+        local secret_name
+        secret_name=$(basename "${onepassword_secret}" ".sops.yaml")
+
+        if [ ! -f "${onepassword_secret}" ]; then
+            log warn "File does not exist" "file=${onepassword_secret}"
+            continue
         fi
-    else
-        log warn "File does not exist" "file=${onepassword_secret}"
-    fi
+
+        # Check if the secret is up-to-date
+        if sops exec-file "${onepassword_secret}" "kubectl diff --filename {}" &>/dev/null; then
+            log info "Secret resource is up-to-date" "resource=${secret_name}"
+            continue
+        fi
+
+        # Apply secret resource
+        if sops exec-file "${onepassword_secret}" "kubectl apply --server-side --filename {}" &>/dev/null; then
+            log info "Secret resource applied successfully" "resource=${secret_name}"
+        else
+            log error "Failed to apply secret resource" "resource=${secret_name}"
+        fi
+    done
 }
 
 # CRDs to be applied before the helmfile charts are installed
@@ -145,30 +156,38 @@ function sync_helm_releases() {
     log info "Helm releases synced successfully"
 }
 
-# Apply ClusterSecretStore for onepassword
-function apply_clustersecretstore() {
-    log debug "Applying ClusterSecretStore"
+# Apply ClusterSecretStores for onepassword (Connect + SDK)
+function apply_clustersecretstores() {
+    log debug "Applying ClusterSecretStores"
 
-    local -r clustersecretstore="${ROOT_DIR}/bootstrap/onepassword-clustersecretstore.yaml"
+    local -r clustersecretstores=(
+        "${ROOT_DIR}/bootstrap/onepassword-clustersecretstore.yaml"
+        "${ROOT_DIR}/bootstrap/onepassword-sdk-clustersecretstore.yaml"
+    )
 
-    if [[ ! -f "${clustersecretstore}" ]]; then
-        log warn "File does not exist" "file=${clustersecretstore}"
-        return
-    fi
+    for clustersecretstore in "${clustersecretstores[@]}"; do
+        local store_name
+        store_name=$(basename "${clustersecretstore}" ".yaml")
 
-    # Check if the ClusterSecretStore is up-to-date
-    if kubectl diff --filename "${clustersecretstore}" &>/dev/null; then
-        log info "ClusterSecretStore is up-to-date"
-        return
-    fi
+        if [[ ! -f "${clustersecretstore}" ]]; then
+            log warn "File does not exist" "file=${clustersecretstore}"
+            continue
+        fi
 
-    # Apply ClusterSecretStore
-    if ! kubectl apply --server-side --filename "${clustersecretstore}" &>/dev/null; then
-        log error "Failed to apply ClusterSecretStore"
-        return
-    fi
+        # Check if the ClusterSecretStore is up-to-date
+        if kubectl diff --filename "${clustersecretstore}" &>/dev/null; then
+            log info "ClusterSecretStore is up-to-date" "resource=${store_name}"
+            continue
+        fi
 
-    log info "ClusterSecretStore applied successfully"
+        # Apply ClusterSecretStore
+        if ! kubectl apply --server-side --filename "${clustersecretstore}" &>/dev/null; then
+            log error "Failed to apply ClusterSecretStore" "resource=${store_name}"
+            continue
+        fi
+
+        log info "ClusterSecretStore applied successfully" "resource=${store_name}"
+    done
 }
 
 function main() {
@@ -181,7 +200,7 @@ function main() {
     apply_sops_secrets
     apply_crds
     sync_helm_releases
-    apply_clustersecretstore
+    apply_clustersecretstores
 
     log info "Congrats! The cluster is bootstrapped and Flux is syncing the Git repository"
 }
