@@ -14,6 +14,10 @@ spec:
       namespace: external-secrets
   interval: 1h
   path: ./kubernetes/apps/volsync-system/volsync/app
+  postBuild:
+    substituteFrom:
+      - name: cluster-secrets
+        kind: Secret
   prune: true
   sourceRef:
     kind: GitRepository
@@ -32,6 +36,10 @@ spec:
     - name: volsync
   interval: 1h
   path: ./kubernetes/apps/volsync-system/volsync/maintenance
+  postBuild:
+    substituteFrom:
+      - name: cluster-secrets
+        kind: Secret
   prune: true
   sourceRef:
     kind: GitRepository

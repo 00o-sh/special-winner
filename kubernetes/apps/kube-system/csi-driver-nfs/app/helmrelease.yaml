@@ -14,8 +14,8 @@ spec:
       create: true
       name: nfs-fast
       parameters:
-        server: nas.3226texas.com
-        share: /mnt/Speed/Kubernetes
+        server: ${NAS_HOSTNAME}
+        share: ${NAS_STORAGE_PATH}/Kubernetes
       mountOptions:
         - nfsvers=4.2
         - nconnect=16

@@ -129,13 +129,13 @@ spec:
             subPath: configuration.toml
       data:
         type: nfs
-        server: nas.3226texas.com
-        path: /mnt/Speed/Kubernetes/apps/garage/data
+        server: ${NAS_HOSTNAME}
+        path: ${NAS_STORAGE_PATH}/Kubernetes/apps/garage/data
         globalMounts:
           - path: /data
       meta:
         type: nfs
-        server: nas.3226texas.com
-        path: /mnt/Speed/Kubernetes/apps/garage/meta
+        server: ${NAS_HOSTNAME}
+        path: ${NAS_STORAGE_PATH}/Kubernetes/apps/garage/meta
         globalMounts:
           - path: /meta

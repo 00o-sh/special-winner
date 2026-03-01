@@ -16,6 +16,9 @@ spec:
   interval: 1h
   path: ./kubernetes/apps/volsync-system/garage/app
   postBuild:
+    substituteFrom:
+      - name: cluster-secrets
+        kind: Secret
     substitute:
       APP: *app
   prune: true
@@ -47,6 +50,9 @@ spec:
   interval: 1h
   path: ./kubernetes/apps/volsync-system/garage/webui
   postBuild:
+    substituteFrom:
+      - name: cluster-secrets
+        kind: Secret
     substitute:
       APP: *app
   prune: true
