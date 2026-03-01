@@ -5,9 +5,10 @@ namespace: flux-system
 
 components:
   - ../../components/alerts
-  - ../../components/sops
 
 resources:
   - ./namespace.yaml
+  - ./cluster-secrets/ks.yaml
   - ./flux-instance/ks.yaml
   - ./flux-operator/ks.yaml
+  - ./github-deploy-key/ks.yaml

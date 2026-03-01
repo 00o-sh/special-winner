@@ -425,7 +425,6 @@ component/sops:
           - "**/*.sops.yaml"
           - "**/*.sops.yml"
           - .sops.yaml
-          - kubernetes/components/sops/**/*
 
 component/prometheus:
   - changed-files:

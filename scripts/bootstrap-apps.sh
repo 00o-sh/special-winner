@@ -53,49 +53,37 @@ function apply_namespaces() {
     done
 }
 
-# SOPS secrets to be applied before the helmfile charts are installed
-function apply_sops_secrets() {
-    log debug "Applying secrets"
+# Bootstrap secrets required before Flux and ESO are running
+# - sops-age: Age key for SOPS decryption (needed by kustomize-controller)
+# - onepassword-secret: 1Password service account token (needed by ESO)
+# - github-deploy-key: Fetched from 1Password via op CLI
+# All other secrets are managed by External Secrets Operator via 1Password
+function apply_bootstrap_secrets() {
+    log debug "Applying bootstrap secrets"
 
-    local -r secrets=(
-        "${ROOT_DIR}/bootstrap/github-deploy-key.sops.yaml"
-        "${ROOT_DIR}/bootstrap/sops-age.sops.yaml"
-        "${ROOT_DIR}/kubernetes/components/sops/cluster-secrets.sops.yaml"
-    )
-
-    for secret in "${secrets[@]}"; do
-        if [ ! -f "${secret}" ]; then
-            log warn "File does not exist" "file=${secret}"
-            continue
-        fi
-
-        # Check if the secret resources are up-to-date
-        if sops exec-file "${secret}" "kubectl --namespace flux-system diff --filename {}" &>/dev/null; then
-            log info "Secret resource is up-to-date" "resource=$(basename "${secret}" ".sops.yaml")"
-            continue
-        fi
-
-        # Apply secret resources
-        if sops exec-file "${secret}" "kubectl --namespace flux-system apply --server-side --filename {}" &>/dev/null; then
-            log info "Secret resource applied successfully" "resource=$(basename "${secret}" ".sops.yaml")"
+    # Apply sops-age secret (still needed for onepassword-secret decryption)
+    local -r sops_age_secret="${ROOT_DIR}/bootstrap/sops-age.sops.yaml"
+    if [ -f "${sops_age_secret}" ]; then
+        if sops exec-file "${sops_age_secret}" "kubectl --namespace flux-system diff --filename {}" &>/dev/null; then
+            log info "Secret resource is up-to-date" "resource=sops-age"
+        elif sops exec-file "${sops_age_secret}" "kubectl --namespace flux-system apply --server-side --filename {}" &>/dev/null; then
+            log info "Secret resource applied successfully" "resource=sops-age"
         else
-            log error "Failed to apply secret resource" "resource=$(basename "${secret}" ".sops.yaml")"
+            log error "Failed to apply secret resource" "resource=sops-age"
         fi
-    done
+    else
+        log warn "File does not exist" "file=${sops_age_secret}"
+    fi
 
-    # Apply onepassword secret to external-secrets namespace
+    # Apply onepassword secret (needed for ESO ClusterSecretStore)
     local -r onepassword_secret="${ROOT_DIR}/bootstrap/onepassword-secret.sops.yaml"
     if [ -f "${onepassword_secret}" ]; then
-        # Check if the secret is up-to-date
-        if ! sops exec-file "${onepassword_secret}" "kubectl diff --filename {}" &>/dev/null; then
-            # Apply secret resource
-            if sops exec-file "${onepassword_secret}" "kubectl apply --server-side --filename {}" &>/dev/null; then
-                log info "Secret resource applied successfully" "resource=onepassword-secret"
-            else
-                log error "Failed to apply secret resource" "resource=onepassword-secret"
-            fi
-        else
+        if sops exec-file "${onepassword_secret}" "kubectl diff --filename {}" &>/dev/null; then
             log info "Secret resource is up-to-date" "resource=onepassword-secret"
+        elif sops exec-file "${onepassword_secret}" "kubectl apply --server-side --filename {}" &>/dev/null; then
+            log info "Secret resource applied successfully" "resource=onepassword-secret"
+        else
+            log error "Failed to apply secret resource" "resource=onepassword-secret"
         fi
     else
         log warn "File does not exist" "file=${onepassword_secret}"
@@ -178,7 +166,7 @@ function main() {
     # Apply resources and Helm releases
     wait_for_nodes
     apply_namespaces
-    apply_sops_secrets
+    apply_bootstrap_secrets
     apply_crds
     sync_helm_releases
     apply_clustersecretstore
