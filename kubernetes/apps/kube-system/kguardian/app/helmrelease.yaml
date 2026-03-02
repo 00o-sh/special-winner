@@ -61,6 +61,15 @@ spec:
                           name: kguardian-secret
           - target:
               kind: Deployment
+              name: kguardian-controller
+            patch: |
+              - op: add
+                path: /spec/template/spec/containers/0/env/-
+                value:
+                  name: RUST_LOG
+                  value: "kguardian::pod_reconciler=debug,kguardian=info"
+          - target:
+              kind: Deployment
               name: kguardian-database
             patch: |
               - op: replace
