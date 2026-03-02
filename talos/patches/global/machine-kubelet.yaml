@@ -2,6 +2,9 @@ machine:
   features:
     hostDNS:
       forwardKubeDNSToHost: false
+    kubePrism:
+      enabled: true
+      port: 7445
     kubernetesTalosAPIAccess:
       allowedKubernetesNamespaces:
         - system-upgrade
