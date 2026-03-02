@@ -60,14 +60,21 @@ spec:
                       - secretRef:
                           name: kguardian-secret
           - target:
-              kind: Deployment
+              kind: DaemonSet
               name: kguardian-controller
             patch: |
-              - op: add
-                path: /spec/template/spec/containers/0/env/-
-                value:
-                  name: RUST_LOG
-                  value: "kguardian::pod_reconciler=debug,kguardian=info"
+              apiVersion: apps/v1
+              kind: DaemonSet
+              metadata:
+                name: kguardian-controller
+              spec:
+                template:
+                  spec:
+                    containers:
+                      - name: controller
+                        env:
+                          - name: RUST_LOG
+                            value: "kguardian::pod_reconciler=debug,kguardian=info"
           - target:
               kind: Deployment
               name: kguardian-database
