@@ -23,6 +23,7 @@ nodes:
     installDisk: "/dev/sda"
     machineSpec:
       secureboot: true
+    talosImageURL: factory.talos.dev/metal-installer-secureboot/68e0812e43a1b91f84dd516198946edae0bdd2551463840ab16e1b9da8b8461f
     schematic:
       customization:
         extraKernelArgs:
@@ -59,6 +60,7 @@ nodes:
     installDisk: "/dev/sda"
     machineSpec:
       secureboot: true
+    talosImageURL: factory.talos.dev/nocloud-installer-secureboot/597f38eddf2c09c12accd19fcee10fc5fc58056795f145277e49d85de44ef8ad
     schematic:
       customization:
         extraKernelArgs:
@@ -94,6 +96,7 @@ nodes:
     installDisk: "/dev/sda"
     machineSpec:
       secureboot: true
+    talosImageURL: factory.talos.dev/nocloud-installer-secureboot/597f38eddf2c09c12accd19fcee10fc5fc58056795f145277e49d85de44ef8ad
     schematic:
       customization:
         extraKernelArgs:
