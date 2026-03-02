@@ -43,8 +43,6 @@ spec:
       enabled: false
     mcpServer:
       enabled: false
-    networkProbe:
-      enabled: false
   postRenderers:
     - kustomize:
         patches:
