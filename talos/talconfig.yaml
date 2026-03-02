@@ -23,6 +23,10 @@ nodes:
     installDisk: "/dev/sda"
     machineSpec:
       secureboot: true
+      customization:
+        extraKernelArgs:
+          - -lockdown
+          - -lockdown=integrity
     talosImageURL: factory.talos.dev/installer-secureboot/1f27123b6d8a11ff4f1b5f09f839f3662244f6bb11124faebe050c632291947b
     controlPlane: true
 
@@ -47,6 +51,10 @@ nodes:
     installDisk: "/dev/sda"
     machineSpec:
       secureboot: true
+      customization:
+        extraKernelArgs:
+          - -lockdown
+          - -lockdown=integrity
     talosImageURL: factory.talos.dev/installer-secureboot/10f9392d7091b30abf573524649756e5bc894f653af525836e9ab0297f301fc2
     controlPlane: true
     networkInterfaces:
@@ -71,6 +79,10 @@ nodes:
     installDisk: "/dev/sda"
     machineSpec:
       secureboot: true
+      customization:
+        extraKernelArgs:
+          - -lockdown
+          - -lockdown=integrity
     talosImageURL: factory.talos.dev/installer-secureboot/10f9392d7091b30abf573524649756e5bc894f653af525836e9ab0297f301fc2
     controlPlane: true
     networkInterfaces:

@@ -9,6 +9,13 @@ spec:
     kind: OCIRepository
     name: kguardian
   interval: 1h
+  install:
+    remediation:
+      retries: 3
+  upgrade:
+    remediation:
+      retries: 3
+      remediateLastFailure: true
   values:
     broker:
       image:
