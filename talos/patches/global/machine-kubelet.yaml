@@ -1,5 +1,7 @@
 machine:
   features:
+    hostDNS:
+      forwardKubeDNSToHost: false
     kubernetesTalosAPIAccess:
       allowedKubernetesNamespaces:
         - system-upgrade
