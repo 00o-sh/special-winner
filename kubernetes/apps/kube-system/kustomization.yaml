@@ -15,5 +15,5 @@ resources:
   - ./reloader/ks.yaml
   - ./snapshot-controller/ks.yaml
   - ./csi-driver-nfs/ks.yaml
-  #- ./kguardian/ks.yaml Disabled until we move from proxmox nodes to bare metal
+  - ./kguardian/ks.yaml Disabled until we move from proxmox nodes to bare metal
   - ./spegel/ks.yaml
