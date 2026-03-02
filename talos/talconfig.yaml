@@ -27,7 +27,7 @@ nodes:
         extraKernelArgs:
           - -lockdown
           - -lockdown=integrity
-    talosImageURL: factory.talos.dev/installer-secureboot/1f27123b6d8a11ff4f1b5f09f839f3662244f6bb11124faebe050c632291947b
+    talosImageURL: factory.talos.dev/installer-secureboot/376567988ad370138ad8b2698212367b8edcb69b5fd68c80be1f2ec7d603b4ba
     controlPlane: true
 
     networkInterfaces:
@@ -55,7 +55,7 @@ nodes:
         extraKernelArgs:
           - -lockdown
           - -lockdown=integrity
-    talosImageURL: factory.talos.dev/installer-secureboot/10f9392d7091b30abf573524649756e5bc894f653af525836e9ab0297f301fc2
+    talosImageURL: factory.talos.dev/installer-secureboot/376567988ad370138ad8b2698212367b8edcb69b5fd68c80be1f2ec7d603b4ba
     controlPlane: true
     networkInterfaces:
       - interface: bond0
@@ -83,7 +83,7 @@ nodes:
         extraKernelArgs:
           - -lockdown
           - -lockdown=integrity
-    talosImageURL: factory.talos.dev/installer-secureboot/10f9392d7091b30abf573524649756e5bc894f653af525836e9ab0297f301fc2
+    talosImageURL: factory.talos.dev/installer-secureboot/376567988ad370138ad8b2698212367b8edcb69b5fd68c80be1f2ec7d603b4ba
     controlPlane: true
     networkInterfaces:
       - interface: bond0
