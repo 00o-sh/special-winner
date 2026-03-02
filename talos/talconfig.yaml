@@ -30,8 +30,8 @@ nodes:
           - lockdown=integrity
         systemExtensions:
           officialExtensions:
-            - siderolabs/amdgpu
             - siderolabs/amd-ucode
+            - siderolabs/amdgpu
             - siderolabs/iscsi-tools
             - siderolabs/nfs-utils
             - siderolabs/nfsd
