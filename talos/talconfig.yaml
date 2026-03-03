@@ -38,6 +38,8 @@ nodes:
             - siderolabs/nfsd
             - siderolabs/nfsrahead
     controlPlane: true
+    patches:
+      - "@./patches/singlenodemaster/machine-kernel.yaml"
 
     networkInterfaces:
       - interface: bond0
