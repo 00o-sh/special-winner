@@ -40,6 +40,7 @@ nodes:
             - siderolabs/multipath-tools
             - siderolabs/nvme-cli
             - siderolabs/util-linux-tools
+            - siderolabs/i915
     controlPlane: true
     patches:
       - "@./patches/singlenodemaster/machine-kernel.yaml"
