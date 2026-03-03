@@ -23,7 +23,7 @@ nodes:
     installDisk: "/dev/sda"
     machineSpec:
       secureboot: true
-    talosImageURL: factory.talos.dev/metal-installer-secureboot/68e0812e43a1b91f84dd516198946edae0bdd2551463840ab16e1b9da8b8461f
+    talosImageURL: factory.talos.dev/metal-installer-secureboot/a0f891b1160aa53ba502804e9d7f904c18bd643776beb117ff9a5566f3ac7b36
     schematic:
       customization:
         extraKernelArgs:
@@ -37,6 +37,9 @@ nodes:
             - siderolabs/nfs-utils
             - siderolabs/nfsd
             - siderolabs/nfsrahead
+            - siderolabs/multipath-tools
+            - siderolabs/nvme-cli
+            - siderolabs/util-linux-tools
     controlPlane: true
 
     networkInterfaces:
@@ -73,6 +76,9 @@ nodes:
             - siderolabs/nfsd
             - siderolabs/nfsrahead
             - siderolabs/qemu-guest-agent
+            - siderolabs/multipath-tools
+            - siderolabs/nvme-cli
+            - siderolabs/util-linux-tools
     controlPlane: true
     networkInterfaces:
       - interface: bond0
@@ -109,6 +115,9 @@ nodes:
             - siderolabs/nfsd
             - siderolabs/nfsrahead
             - siderolabs/qemu-guest-agent
+            - siderolabs/multipath-tools
+            - siderolabs/nvme-cli
+            - siderolabs/util-linux-tools
     controlPlane: true
     networkInterfaces:
       - interface: bond0
