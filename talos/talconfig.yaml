@@ -41,6 +41,8 @@ nodes:
             - siderolabs/nvme-cli
             - siderolabs/util-linux-tools
     controlPlane: true
+    patches:
+      - "@./patches/singlenodemaster/machine-kernel.yaml"
 
     networkInterfaces:
       - interface: bond0

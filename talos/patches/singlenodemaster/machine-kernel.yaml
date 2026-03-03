@@ -1,0 +1,6 @@
+machine:
+  kernel:
+    modules:
+      - name: igc
+        parameters:
+          - disable_eee=1
