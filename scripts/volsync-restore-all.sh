@@ -1,15 +1,16 @@
 #!/usr/bin/env bash
 # Restore all VolSync-backed PVCs to a specific point in time.
 # Usage: ./scripts/volsync-restore-all.sh [RESTORE_DATE]
-#   RESTORE_DATE: ISO-8601 date (default: 2026-03-01T23:59:59Z)
+#   RESTORE_DATE: RFC3339 timestamp (default: 2026-03-01T23:59:59Z)
 #
 # What this script does:
 #   1. Suspends all Flux Kustomizations for VolSync-backed apps
-#   2. Scales down app workloads so PVCs can be deleted
-#   3. Deletes the existing PVCs
-#   4. Patches each ReplicationDestination with restoreAsOf + new trigger
-#   5. Waits for all restores to complete
-#   6. Resumes all Flux Kustomizations
+#   2. Scales down app workloads so PVCs are not actively written to
+#   3. Patches each ReplicationDestination with restoreAsOf + new trigger
+#      (copyMethod: Direct restores into the existing PVC — no PVC deletion needed;
+#       enableFileDeletion: true in the component template removes stale files)
+#   4. Waits for all restores to complete
+#   5. Resumes all Flux Kustomizations
 set -Eeuo pipefail
 
 source "$(dirname "${0}")/lib/common.sh"
@@ -18,40 +19,52 @@ export LOG_LEVEL="info"
 
 readonly RESTORE_AS_OF="${1:-2026-03-01T23:59:59Z}"
 readonly RESTORE_TRIGGER="restore-$(date -u +%Y%m%d-%H%M%S)"
-readonly FLUX_NS="flux-system"
 
-# Format: "kustomization-name:target-namespace:app-name"
-# kustomization-name is the metadata.name in ks.yaml
-# target-namespace is the targetNamespace in ks.yaml
-# app-name is the APP substitution variable (= PVC name = ReplicationDestination prefix)
+# Format: "kustomization-name:ks-namespace:target-namespace:app-name"
+#
+# ks-namespace is where the Flux Kustomization CR lives.
+# This is determined by the parent kustomization.yaml namespace: field:
+#   kubernetes/apps/media/kustomization.yaml         → namespace: media
+#   kubernetes/apps/network/kustomization.yaml       → namespace: network
+#   kubernetes/apps/observability/kustomization.yaml → namespace: observability
+#   kubernetes/apps/utils/kustomization.yaml         → namespace: utils
+#
+# target-namespace is the targetNamespace in ks.yaml (where the app pods/PVCs live).
+# app-name is the APP substitution variable (= PVC name = ReplicationDestination prefix).
 readonly -a APPS=(
-    "autobrr:media:autobrr"
-    "bazarr:media:bazarr"
-    "plex:media:plex"
-    "prowlarr:media:prowlarr"
-    "qbittorrent:media:qbittorrent"
-    "radarr:media:radarr"
-    "recyclarr:media:recyclarr"
-    "seerr:media:seerr"
-    "sonarr:media:sonarr"
-    "tautulli:media:tautulli"
-    "thelounge:media:thelounge"
-    "qui:media:qui"
-    "unifi-toolkit:network:unifi-toolkit"
-    "gatus:observability:gatus"
-    "forgejo:utils:forgejo"
-    "penpot:utils:penpot"
+    "autobrr:media:media:autobrr"
+    "bazarr:media:media:bazarr"
+    "plex:media:media:plex"
+    "prowlarr:media:media:prowlarr"
+    "qbittorrent:media:media:qbittorrent"
+    "radarr:media:media:radarr"
+    "recyclarr:media:media:recyclarr"
+    "seerr:media:media:seerr"
+    "sonarr:media:media:sonarr"
+    "tautulli:media:media:tautulli"
+    "thelounge:media:media:thelounge"
+    "qui:media:media:qui"
+    "unifi-toolkit:network:network:unifi-toolkit"
+    "gatus:observability:observability:gatus"
+    "forgejo:utils:utils:forgejo"
+    "penpot:utils:utils:penpot"
 )
+
+function parse_entry() {
+    # Usage: parse_entry <entry> <field>
+    # Fields: ks_name=1, ks_ns=2, target_ns=3, app=4
+    echo "${1}" | cut -d: -f"${2}"
+}
 
 function phase_suspend_kustomizations() {
     log info "Phase 1: Suspending Flux Kustomizations"
     for entry in "${APPS[@]}"; do
-        local ks_name ns app
-        ks_name="${entry%%:*}"
-        ns="${entry#*:}"; ns="${ns%%:*}"
-        app="${entry##*:}"
-        log info "Suspending Kustomization" "ks=${ks_name}" "namespace=${ns}" "app=${app}"
-        flux suspend ks -n "${FLUX_NS}" "${ks_name}" || log warn "Could not suspend ks ${ks_name}, may already be suspended"
+        local ks_name ks_ns
+        ks_name="$(parse_entry "${entry}" 1)"
+        ks_ns="$(parse_entry "${entry}" 2)"
+        log info "Suspending Kustomization" "ks=${ks_name}" "ks-namespace=${ks_ns}"
+        flux suspend ks -n "${ks_ns}" "${ks_name}" \
+            || log warn "Could not suspend ${ks_name} in ${ks_ns}, may already be suspended"
     done
     log info "All Kustomizations suspended"
 }
@@ -59,28 +72,28 @@ function phase_suspend_kustomizations() {
 function phase_scale_down() {
     log info "Phase 2: Scaling down app workloads"
     for entry in "${APPS[@]}"; do
-        local ns app
-        ns="${entry#*:}"; ns="${ns%%:*}"
-        app="${entry##*:}"
-        # Try Deployment first, then StatefulSet — ignore errors (workload may have a different name)
-        if kubectl -n "${ns}" get deployment "${app}" &>/dev/null; then
-            log info "Scaling down Deployment" "app=${app}" "namespace=${ns}"
-            kubectl -n "${ns}" scale deployment "${app}" --replicas=0
-        elif kubectl -n "${ns}" get statefulset "${app}" &>/dev/null; then
-            log info "Scaling down StatefulSet" "app=${app}" "namespace=${ns}"
-            kubectl -n "${ns}" scale statefulset "${app}" --replicas=0
+        local target_ns app
+        target_ns="$(parse_entry "${entry}" 3)"
+        app="$(parse_entry "${entry}" 4)"
+        if kubectl -n "${target_ns}" get deployment "${app}" &>/dev/null; then
+            log info "Scaling down Deployment" "app=${app}" "namespace=${target_ns}"
+            kubectl -n "${target_ns}" scale deployment "${app}" --replicas=0
+        elif kubectl -n "${target_ns}" get statefulset "${app}" &>/dev/null; then
+            log info "Scaling down StatefulSet" "app=${app}" "namespace=${target_ns}"
+            kubectl -n "${target_ns}" scale statefulset "${app}" --replicas=0
         else
-            log warn "No Deployment or StatefulSet named '${app}' found in ${ns} — deleting pods directly"
-            kubectl -n "${ns}" delete pods -l "app.kubernetes.io/name=${app}" --wait=false 2>/dev/null || true
+            log warn "No Deployment/StatefulSet named '${app}' in ${target_ns} — deleting pods by label"
+            kubectl -n "${target_ns}" delete pods \
+                -l "app.kubernetes.io/name=${app}" --wait=false 2>/dev/null || true
         fi
     done
 
     log info "Waiting for pods to terminate (up to 60s)..."
     for entry in "${APPS[@]}"; do
-        local ns app
-        ns="${entry#*:}"; ns="${ns%%:*}"
-        app="${entry##*:}"
-        kubectl -n "${ns}" wait pods \
+        local target_ns app
+        target_ns="$(parse_entry "${entry}" 3)"
+        app="$(parse_entry "${entry}" 4)"
+        kubectl -n "${target_ns}" wait pods \
             --for=delete \
             -l "app.kubernetes.io/name=${app}" \
             --timeout=60s 2>/dev/null || true
@@ -88,76 +101,66 @@ function phase_scale_down() {
     log info "Workloads scaled down"
 }
 
-function phase_delete_pvcs() {
-    log info "Phase 3: Deleting PVCs"
-    for entry in "${APPS[@]}"; do
-        local ns app
-        ns="${entry#*:}"; ns="${ns%%:*}"
-        app="${entry##*:}"
-        if kubectl -n "${ns}" get pvc "${app}" &>/dev/null; then
-            log info "Deleting PVC" "pvc=${app}" "namespace=${ns}"
-            kubectl -n "${ns}" delete pvc "${app}" --wait=true
-        else
-            log warn "PVC not found, skipping" "pvc=${app}" "namespace=${ns}"
-        fi
-    done
-    log info "PVCs deleted"
-}
-
 function phase_patch_replication_destinations() {
-    log info "Phase 4: Patching ReplicationDestinations (restoreAsOf=${RESTORE_AS_OF}, trigger=${RESTORE_TRIGGER})"
+    log info "Phase 3: Patching ReplicationDestinations" \
+        "restoreAsOf=${RESTORE_AS_OF}" \
+        "trigger=${RESTORE_TRIGGER}"
+
     local patch
     patch=$(printf '{"spec":{"trigger":{"manual":"%s"},"kopia":{"restoreAsOf":"%s"}}}' \
         "${RESTORE_TRIGGER}" "${RESTORE_AS_OF}")
 
     for entry in "${APPS[@]}"; do
-        local ns app
-        ns="${entry#*:}"; ns="${ns%%:*}"
-        app="${entry##*:}"
-        local rd_name="${app}-dst"
-        if kubectl -n "${ns}" get replicationdestination "${rd_name}" &>/dev/null; then
-            log info "Patching ReplicationDestination" "rd=${rd_name}" "namespace=${ns}"
-            kubectl -n "${ns}" patch replicationdestination "${rd_name}" \
+        local target_ns app rd_name
+        target_ns="$(parse_entry "${entry}" 3)"
+        app="$(parse_entry "${entry}" 4)"
+        rd_name="${app}-dst"
+        if kubectl -n "${target_ns}" get replicationdestination "${rd_name}" &>/dev/null; then
+            log info "Patching ReplicationDestination" "rd=${rd_name}" "namespace=${target_ns}"
+            kubectl -n "${target_ns}" patch replicationdestination "${rd_name}" \
                 --type=merge -p "${patch}"
         else
-            log warn "ReplicationDestination not found, skipping" "rd=${rd_name}" "namespace=${ns}"
+            log warn "ReplicationDestination not found, skipping" \
+                "rd=${rd_name}" "namespace=${target_ns}"
         fi
     done
     log info "ReplicationDestinations patched"
 }
 
 function phase_wait_for_restores() {
-    log info "Phase 5: Waiting for all restores to complete"
-    local all_done failed=0
+    log info "Phase 4: Waiting for all restores to complete (polling every 10s, timeout 20m per app)"
+    local failed=0
 
     for entry in "${APPS[@]}"; do
-        local ns app
-        ns="${entry#*:}"; ns="${ns%%:*}"
-        app="${entry##*:}"
-        local rd_name="${app}-dst"
+        local target_ns app rd_name
+        target_ns="$(parse_entry "${entry}" 3)"
+        app="$(parse_entry "${entry}" 4)"
+        rd_name="${app}-dst"
 
-        if ! kubectl -n "${ns}" get replicationdestination "${rd_name}" &>/dev/null; then
+        if ! kubectl -n "${target_ns}" get replicationdestination "${rd_name}" &>/dev/null; then
             log warn "ReplicationDestination not found, skipping wait" "rd=${rd_name}"
             continue
         fi
 
-        log info "Waiting for restore" "rd=${rd_name}" "namespace=${ns}"
+        log info "Waiting for restore" "rd=${rd_name}" "namespace=${target_ns}"
         local attempts=0
         while true; do
             local result
-            result=$(kubectl -n "${ns}" get replicationdestination "${rd_name}" \
-                -o jsonpath='{.status.latestMoverStatus.result}' 2>/dev/null || echo "")
+            result=$(kubectl -n "${target_ns}" get replicationdestination "${rd_name}" \
+                -o jsonpath='{.status.latestMoverStatus.result}' 2>/dev/null || true)
             if [[ "${result}" == "Successful" ]]; then
-                log info "Restore complete" "rd=${rd_name}" "namespace=${ns}"
+                log info "Restore complete" "rd=${rd_name}" "namespace=${target_ns}"
                 break
             elif [[ "${result}" == "Failed" ]]; then
-                log warn "Restore FAILED" "rd=${rd_name}" "namespace=${ns}"
+                log warn "Restore FAILED — check mover logs" \
+                    "rd=${rd_name}" "namespace=${target_ns}"
+                log warn "  kubectl -n ${target_ns} logs -l volsync.backube/mover-owner-name=${rd_name} --tail=50"
                 failed=$((failed + 1))
                 break
             fi
             attempts=$((attempts + 1))
             if ((attempts > 120)); then
-                log warn "Restore timed out after 20m" "rd=${rd_name}" "namespace=${ns}"
+                log warn "Restore timed out after 20m" "rd=${rd_name}" "namespace=${target_ns}"
                 failed=$((failed + 1))
                 break
             fi
@@ -166,11 +169,11 @@ function phase_wait_for_restores() {
     done
 
     if ((failed > 0)); then
-        log warn "Some restores failed or timed out. Check ReplicationDestination status before resuming." \
-            "failed=${failed}"
-        read -r -p "Resume Kustomizations anyway? (y/N): " confirm
+        log warn "Some restores failed or timed out" "count=${failed}"
+        read -r -p "Resume Kustomizations anyway? Unhealthy apps will stay down. (y/N): " confirm
         if [[ "${confirm,,}" != "y" ]]; then
-            log info "Aborting resume. Run 'flux resume ks -n flux-system <name>' manually when ready."
+            log info "Aborting resume. Fix failing restores then resume manually:"
+            log info "  flux resume ks -n <ks-namespace> <app>"
             exit 1
         fi
     fi
@@ -178,14 +181,14 @@ function phase_wait_for_restores() {
 }
 
 function phase_resume_kustomizations() {
-    log info "Phase 6: Resuming Flux Kustomizations"
+    log info "Phase 5: Resuming Flux Kustomizations"
     for entry in "${APPS[@]}"; do
-        local ks_name ns app
-        ks_name="${entry%%:*}"
-        ns="${entry#*:}"; ns="${ns%%:*}"
-        app="${entry##*:}"
-        log info "Resuming Kustomization" "ks=${ks_name}" "namespace=${ns}" "app=${app}"
-        flux resume ks -n "${FLUX_NS}" "${ks_name}" || log warn "Could not resume ks ${ks_name}"
+        local ks_name ks_ns
+        ks_name="$(parse_entry "${entry}" 1)"
+        ks_ns="$(parse_entry "${entry}" 2)"
+        log info "Resuming Kustomization" "ks=${ks_name}" "ks-namespace=${ks_ns}"
+        flux resume ks -n "${ks_ns}" "${ks_name}" \
+            || log warn "Could not resume ${ks_name} in ${ks_ns}"
     done
     log info "All Kustomizations resumed — Flux will reconcile and bring apps back up"
 }
@@ -201,12 +204,11 @@ function main() {
 
     phase_suspend_kustomizations
     phase_scale_down
-    phase_delete_pvcs
     phase_patch_replication_destinations
     phase_wait_for_restores
     phase_resume_kustomizations
 
-    log info "Done. Monitor with: flux get ks -A"
+    log info "Done. Monitor with: flux get ks -A && kubectl get replicationdestination -A"
 }
 
 main "$@"
