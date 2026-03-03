@@ -36,3 +36,13 @@ tasks:
     preconditions:
       - test -f {{.KUBECONFIG}}
       - which flux
+
+  volsync:restore-all:
+    desc: Restore all VolSync-backed PVCs to a point in time (DATE=2026-03-01T23:59:59Z)
+    vars:
+      DATE: '{{.DATE | default "2026-03-01T23:59:59Z"}}'
+    cmd: bash {{.SCRIPTS_DIR}}/volsync-restore-all.sh "{{.DATE}}"
+    preconditions:
+      - test -f {{.KUBECONFIG}}
+      - which kubectl
+      - which flux
