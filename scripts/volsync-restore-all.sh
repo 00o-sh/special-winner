@@ -75,16 +75,27 @@ function phase_scale_down() {
         local target_ns app
         target_ns="$(parse_entry "${entry}" 3)"
         app="$(parse_entry "${entry}" 4)"
-        if kubectl -n "${target_ns}" get deployment "${app}" &>/dev/null; then
-            log info "Scaling down Deployment" "app=${app}" "namespace=${target_ns}"
-            kubectl -n "${target_ns}" scale deployment "${app}" --replicas=0
-        elif kubectl -n "${target_ns}" get statefulset "${app}" &>/dev/null; then
-            log info "Scaling down StatefulSet" "app=${app}" "namespace=${target_ns}"
-            kubectl -n "${target_ns}" scale statefulset "${app}" --replicas=0
-        else
-            log warn "No Deployment/StatefulSet named '${app}' in ${target_ns} — deleting pods by label"
-            kubectl -n "${target_ns}" delete pods \
-                -l "app.kubernetes.io/name=${app}" --wait=false 2>/dev/null || true
+
+        # Scale down ALL Deployments matching the app label (handles multi-controller
+        # apps like penpot where names are penpot-frontend, penpot-backend, etc.)
+        local deployments
+        deployments=$(kubectl -n "${target_ns}" get deployments \
+            -l "app.kubernetes.io/name=${app}" -o name 2>/dev/null || true)
+        if [[ -n "${deployments}" ]]; then
+            log info "Scaling down Deployments" "app=${app}" "namespace=${target_ns}"
+            echo "${deployments}" | xargs -r kubectl -n "${target_ns}" scale --replicas=0
+        fi
+
+        local statefulsets
+        statefulsets=$(kubectl -n "${target_ns}" get statefulsets \
+            -l "app.kubernetes.io/name=${app}" -o name 2>/dev/null || true)
+        if [[ -n "${statefulsets}" ]]; then
+            log info "Scaling down StatefulSets" "app=${app}" "namespace=${target_ns}"
+            echo "${statefulsets}" | xargs -r kubectl -n "${target_ns}" scale --replicas=0
+        fi
+
+        if [[ -z "${deployments}" && -z "${statefulsets}" ]]; then
+            log warn "No Deployments/StatefulSets with label app.kubernetes.io/name=${app} in ${target_ns}"
         fi
     done
 
@@ -93,10 +104,19 @@ function phase_scale_down() {
         local target_ns app
         target_ns="$(parse_entry "${entry}" 3)"
         app="$(parse_entry "${entry}" 4)"
-        kubectl -n "${target_ns}" wait pods \
-            --for=delete \
-            -l "app.kubernetes.io/name=${app}" \
-            --timeout=60s 2>/dev/null || true
+        # Only wait if pods actually exist — kubectl wait hangs until timeout when
+        # no pods match the selector.
+        local pod_count
+        pod_count=$(kubectl -n "${target_ns}" get pods \
+            -l "app.kubernetes.io/name=${app}" --no-headers 2>/dev/null | wc -l)
+        if [[ "${pod_count}" -gt 0 ]]; then
+            log info "Waiting for ${pod_count} pod(s) to terminate" \
+                "app=${app}" "namespace=${target_ns}"
+            kubectl -n "${target_ns}" wait pods \
+                --for=delete \
+                -l "app.kubernetes.io/name=${app}" \
+                --timeout=60s 2>/dev/null || true
+        fi
     done
     log info "Workloads scaled down"
 }
