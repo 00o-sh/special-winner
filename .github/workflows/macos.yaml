@@ -1,0 +1,127 @@
+---
+# Reusable workflow that deploys a macOS VM (dockur/macos) on the self-hosted runner.
+# Uses KVM acceleration via /dev/kvm on cluster nodes.
+# yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
+name: macOS VM
+
+on:
+  workflow_call:
+    inputs:
+      version:
+        description: macOS version to deploy
+        required: false
+        type: string
+        default: "15"
+      cpu_cores:
+        description: Number of CPU cores
+        required: false
+        type: string
+        default: "2"
+      ram_size:
+        description: RAM size (e.g. 4G, 8G)
+        required: false
+        type: string
+        default: "4G"
+      disk_size:
+        description: Disk size (e.g. 64G, 128G)
+        required: false
+        type: string
+        default: "64G"
+      timeout:
+        description: Timeout in minutes before cleanup
+        required: false
+        type: number
+        default: 60
+
+permissions:
+  contents: read
+
+jobs:
+  macos:
+    name: macOS VM
+    runs-on: special-winner-runner
+    timeout-minutes: ${{ inputs.timeout }}
+    steps:
+      - name: Deploy macOS Pod
+        run: |
+          cat <<'MANIFEST' | sed \
+            -e "s|__VERSION__|${{ inputs.version }}|g" \
+            -e "s|__CPU_CORES__|${{ inputs.cpu_cores }}|g" \
+            -e "s|__RAM_SIZE__|${{ inputs.ram_size }}|g" \
+            -e "s|__DISK_SIZE__|${{ inputs.disk_size }}|g" \
+            -e "s|__RUN_ID__|${{ github.run_id }}|g" \
+            | kubectl apply -f -
+          ---
+          apiVersion: v1
+          kind: Pod
+          metadata:
+            name: macos-__RUN_ID__
+            namespace: actions-runner-system
+            labels:
+              app.kubernetes.io/name: macos
+              app.kubernetes.io/instance: macos-__RUN_ID__
+          spec:
+            terminationGracePeriodSeconds: 120
+            containers:
+              - name: macos
+                image: dockurr/macos:latest
+                ports:
+                  - containerPort: 8006
+                    name: web
+                    protocol: TCP
+                  - containerPort: 5900
+                    name: vnc
+                    protocol: TCP
+                env:
+                  - name: VERSION
+                    value: "__VERSION__"
+                  - name: CPU_CORES
+                    value: "__CPU_CORES__"
+                  - name: RAM_SIZE
+                    value: "__RAM_SIZE__"
+                  - name: DISK_SIZE
+                    value: "__DISK_SIZE__"
+                resources:
+                  requests:
+                    cpu: __CPU_CORES__
+                    memory: __RAM_SIZE__i
+                  limits:
+                    memory: __RAM_SIZE__i
+                securityContext:
+                  privileged: true
+                volumeMounts:
+                  - mountPath: /storage
+                    name: storage
+                  - mountPath: /dev/kvm
+                    name: kvm
+                  - mountPath: /dev/net/tun
+                    name: tun
+            volumes:
+              - name: storage
+                emptyDir:
+                  sizeLimit: __DISK_SIZE__i
+              - name: kvm
+                hostPath:
+                  path: /dev/kvm
+                  type: CharDevice
+              - name: tun
+                hostPath:
+                  path: /dev/net/tun
+                  type: CharDevice
+          MANIFEST
+
+      - name: Wait for macOS Pod
+        run: |
+          echo "Waiting for macOS pod to be ready..."
+          kubectl -n actions-runner-system wait pod/macos-${{ github.run_id }} \
+            --for=condition=Ready \
+            --timeout=600s
+          echo "macOS pod is ready"
+          echo "Web viewer available on port 8006"
+
+      - name: Cleanup macOS Pod
+        if: always()
+        run: |
+          kubectl -n actions-runner-system delete pod macos-${{ github.run_id }} \
+            --grace-period=120 \
+            --ignore-not-found=true
