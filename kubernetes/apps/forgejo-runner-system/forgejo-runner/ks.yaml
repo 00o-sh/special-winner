@@ -5,6 +5,7 @@ kind: Kustomization
 metadata:
   name: forgejo-runner
 spec:
+  suspend: "${CLUSTER_TIER2_SUSPENDED}"
   dependsOn:
     - name: external-secrets
       namespace: external-secrets

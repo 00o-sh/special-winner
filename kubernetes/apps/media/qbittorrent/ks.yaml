@@ -5,6 +5,7 @@ kind: Kustomization
 metadata:
   name: qbittorrent
 spec:
+  suspend: "${CLUSTER_TIER2_SUSPENDED}"
   components:
     - ../../../../components/nfs-scaler
     - ../../../../components/volsync

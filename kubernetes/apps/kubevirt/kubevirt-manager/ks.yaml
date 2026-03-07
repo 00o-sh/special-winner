@@ -5,6 +5,7 @@ kind: Kustomization
 metadata:
   name: kubevirt-manager
 spec:
+  suspend: "${CLUSTER_TIER2_SUSPENDED}"
   dependsOn:
     - name: kubevirt
     - name: cdi

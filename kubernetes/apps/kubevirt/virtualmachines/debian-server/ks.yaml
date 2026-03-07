@@ -5,6 +5,7 @@ kind: Kustomization
 metadata:
   name: debian-server
 spec:
+  suspend: "${CLUSTER_TIER2_SUSPENDED}"
   dependsOn:
     - name: kubevirt
     - name: cdi

@@ -4,6 +4,7 @@ kind: Kustomization
 metadata:
   name: cloudflare-dns
 spec:
+  suspend: "${CLUSTER_TIER2_SUSPENDED}"
   interval: 1h
   path: ./kubernetes/apps/network/cloudflare-dns/app
   postBuild:
