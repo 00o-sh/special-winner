@@ -5,7 +5,7 @@ kind: Kustomization
 metadata:
   name: flaresolverr
 spec:
-  suspend: "${CLUSTER_TIER2_SUSPENDED}"
+  suspend: ${CLUSTER_TIER2_SUSPENDED}
   dependsOn:
     - name: kube-prometheus-stack
       namespace: observability

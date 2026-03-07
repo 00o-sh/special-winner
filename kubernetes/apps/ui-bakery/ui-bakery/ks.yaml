@@ -6,7 +6,7 @@ metadata:
   name: ui-bakery-database
   namespace: flux-system
 spec:
-  suspend: "${CLUSTER_TIER2_SUSPENDED}"
+  suspend: ${CLUSTER_TIER2_SUSPENDED}
   targetNamespace: database
   commonMetadata:
     labels:
@@ -32,7 +32,7 @@ metadata:
   name: &app ui-bakery
   namespace: flux-system
 spec:
-  suspend: "${CLUSTER_TIER2_SUSPENDED}"
+  suspend: ${CLUSTER_TIER2_SUSPENDED}
   targetNamespace: ui-bakery
   commonMetadata:
     labels:

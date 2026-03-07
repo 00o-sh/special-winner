@@ -4,7 +4,7 @@ kind: Kustomization
 metadata:
   name: librespeed-cert
 spec:
-  suspend: "${CLUSTER_TIER2_SUSPENDED}"
+  suspend: ${CLUSTER_TIER2_SUSPENDED}
   dependsOn:
     - name: cert-manager
       namespace: cert-manager
@@ -32,7 +32,7 @@ kind: Kustomization
 metadata:
   name: librespeed
 spec:
-  suspend: "${CLUSTER_TIER2_SUSPENDED}"
+  suspend: ${CLUSTER_TIER2_SUSPENDED}
   dependsOn:
     - name: librespeed-cert
   interval: 1h

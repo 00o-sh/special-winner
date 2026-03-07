@@ -5,7 +5,7 @@ kind: Kustomization
 metadata:
   name: dbgate
 spec:
-  suspend: "${CLUSTER_TIER2_SUSPENDED}"
+  suspend: ${CLUSTER_TIER2_SUSPENDED}
   dependsOn:
     - name: cloudnative-pg
     - name: mariadb-operator
