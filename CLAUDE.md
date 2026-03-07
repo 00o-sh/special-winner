@@ -24,6 +24,58 @@ This document provides comprehensive guidance for AI assistants working with thi
 - **Virtualization**: KubeVirt 1.7.0 (virtual machine management)
 - **External Secrets**: External Secrets Operator 2.0.0 + 1Password Connect (reads) + 1Password SDK (writes)
 
+## Multi-Cluster Architecture
+
+The repository supports multiple Kubernetes clusters with a tiered warm standby model:
+
+### Clusters
+
+| Cluster | Role | Description |
+|---------|------|-------------|
+| **3226** | `active` | Primary cluster, runs all tiers |
+| **rochelle** | `standby` | Warm standby, runs Tier 1 only; promotes to full on failover |
+
+### Cluster Roles and Tiers
+
+Each cluster has a `cluster_role` (`active` or `standby`). This single variable controls what runs where.
+
+**Tier 1 — Always Running** (all clusters):
+- Networking: Cilium, CoreDNS, Envoy Gateway, k8s_gateway, Cloudflare Tunnel, Multus, Macvtap CNI
+- Storage: OpenEBS, VolSync, Garage S3, CSI Driver NFS, Snapshot Controller
+- Databases: CloudNative-PG + cluster, MariaDB Operator + Galera, Dragonfly
+- Secrets: External Secrets, cert-manager, SOPS/Age, Kanidm
+- Observability: Kube Prometheus Stack, Grafana, Victoria Logs, Fluent Bit, Gatus, Blackbox Exporter, OpenCost, kGuardian, KEDA, Silence Operator, Kromgo
+- System: Reloader, Metrics Server, Spegel, Flux
+
+**Tier 2 — Active Only** (gated by `CLUSTER_TIER2_SUSPENDED`):
+- Media stack (14 apps), FreePBX VMs, n8n, Penpot, Forgejo + runners
+- Actions Runner Controller, UI Bakery, Homepage, DBGate, SMTP relay
+- LibreSpeed, echo, KubeVirt Manager, all VMs
+- cloudflare-dns (external-dns), unifi-dns, unifi-toolkit
+
+### Failover Procedure
+
+**Manual failover** (change one variable + git push):
+
+1. Edit `kubernetes/clusters/rochelle/flux/ks.yaml`: set `cluster_role: "active"` and `CLUSTER_TIER2_SUSPENDED: "false"`
+2. Edit `kubernetes/clusters/3226/flux/ks.yaml`: set `cluster_role: "standby"` and `CLUSTER_TIER2_SUSPENDED: "true"`
+3. Remove/disable the CNPG standby patch for rochelle (`kubernetes/clusters/rochelle/overrides/databases/cnpg-standby-patch.yaml`)
+4. Git commit and push — Flux handles the rest
+
+### Adding a Third Cluster
+
+1. Create `kubernetes/clusters/<name>/flux/ks.yaml` with `cluster-local-vars` ConfigMap and `cluster-apps` Kustomization
+2. Create `talos/clusters/<name>/talconfig.yaml` referencing `../../shared/patches/`
+3. Generate an Age keypair and add to `.sops.yaml`
+4. Re-encrypt shared secrets with the new key
+
+### SOPS Multi-Cluster Key Strategy
+
+- Each cluster has its own Age keypair (stored in 1Password)
+- Cluster-specific secrets: only that cluster's key
+- Shared secrets (`kubernetes/apps/`, `kubernetes/components/`): all cluster keys
+- See `.sops.yaml` for path-based rules
+
 ## Directory Structure
 
 ```
@@ -51,7 +103,17 @@ special-winner/
 │   └── sops-age.sops.yaml          # Age encryption key
 │
 ├── kubernetes/                       # Kubernetes manifests
-│   ├── apps/                        # Application deployments
+│   ├── clusters/                    # Per-cluster Flux entrypoints
+│   │   ├── 3226/                   # Primary (active) cluster
+│   │   │   ├── flux/ks.yaml       # Flux entrypoint + cluster-local-vars
+│   │   │   ├── config/            # Cluster-specific config
+│   │   │   └── overrides/         # Cluster-specific patches
+│   │   └── rochelle/               # Standby cluster
+│   │       ├── flux/ks.yaml       # Flux entrypoint + cluster-local-vars
+│   │       ├── config/            # Cluster-specific config
+│   │       └── overrides/         # CNPG standby patch, etc.
+│   │           └── databases/     # Database overrides
+│   ├── apps/                        # Shared application deployments
 │   │   ├── <namespace>/            # One dir per namespace
 │   │   │   ├── <app-name>/        # One dir per app
 │   │   │   │   ├── app/           # App manifests
@@ -59,7 +121,7 @@ special-winner/
 │   │   │   │   │   ├── ocirepository.yaml
 │   │   │   │   │   ├── secret.sops.yaml
 │   │   │   │   │   └── kustomization.yaml
-│   │   │   │   └── ks.yaml        # Flux Kustomization
+│   │   │   │   └── ks.yaml        # Flux Kustomization (Tier 2 have suspend gate)
 │   │   │   ├── namespace.yaml
 │   │   │   └── kustomization.yaml
 │   │   └── kustomization.yaml
@@ -71,15 +133,23 @@ special-winner/
 │   │   ├── nfs-scaler/            # KEDA-based NFS scaling
 │   │   ├── sops/                  # SOPS integration
 │   │   └── volsync/               # Backup config
-│   └── flux/                        # Flux configuration
-│       └── cluster/ks.yaml         # Root Kustomization
+│   └── flux/                        # Legacy Flux configuration
+│       └── cluster/ks.yaml         # Original root Kustomization (kept for reference)
 │
 ├── talos/                           # Talos Linux config
+│   ├── clusters/                    # Per-cluster Talos configs
+│   │   ├── 3226/                   # 3226 talconfig + talenv
+│   │   └── rochelle/               # rochelle talconfig + talenv (placeholder)
+│   ├── shared/                      # Shared Talos patches
+│   │   └── patches/                # Reusable patches across clusters
+│   │       ├── global/            # All nodes
+│   │       ├── controller/        # Controller-specific
+│   │       ├── vm-node/           # VM-specific
+│   │       └── singlenodemaster/  # Per-node
 │   ├── clusterconfig/              # Generated configs (gitignored)
-│   └── patches/                    # Config patches
+│   └── patches/                    # Legacy config patches (kept for reference)
 │       ├── global/                # All nodes
 │       ├── controller/            # Controller-specific
-│       ├── worker/                # Worker-specific
 │       ├── vm-node/              # VM-specific (KubeVirt nodes)
 │       └── ${node-hostname}/      # Per-node
 │
@@ -495,11 +565,12 @@ When adding a new Kubernetes application:
 |------|---------|
 | List all tasks | `task --list` |
 | Initialize config | `task init` |
-| Validate & render | `task configure` |
+| Validate & render (3226) | `task configure` or `task configure CLUSTER=3226` |
+| Validate & render (rochelle) | `task configure CLUSTER=rochelle` |
 | Bootstrap Talos | `task bootstrap:talos` |
 | Bootstrap apps | `task bootstrap:apps` |
 | Force Flux sync | `task reconcile` |
-| Generate Talos config | `task talos:generate-config` |
+| Generate Talos config | `task talos:generate-config` or `task talos:generate-config CLUSTER=rochelle` |
 | Apply config to node | `task talos:apply-node IP=<ip> MODE=auto` |
 | Upgrade Talos | `task talos:upgrade-node IP=<ip>` |
 | Upgrade Kubernetes | `task talos:upgrade-k8s` |
@@ -797,6 +868,11 @@ Check `.mise.toml` for exact versions of all tools.
 
 ## Recent Notable Changes
 
+- **2026-03-07**: Multi-cluster refactor: Added `kubernetes/clusters/` with 3226 (active) and rochelle (standby) cluster support
+- **2026-03-07**: Multi-cluster refactor: Added Tier 2 gating with `suspend: "${CLUSTER_TIER2_SUSPENDED}"` on 42 Kustomizations across 35 files
+- **2026-03-07**: Multi-cluster refactor: Updated SOPS rules for per-cluster Age keys and multi-recipient shared secrets
+- **2026-03-07**: Multi-cluster refactor: Added CNPG streaming replication standby override for rochelle
+- **2026-03-07**: Multi-cluster refactor: Updated Taskfile and CI workflows for cluster-aware paths
 - **2026-03-07**: Added ambersecurityinc runner scale set to actions-runner-system (minRunners: 1, maxRunners: 3, 25Gi storage, 1Password integration)
 - **2026-03-07**: Added ARC Grafana monitoring dashboard for runner autoscaling metrics
 - **2026-03-07**: Added VolSync mass point-in-time restore script (`scripts/volsync-restore-all.sh`) for all 16 VolSync-backed apps
