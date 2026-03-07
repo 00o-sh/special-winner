@@ -1,0 +1,158 @@
+---
+clusterName: kubernetes
+
+talosVersion: "${talosVersion}"
+kubernetesVersion: "${kubernetesVersion}"
+
+endpoint: https://10.0.6.10:6443
+additionalApiServerCertSans: &sans
+  - "127.0.0.1"
+  - "10.0.6.10"
+additionalMachineCertSans: *sans
+
+clusterPodNets: ["172.30.0.0/16"]
+clusterSvcNets: ["172.31.0.0/16"]
+
+# Disable built-in CNI to use Cilium
+cniConfig:
+  name: none
+
+nodes:
+  - hostname: "singlenodemaster"
+    ipAddress: "10.0.6.211"
+    installDisk: "/dev/sda"
+    machineSpec:
+      secureboot: true
+    talosImageURL: factory.talos.dev/metal-installer-secureboot/a0f891b1160aa53ba502804e9d7f904c18bd643776beb117ff9a5566f3ac7b36
+    schematic:
+      customization:
+        extraKernelArgs:
+          - -lockdown
+          - lockdown=integrity
+        systemExtensions:
+          officialExtensions:
+            - siderolabs/amd-ucode
+            - siderolabs/amdgpu
+            - siderolabs/iscsi-tools
+            - siderolabs/nfs-utils
+            - siderolabs/nfsd
+            - siderolabs/nfsrahead
+            - siderolabs/multipath-tools
+            - siderolabs/nvme-cli
+            - siderolabs/util-linux-tools
+            - siderolabs/i915
+    controlPlane: true
+    patches:
+      - "@../../shared/patches/singlenodemaster/machine-kernel.yaml"
+
+    networkInterfaces:
+      - interface: bond0
+        bond:
+          mode: active-backup
+          deviceSelectors: [{ hardwareAddr: "58:47:ca:74:e4:*", driver: igc }]
+        mtu: 1500
+        dhcp: false
+        addresses:
+          - 10.0.6.211/24
+        routes:
+          - network: 0.0.0.0/0
+            gateway: 10.0.6.1
+        vip:
+          ip: 10.0.6.10
+
+  # Control plane nodes running as Proxmox VE VMs
+  - hostname: "node-01-pve"
+    ipAddress: "10.0.6.212"
+    installDisk: "/dev/sda"
+    machineSpec:
+      secureboot: true
+    talosImageURL: factory.talos.dev/nocloud-installer-secureboot/597f38eddf2c09c12accd19fcee10fc5fc58056795f145277e49d85de44ef8ad
+    schematic:
+      customization:
+        extraKernelArgs:
+          - -lockdown
+          - lockdown=integrity
+        systemExtensions:
+          officialExtensions:
+            - siderolabs/iscsi-tools
+            - siderolabs/nfs-utils
+            - siderolabs/nfsd
+            - siderolabs/nfsrahead
+            - siderolabs/qemu-guest-agent
+            - siderolabs/multipath-tools
+            - siderolabs/nvme-cli
+            - siderolabs/util-linux-tools
+    controlPlane: true
+    networkInterfaces:
+      - interface: bond0
+        bond:
+          mode: active-backup
+          deviceSelectors: [{ hardwareAddr: "bc:24:11:d7:17:*" }]
+        mtu: 1500
+        dhcp: false
+        addresses:
+          - 10.0.6.212/24
+        routes:
+          - network: 0.0.0.0/0
+            gateway: 10.0.6.1
+        vip:
+          ip: 10.0.6.10
+    patches:
+      - "@../../shared/patches/vm-node/machine-kubelet.yaml"
+
+  - hostname: "node-02-pve"
+    ipAddress: "10.0.6.213"
+    installDisk: "/dev/sda"
+    machineSpec:
+      secureboot: true
+    talosImageURL: factory.talos.dev/nocloud-installer-secureboot/597f38eddf2c09c12accd19fcee10fc5fc58056795f145277e49d85de44ef8ad
+    schematic:
+      customization:
+        extraKernelArgs:
+          - -lockdown
+          - lockdown=integrity
+        systemExtensions:
+          officialExtensions:
+            - siderolabs/iscsi-tools
+            - siderolabs/nfs-utils
+            - siderolabs/nfsd
+            - siderolabs/nfsrahead
+            - siderolabs/qemu-guest-agent
+            - siderolabs/multipath-tools
+            - siderolabs/nvme-cli
+            - siderolabs/util-linux-tools
+    controlPlane: true
+    networkInterfaces:
+      - interface: bond0
+        bond:
+          mode: active-backup
+          deviceSelectors: [{ hardwareAddr: "bc:24:11:80:3e:*" }]
+        mtu: 1500
+        dhcp: false
+        addresses:
+          - 10.0.6.213/24
+        routes:
+          - network: 0.0.0.0/0
+            gateway: 10.0.6.1
+        vip:
+          ip: 10.0.6.10
+    patches:
+      - "@../../shared/patches/vm-node/machine-kubelet.yaml"
+
+
+# Global patches
+patches:
+  - "@../../shared/patches/global/machine-files.yaml"
+  - "@../../shared/patches/global/machine-kubelet.yaml"
+  - "@../../shared/patches/global/machine-kubevirt.yaml"
+  - "@../../shared/patches/global/machine-network.yaml"
+  - "@../../shared/patches/global/machine-sysctls.yaml"
+  - "@../../shared/patches/global/machine-time.yaml"
+  - "@../../shared/patches/global/machine-vlan56.yaml"
+  - "@../../shared/patches/global/machine-vlan57.yaml"
+
+
+# Controller patches
+controlPlane:
+  patches:
+    - "@../../shared/patches/controller/cluster.yaml"

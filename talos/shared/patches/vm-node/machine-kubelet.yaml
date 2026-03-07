@@ -1,0 +1,7 @@
+# Configuration for VM nodes (Proxmox VE)
+# Labels to identify VM nodes where KubeVirt cannot run
+# (nested virtualization not supported)
+machine:
+  nodeLabels:
+    node.kubernetes.io/instance-type: "proxmox-vm"
+    kubevirt.io/schedulable: "false"
