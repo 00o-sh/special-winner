@@ -29,7 +29,7 @@
   kustomize: {
     managerFilePatterns: ["/^kustomization\\.ya?ml(?:\\.j2)?$/"],
   },
-  ignoreDeps: ["aqua:1password/cli"],
+  ignoreDeps: ["1password/cli"],
   packageRules: [
     {
       description: "Disable digest pinning for Flux, helmfile, and custom regex managers (Flux CRD uses separate ref.digest field; custom regex duplicates native kubernetes/github-actions managers)",
