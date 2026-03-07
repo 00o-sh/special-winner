@@ -12,7 +12,7 @@ This document provides comprehensive guidance for AI assistants working with thi
 
 - **OS**: Talos Linux 1.12.4 (immutable Kubernetes OS)
 - **Orchestration**: Kubernetes 1.34.0
-- **GitOps**: Flux CD 2.7.5 (declarative continuous delivery)
+- **GitOps**: Flux CD 2.8.1 (declarative continuous delivery)
 - **CNI**: Cilium 1.19.0 (eBPF-based networking)
 - **Ingress**: Envoy Gateway v1.6.3 (HTTP routing)
 - **Secrets**: SOPS 3.12.1 + Age 1.3.1 encryption
@@ -89,13 +89,26 @@ special-winner/
 │   └── scripts/                   # Custom Jinja2 filters
 │       └── plugin.py              # Custom functions
 │
+├── docs/                            # MkDocs documentation site
+│   ├── index.md                    # Home page
+│   ├── architecture.md             # Architecture overview
+│   ├── getting-started/            # Setup guides
+│   ├── infrastructure/             # Infrastructure docs
+│   ├── applications/               # Application docs
+│   ├── operations/                 # Operations & troubleshooting
+│   ├── development/                # Development guides
+│   └── research/                   # Research notes
+│
 ├── scripts/                         # Utility scripts
 │   ├── bootstrap-apps.sh           # Main bootstrap script
+│   ├── generate-labels.sh          # Auto-generate GitHub labels from directory structure
+│   ├── volsync-restore-all.sh      # Mass VolSync point-in-time restore for all apps
 │   └── lib/common.sh               # Shared utilities
 │
 ├── .mise.toml                       # Development tools config
 ├── .sops.yaml                      # SOPS encryption config
 ├── makejinja.toml                 # Template rendering config
+├── mkdocs.yml                     # Documentation site config
 ├── Taskfile.yaml                  # Root task definitions
 └── README.md                        # User documentation
 ```
@@ -495,6 +508,9 @@ When adding a new Kubernetes application:
 | Tidy templates | `task template:tidy` |
 | VM console | `task vm:console VM=<name>` |
 | VM start/stop | `task vm:start VM=<name>` / `task vm:stop VM=<name>` |
+| Mass VolSync restore | `./scripts/volsync-restore-all.sh` |
+| Generate GitHub labels | `./scripts/generate-labels.sh` |
+| Build docs locally | `mkdocs build` or `mkdocs serve` |
 
 ## Renovate Automation
 
@@ -639,7 +655,7 @@ talosctl logs --nodes <ip> --insecure
 ### Current Namespaces and Applications
 
 **actions-runner-system**: GitHub Actions Infrastructure
-- actions-runner-controller (self-hosted runner controller)
+- actions-runner-controller (self-hosted runner controller with scale sets for special-winner and ambersecurityinc orgs)
 
 **cert-manager**: Certificate management
 - cert-manager
@@ -748,7 +764,7 @@ talosctl logs --nodes <ip> --insecure
 
 ## Additional Resources
 
-- **Official Docs**: See README.md for detailed user documentation
+- **Official Docs**: See [docs.00o.sh](https://docs.00o.sh) for detailed documentation (built from `docs/` directory)
 - **Community**: GitHub Discussions and Discord (Home Operations)
 - **Related Tools**:
   - [Talos Linux](https://www.talos.dev/)
@@ -766,7 +782,7 @@ talosctl logs --nodes <ip> --insecure
 This documentation applies to:
 - Talos Linux: 1.12.4
 - Kubernetes: 1.34.0
-- Flux CD: 2.7.5
+- Flux CD: 2.8.1
 - Cilium: 1.19.0
 - Helm: 4.1.1
 - Python: 3.14.3
@@ -781,6 +797,14 @@ Check `.mise.toml` for exact versions of all tools.
 
 ## Recent Notable Changes
 
+- **2026-03-07**: Added ambersecurityinc runner scale set to actions-runner-system (minRunners: 1, maxRunners: 3, 25Gi storage, 1Password integration)
+- **2026-03-07**: Added ARC Grafana monitoring dashboard for runner autoscaling metrics
+- **2026-03-07**: Added VolSync mass point-in-time restore script (`scripts/volsync-restore-all.sh`) for all 16 VolSync-backed apps
+- **2026-03-07**: Added label generation script (`scripts/generate-labels.sh`) for auto-generating GitHub label config from directory structure
+- **2026-03-07**: Added comprehensive MkDocs Material documentation site at docs.00o.sh (35 pages covering architecture, infrastructure, applications, operations, development)
+- **2026-03-07**: Flux CD updated from 2.7.5 to 2.8.1
+- **2026-03-07**: Tool updates: 1password-cli 2.30.0 → 2.32.1, helmfile 1.3.2 → 1.4.1, cue 0.15.4 → 0.16.0
+- **2026-03-07**: kube-prometheus-stack updated to 82.10.1, Kromgo to v0.8.0, n8n to 2.11.1, Recyclarr to 8.4.0
 - **2026-03-01**: Restored 1Password Connect Server for reads, added 1Password SDK ClusterSecretStore (`onepassword-sdk`) for write access via PushSecret
 - **2026-03-01**: Migrated External Secrets from 1Password Connect Server to 1Password SDK (removed connect-api/connect-sync deployment, uses service account token directly)
 - **2026-02-25**: Added UI Bakery low-code internal tool builder to ui-bakery namespace (7 microservices, MariaDB backend, ExternalSecrets, Envoy Gateway ingress at uibakery.00o.sh)
@@ -905,12 +929,17 @@ Located in `kubernetes/apps/actions-runner-system/`, this system provides self-h
 - **actions-runner-controller**: Manages GitHub Actions Runner Scale Sets
 - **runners**: Ephemeral runner pods that execute GitHub Actions workflows
 
+**Runner Scale Sets**:
+- **special-winner**: Runners for this repository's workflows
+- **ambersecurityinc**: Runners for the ambersecurityinc GitHub organization (minRunners: 1, maxRunners: 3, 25Gi storage)
+
 **How it works**:
 - Uses GitHub's official Actions Runner Controller (ARC) architecture
 - Creates on-demand runner pods for workflow jobs
 - Scales based on GitHub webhook events
 - Provides isolated execution environment with cluster access
 - Used by workflows like `image-pull.yaml` and `schemas.yaml` that need cluster access
+- Grafana dashboard for ARC monitoring (autoscaling runner set metrics)
 
 **Benefits**:
 - Access to internal cluster resources (Talosctl for image pulling)
@@ -1139,7 +1168,45 @@ Located in `kubernetes/apps/utils/homepage/`, Homepage provides a unified dashbo
 
 **Purpose**: Central entry point for accessing all deployed services with status monitoring.
 
+### VolSync Mass Restore
+
+The `scripts/volsync-restore-all.sh` script provides automated point-in-time restore for all 16 VolSync-backed applications.
+
+**Supported Apps**:
+- **Media (12)**: autobrr, bazarr, plex, prowlarr, qbittorrent, radarr, recyclarr, seerr, sonarr, tautulli, thelounge, qui
+- **Network (1)**: unifi-toolkit
+- **Observability (1)**: gatus
+- **Utils (2)**: forgejo, penpot
+
+**Workflow**:
+1. Suspends Flux Kustomizations
+2. Scales down app workloads (handles both Deployments and StatefulSets)
+3. Patches ReplicationDestinations with `restoreAsOf` timestamp and manual trigger
+4. Waits for restores to complete (20-minute timeout per app)
+5. Resumes Kustomizations on success
+
+**Usage**: Edit the `RESTORE_TIME` variable in the script (default: `2026-03-01T23:59:59Z`) and run:
+```bash
+./scripts/volsync-restore-all.sh
+```
+
+### Documentation Site
+
+The repository includes a comprehensive MkDocs Material documentation site published at [docs.00o.sh](https://docs.00o.sh).
+
+**Structure** (35 pages):
+- **Getting Started**: Prerequisites, configuration, bootstrap, post-install
+- **Infrastructure**: Talos, Flux, Cilium, Envoy, storage, databases, certs/DNS, secrets, identity/SSO
+- **Applications**: Media stack, FreePBX, virtualization, observability, utilities
+- **Operations**: Day-2 ops, backup/recovery, VM management, troubleshooting
+- **Development**: Templates, CI/CD pipelines, contributing
+- **Research**: SSO providers
+
+**Configuration**: `mkdocs.yml` at repository root
+**Build**: `mkdocs build` or pushed automatically via `docs.yaml` workflow
+**Deploy**: Cloudflare Pages (`special-winner-docs` project)
+
 ---
 
-**Last Updated**: 2026-02-25
+**Last Updated**: 2026-03-07
 **Template Source**: [onedr0p/cluster-template](https://github.com/onedr0p/cluster-template)

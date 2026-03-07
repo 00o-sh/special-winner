@@ -105,6 +105,42 @@ kubectl -n <namespace> describe replicationsource <app-name>
     kubectl -n <namespace> get pods
     ```
 
+### Mass Point-in-Time Restore
+
+For disaster recovery scenarios where all VolSync-backed applications need to be restored simultaneously, use the automated mass restore script:
+
+```sh
+./scripts/volsync-restore-all.sh
+```
+
+!!! warning
+    This script restores **all 16 VolSync-backed applications** at once. Ensure you understand the implications before running it.
+
+**Supported applications (16 total):**
+
+| Namespace | Applications |
+|-----------|-------------|
+| media | autobrr, bazarr, plex, prowlarr, qbittorrent, radarr, recyclarr, seerr, sonarr, tautulli, thelounge, qui |
+| network | unifi-toolkit |
+| observability | gatus |
+| utils | forgejo, penpot |
+
+**How it works:**
+
+1. Suspends all Flux Kustomizations for the target apps
+2. Scales down workloads (handles both Deployments and StatefulSets)
+3. Patches each `ReplicationDestination` with a `restoreAsOf` timestamp and manual trigger
+4. Waits for all restores to complete (20-minute timeout per app)
+5. Resumes Flux Kustomizations on success
+
+**Configuration:** Edit the `RESTORE_TIME` variable at the top of the script to set the desired point-in-time (RFC3339 format, e.g., `2026-03-01T23:59:59Z`).
+
+**Notes:**
+
+- Handles multi-controller apps (e.g., penpot with separate frontend/backend deployments)
+- Prevents `kubectl` hangs when pods are already absent
+- Reports failures at the end with a summary of which apps failed
+
 ## PostgreSQL Backups
 
 CloudNative-PG handles PostgreSQL backups independently via the barman-cloud plugin:
