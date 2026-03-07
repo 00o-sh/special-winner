@@ -123,6 +123,16 @@
       ignoreTests: true,
     },
     {
+      description: "1Password CLI version tracking",
+      matchDepNames: ["1password-cli"],
+      automerge: true,
+      automergeType: "branch",
+      matchUpdateTypes: ["minor", "patch"],
+      ignoreTests: true,
+      semanticCommitScope: "mise",
+      commitMessageTopic: "tool 1password-cli",
+    },
+    {
       matchUpdateTypes: ["major"],
       semanticCommitType: "feat",
       commitMessagePrefix: "{{semanticCommitType}}({{semanticCommitScope}})!:",
@@ -215,6 +225,12 @@
       labels: ["type/pin"],
     },
   ],
+  customDatasources: {
+    "onepassword-cli": {
+      defaultRegistryUrlTemplate: "https://releases.1password.com/developers/cli/",
+      format: "html",
+    },
+  },
   customManagers: [
     {
       description: "Process Grafana dashboard URLs",
@@ -262,6 +278,18 @@
         "docker://(?<depName>[^:]+):(?<currentValue>[^\"\\s]+)",
       ],
       datasourceTemplate: "docker",
+    },
+    {
+      description: "Process 1Password CLI version in mise config",
+      customType: "regex",
+      managerFilePatterns: ["/(^|/)\\.mise\\.toml$/"],
+      matchStrings: [
+        // "aqua:1password/cli" = "2.32.1"
+        "\"aqua:1password/cli\"\\s*=\\s*\"(?<currentValue>[^\"]+)\"",
+      ],
+      depNameTemplate: "1password-cli",
+      datasourceTemplate: "custom.onepassword-cli",
+      extractVersionTemplate: "(?<version>\\d+\\.\\d+\\.\\d+)",
     },
   ],
 }
