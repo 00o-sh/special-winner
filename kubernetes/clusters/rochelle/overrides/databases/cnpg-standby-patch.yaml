@@ -1,0 +1,48 @@
+---
+# CNPG Standby Cluster Override for Rochelle
+#
+# This patch converts the shared CNPG Cluster resource into a standby
+# replica pointing at the 3226 primary cluster via streaming replication.
+#
+# When rochelle is promoted to active (cluster_role: active), this patch
+# should be removed or disabled so the cluster becomes a standalone primary.
+#
+# Prerequisites (TODO — complete before bringing rochelle online):
+# 1. Cross-cluster networking between rochelle and 3226 must be established
+#    (Cloudflare Tunnel, WireGuard, or direct VPN)
+# 2. TLS certificates for streaming replication must be provisioned:
+#    - cnpg-replication-client-cert (tls.crt + tls.key)
+#    - cnpg-ca-cert (ca.crt)
+# 3. The streaming_replica user must be created on the 3226 primary
+# 4. pg_hba.conf on 3226 must allow connections from rochelle's IP range
+#
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: postgres
+spec:
+  replica:
+    enabled: true
+    source: primary-3226
+  externalClusters:
+    - name: primary-3226
+      connectionParameters:
+        # TODO: Replace with actual cross-cluster hostname once networking is established
+        # Options:
+        #   - Cloudflare Tunnel: cnpg-3226.internal.${cluster_domain}
+        #   - WireGuard/VPN: direct IP of 3226 postgres service
+        host: cnpg-3226.internal.00o.sh
+        user: streaming_replica
+        dbname: postgres
+        sslmode: verify-full
+      sslCert:
+        # TODO: Create this secret with the replication client certificate
+        name: cnpg-replication-client-cert
+        key: tls.crt
+      sslKey:
+        name: cnpg-replication-client-cert
+        key: tls.key
+      sslRootCert:
+        # TODO: Create this secret with the CNPG CA certificate from 3226
+        name: cnpg-ca-cert
+        key: ca.crt
