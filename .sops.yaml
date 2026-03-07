@@ -1,12 +1,55 @@
 ---
 creation_rules:
-  - path_regex: talos/.*\.sops\.ya?ml
-    mac_only_encrypted: true
-    age: "age17a9gk8fq0rz9utn3jzhtc2nqvypk996cj5eamuw75j73uphvsursv37973"
-  - path_regex: (bootstrap|kubernetes)/.*\.sops\.ya?ml
+  # Cluster-specific secrets: only that cluster's key can decrypt
+  - path_regex: kubernetes/clusters/3226/.*\.sops\.ya?ml
     encrypted_regex: "^(data|stringData)$"
     mac_only_encrypted: true
     age: "age17a9gk8fq0rz9utn3jzhtc2nqvypk996cj5eamuw75j73uphvsursv37973"
+
+  - path_regex: kubernetes/clusters/rochelle/.*\.sops\.ya?ml
+    encrypted_regex: "^(data|stringData)$"
+    mac_only_encrypted: true
+    # TODO: Replace with rochelle Age public key once generated
+    # Generate with: age-keygen -o rochelle.key
+    # Store in 1Password as "Kubernetes - rochelle - Age Key"
+    age: "ROCHELLE_AGE_PUBLIC_KEY_PLACEHOLDER"
+
+  # Shared Kubernetes secrets: all cluster keys (any cluster can decrypt)
+  - path_regex: kubernetes/(apps|components)/.*\.sops\.ya?ml
+    encrypted_regex: "^(data|stringData)$"
+    mac_only_encrypted: true
+    age: >-
+      age17a9gk8fq0rz9utn3jzhtc2nqvypk996cj5eamuw75j73uphvsursv37973,
+      ROCHELLE_AGE_PUBLIC_KEY_PLACEHOLDER
+
+  # Talos secrets: cluster-scoped
+  - path_regex: talos/clusters/3226/.*\.sops\.ya?ml
+    mac_only_encrypted: true
+    age: "age17a9gk8fq0rz9utn3jzhtc2nqvypk996cj5eamuw75j73uphvsursv37973"
+
+  - path_regex: talos/clusters/rochelle/.*\.sops\.ya?ml
+    mac_only_encrypted: true
+    # TODO: Replace with rochelle Age public key
+    age: "ROCHELLE_AGE_PUBLIC_KEY_PLACEHOLDER"
+
+  # Talos shared patches (if any are encrypted): all cluster keys
+  - path_regex: talos/shared/.*\.sops\.ya?ml
+    mac_only_encrypted: true
+    age: >-
+      age17a9gk8fq0rz9utn3jzhtc2nqvypk996cj5eamuw75j73uphvsursv37973,
+      ROCHELLE_AGE_PUBLIC_KEY_PLACEHOLDER
+
+  # Legacy Talos path (existing talsecret.sops.yaml at talos root)
+  - path_regex: talos/.*\.sops\.ya?ml
+    mac_only_encrypted: true
+    age: "age17a9gk8fq0rz9utn3jzhtc2nqvypk996cj5eamuw75j73uphvsursv37973"
+
+  # Bootstrap secrets: 3226 cluster key (bootstrap is cluster-specific)
+  - path_regex: bootstrap/.*\.sops\.ya?ml
+    encrypted_regex: "^(data|stringData)$"
+    mac_only_encrypted: true
+    age: "age17a9gk8fq0rz9utn3jzhtc2nqvypk996cj5eamuw75j73uphvsursv37973"
+
 stores:
   yaml:
     indent: 2
