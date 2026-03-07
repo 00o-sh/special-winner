@@ -1,4 +1,20 @@
 ---
+# Cluster-local variables for 3226 (active cluster)
+# THE FAILOVER SWITCH: Change cluster_role to "standby" and push to trigger failover
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cluster-local-vars
+  namespace: flux-system
+data:
+  cluster_name: "3226"
+  cluster_role: "active"
+  cluster_env: "production"
+  # Derived from cluster_role — controls Tier 2 app suspension
+  # active  → "false" (Tier 2 apps run)
+  # standby → "true"  (Tier 2 apps suspended)
+  CLUSTER_TIER2_SUSPENDED: "false"
+---
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
@@ -10,6 +26,12 @@ spec:
   deletionPolicy: WaitForTermination
   interval: 1h
   path: ./kubernetes/apps
+  postBuild:
+    substituteFrom:
+      - kind: Secret
+        name: cluster-secrets
+      - kind: ConfigMap
+        name: cluster-local-vars
   prune: true
   sourceRef:
     kind: GitRepository
