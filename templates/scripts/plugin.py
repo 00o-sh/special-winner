@@ -4,6 +4,7 @@ from typing import Any
 import base64
 import ipaddress
 import makejinja
+import os
 import re
 import json
 
@@ -127,6 +128,9 @@ class Plugin(makejinja.plugin.Plugin):
 
     def data(self) -> makejinja.plugin.Data:
         data = self._data
+
+        # Cluster-awareness: read from CLUSTER_NAME env var (default: 3226)
+        data.setdefault('cluster_name', os.environ.get('CLUSTER_NAME', '3226'))
 
         # Set default values for optional fields
         data.setdefault('node_default_gateway', nthhost(data.get('node_cidr'), 1))

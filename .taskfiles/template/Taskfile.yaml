@@ -87,6 +87,7 @@ tasks:
     cmd: makejinja
     env:
       PYTHONDONTWRITEBYTECODE: '1'
+      CLUSTER_NAME: '{{.CLUSTER}}'
     preconditions:
       - test -f {{.TEMPLATE_DIR}}/scripts/plugin.py
       - test -f {{.MAKEJINJA_CONFIG_FILE}}
@@ -117,10 +118,10 @@ tasks:
 
   validate-talos-config:
     internal: true
-    dir: '{{.TALOS_DIR}}'
-    cmd: talhelper validate talconfig {{.TALOS_DIR}}/talconfig.yaml
+    dir: '{{.TALOS_CLUSTER_DIR}}'
+    cmd: talhelper validate talconfig {{.TALOS_CLUSTER_DIR}}/talconfig.yaml
     preconditions:
-      - test -f {{.TALOS_DIR}}/talconfig.yaml
+      - test -f {{.TALOS_CLUSTER_DIR}}/talconfig.yaml
       - which talhelper
 
   debug:

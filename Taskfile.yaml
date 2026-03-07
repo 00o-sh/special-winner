@@ -8,10 +8,14 @@ set: [pipefail]
 shopt: [globstar]
 
 vars:
+  # CLUSTER: Target cluster name (default: 3226)
+  # Usage: task configure CLUSTER=rochelle
+  CLUSTER: '{{.CLUSTER | default "3226"}}'
   BOOTSTRAP_DIR: '{{.ROOT_DIR}}/bootstrap'
   KUBERNETES_DIR: '{{.ROOT_DIR}}/kubernetes'
   SCRIPTS_DIR: '{{.ROOT_DIR}}/scripts'
   TALOS_DIR: '{{.ROOT_DIR}}/talos'
+  TALOS_CLUSTER_DIR: '{{.ROOT_DIR}}/talos/clusters/{{.CLUSTER}}'
   PRIVATE_DIR: '{{.ROOT_DIR}}/.private'
   TALOSCONFIG: '{{.ROOT_DIR}}/talos/clusterconfig/talosconfig'
 
