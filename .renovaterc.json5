@@ -31,6 +31,12 @@
   },
   packageRules: [
     {
+      description: "Disable mise manager for 1Password CLI (HTTP-type aqua package, no GitHub repo)",
+      matchManagers: ["mise"],
+      matchDepNames: ["aqua:1password/cli"],
+      enabled: false,
+    },
+    {
       description: "Disable digest pinning for Flux, helmfile, and custom regex managers (Flux CRD uses separate ref.digest field; custom regex duplicates native kubernetes/github-actions managers)",
       matchManagers: ["flux", "helmfile", "custom.regex"],
       pinDigests: false,
@@ -120,6 +126,16 @@
       automergeType: "branch",
       matchUpdateTypes: ["minor", "patch"],
       ignoreTests: true,
+    },
+    {
+      description: "1Password CLI version tracking",
+      matchDepNames: ["1password-cli"],
+      automerge: true,
+      automergeType: "branch",
+      matchUpdateTypes: ["minor", "patch"],
+      ignoreTests: true,
+      semanticCommitScope: "mise",
+      commitMessageTopic: "tool 1password-cli",
     },
     {
       matchUpdateTypes: ["major"],
@@ -214,6 +230,12 @@
       labels: ["type/pin"],
     },
   ],
+  customDatasources: {
+    "onepassword-cli": {
+      defaultRegistryUrlTemplate: "https://releases.1password.com/developers/cli/",
+      format: "html",
+    },
+  },
   customManagers: [
     {
       description: "Process Grafana dashboard URLs",
@@ -261,6 +283,18 @@
         "docker://(?<depName>[^:]+):(?<currentValue>[^\"\\s]+)",
       ],
       datasourceTemplate: "docker",
+    },
+    {
+      description: "Process 1Password CLI version in mise config",
+      customType: "regex",
+      managerFilePatterns: ["/(^|/)\\.mise\\.toml$/"],
+      matchStrings: [
+        // "aqua:1password/cli" = "2.32.1"
+        "\"aqua:1password/cli\"\\s*=\\s*\"(?<currentValue>[^\"]+)\"",
+      ],
+      depNameTemplate: "1password-cli",
+      datasourceTemplate: "custom.onepassword-cli",
+      extractVersionTemplate: "(?<version>\\d+\\.\\d+\\.\\d+)",
     },
   ],
 }
