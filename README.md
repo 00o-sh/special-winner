@@ -23,7 +23,7 @@ A Kubernetes cluster deployed with [Talos Linux](https://github.com/siderolabs/t
 **Operating System & Orchestration:**
 - [Talos Linux](https://github.com/siderolabs/talos) 1.12.4 - Immutable Kubernetes OS
 - [Kubernetes](https://kubernetes.io/) 1.34.0 - Container orchestration
-- [Flux CD](https://github.com/fluxcd/flux2) 2.7.5 - GitOps continuous delivery
+- [Flux CD](https://github.com/fluxcd/flux2) 2.8.1 - GitOps continuous delivery
 
 **Networking:**
 - [Cilium](https://github.com/cilium/cilium) 1.19.0 - eBPF-based CNI
@@ -55,6 +55,7 @@ A Kubernetes cluster deployed with [Talos Linux](https://github.com/siderolabs/t
 
 **Database:**
 - [CloudNative-PG](https://cloudnative-pg.io/) - PostgreSQL 17.7 HA cluster (3 instances)
+- [MariaDB Operator](https://github.com/mariadb-operator/mariadb-operator) - MariaDB 11.7 Galera cluster (3 instances)
 - [Dragonfly](https://www.dragonflydb.io/) - Redis-compatible in-memory datastore
 - [DBGate](https://dbgate.org/) - Database management web UI
 
@@ -97,8 +98,14 @@ A Kubernetes cluster deployed with [Talos Linux](https://github.com/siderolabs/t
 - [FlareSolverr](https://github.com/FlareSolverr/FlareSolverr) - Cloudflare bypass proxy
 - [TheLounge](https://thelounge.chat/) - Self-hosted IRC client
 
+**VoIP & Telephony:**
+- [FreePBX](https://www.freepbx.org/) - Containerized telephony platform (MariaDB backend)
+
+**Low-Code Platform:**
+- [UI Bakery](https://uibakery.io/) - Internal tool builder (7 microservices, MariaDB backend)
+
 **Infrastructure & Utilities:**
-- [GitHub Actions Runner Controller](https://github.com/actions/actions-runner-controller) - Self-hosted GitHub Actions runners
+- [GitHub Actions Runner Controller](https://github.com/actions/actions-runner-controller) - Self-hosted GitHub Actions runners (special-winner + ambersecurityinc scale sets)
 - [Forgejo](https://forgejo.org/) - Self-hosted Git repository service with CI/CD runners
 - [SMTP Relay](https://github.com/foxcpp/maddy) - Outbound email relay using Maddy
 - [n8n](https://n8n.io/) - Workflow automation platform
@@ -577,7 +584,7 @@ Community member [@whazor](https://github.com/whazor) created [Kubesearch](https
 - [ ] Vaultwarden (Bitwarden/1Password supplementary instance)
 - [ ] rclone CronJobs for automated cloud sync
 - [ ] Linkding (bookmark backup)
-- [ ] Migrate External Secrets from 1Password Connect to 1Password SDK (enables PushSecret for cross-namespace secret sync)
+- [x] Migrate External Secrets from 1Password Connect to 1Password SDK (enables PushSecret for cross-namespace secret sync)
 
 ### Phase 2: Test Multi-Node Features
 
@@ -665,11 +672,11 @@ If this repo is too hot to handle or too cold to hold check out these following 
 
 | Metric | Value |
 |--------|-------|
-| **Deployed Components** | 65+ applications across 17 namespaces |
+| **Deployed Components** | 70+ applications across 18 namespaces |
 | **Template Source** | [onedr0p/cluster-template](https://github.com/onedr0p/cluster-template) |
 | **Infrastructure** | GitOps with Flux CD + Talos Linux |
 | **Documentation** | [docs.00o.sh](https://docs.00o.sh) |
-| **Last Updated** | 2026-02-22 |
+| **Last Updated** | 2026-03-07 |
 
 ---
 
