@@ -65,11 +65,17 @@ All applications are deployed via Flux CD from manifests in `kubernetes/apps/`.
 | [Fluent Bit](https://fluentbit.io/) | Log forwarding | observability |
 | [KEDA](https://keda.sh/) | Event-driven autoscaling | observability |
 
+### Low-Code Platform
+
+| App | Description | Namespace |
+|-----|-------------|-----------|
+| [UI Bakery](https://uibakery.io/) | Internal tool builder | ui-bakery |
+
 ### CI/CD
 
 | App | Description | Namespace |
 |-----|-------------|-----------|
-| Actions Runner Controller | GitHub Actions runners | actions-runner-system |
+| Actions Runner Controller | GitHub Actions runners (special-winner + ambersecurityinc scale sets) | actions-runner-system |
 | Forgejo Runner | Forgejo CI/CD runners | forgejo-runner-system |
 
 See the detailed pages for more on each category:

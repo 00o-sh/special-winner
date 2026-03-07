@@ -16,6 +16,8 @@ Guides for managing the cluster day-to-day.
 | Validate K8s manifests | `task template:validate-kubernetes-config` |
 | VM console | `task vm:console VM=<name>` |
 | VM start/stop | `task vm:start VM=<name>` / `task vm:stop VM=<name>` |
+| Mass VolSync restore | `./scripts/volsync-restore-all.sh` |
+| Generate GitHub labels | `./scripts/generate-labels.sh` |
 
 ## Pages
 

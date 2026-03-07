@@ -85,12 +85,23 @@ Repository release management.
 
 ## Self-Hosted Runners
 
-Some workflows run on `special-winner-runner` (self-hosted) with cluster access:
+Some workflows run on self-hosted runners with cluster access, managed by Actions Runner Controller (ARC) in the `actions-runner-system` namespace.
+
+### Runner Scale Sets
+
+| Scale Set | Organization | Min Runners | Max Runners | Storage |
+|-----------|-------------|-------------|-------------|---------|
+| `special-winner` | 00o-sh | - | - | - |
+| `ambersecurityinc` | ambersecurityinc | 1 | 3 | 25Gi |
+
+### Workflows Using Self-Hosted Runners
 
 - `image-pull.yaml` -- Needs Talosctl for image pulling
 - `schemas.yaml` -- Needs kubectl for CRD extraction
 
-Runners are managed by Actions Runner Controller in the `actions-runner-system` namespace.
+### Monitoring
+
+An ARC Grafana dashboard is available for monitoring runner autoscaling metrics (counters, gauges, histograms) at the cluster's Grafana instance.
 
 ## Troubleshooting CI/CD
 
