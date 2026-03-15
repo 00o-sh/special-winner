@@ -25,7 +25,7 @@ spec:
           migrations:
             image:
               repository: makeplane/plane-backend
-              tag: v0.28.0
+              tag: v1.2.3
             command: ["./bin/docker-entrypoint-migrator.sh"]
             env:
               DJANGO_SETTINGS_MODULE: plane.settings.production
@@ -42,7 +42,7 @@ spec:
           app:
             image:
               repository: makeplane/plane-backend
-              tag: v0.28.0
+              tag: v1.2.3
             command: ["./bin/docker-entrypoint-api.sh"]
             env:
               DJANGO_SETTINGS_MODULE: plane.settings.production
@@ -104,7 +104,7 @@ spec:
           app:
             image:
               repository: makeplane/plane-backend
-              tag: v0.28.0
+              tag: v1.2.3
             command: ["./bin/docker-entrypoint-worker.sh"]
             env:
               DJANGO_SETTINGS_MODULE: plane.settings.production
@@ -148,7 +148,7 @@ spec:
           app:
             image:
               repository: makeplane/plane-backend
-              tag: v0.28.0
+              tag: v1.2.3
             command: ["./bin/docker-entrypoint-beat.sh"]
             env:
               DJANGO_SETTINGS_MODULE: plane.settings.production
