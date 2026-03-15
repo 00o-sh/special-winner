@@ -1,0 +1,268 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s-labs/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: plane
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: plane
+  interval: 1h
+  values:
+    controllers:
+      api:
+        annotations:
+          reloader.stakater.com/auto: "true"
+        initContainers:
+          init-db:
+            image:
+              repository: ghcr.io/home-operations/postgres-init
+              tag: 18@sha256:6fa1f331cddd2eb0b6afa7b8d3685c864127a81ab01c3d9400bc3ff5263a51cf
+            envFrom:
+              - secretRef:
+                  name: plane-secret
+          migrations:
+            image:
+              repository: makeplane/plane-backend
+              tag: v0.23.0
+            command: ["./bin/docker-entrypoint-migrator.sh"]
+            env:
+              DJANGO_SETTINGS_MODULE: plane.settings.production
+              REDIS_URL: redis://plane-valkey:6379/0
+              AWS_S3_ENDPOINT_URL: http://garage.volsync-system.svc.cluster.local:3900
+              AWS_STORAGE_BUCKET_NAME: plane-uploads
+              AWS_REGION: garage
+            envFrom:
+              - secretRef:
+                  name: plane-secret
+        containers:
+          app:
+            image:
+              repository: makeplane/plane-backend
+              tag: v0.23.0
+            command: ["./bin/docker-entrypoint-api.sh"]
+            env:
+              DJANGO_SETTINGS_MODULE: plane.settings.production
+              WEB_URL: https://plane.00o.sh
+              CORS_ALLOWED_ORIGINS: https://plane.00o.sh
+              REDIS_URL: redis://plane-valkey:6379/0
+              AWS_S3_ENDPOINT_URL: http://garage.volsync-system.svc.cluster.local:3900
+              AWS_STORAGE_BUCKET_NAME: plane-uploads
+              AWS_REGION: garage
+              FILE_SIZE_LIMIT: "5242880"
+              ENABLE_SIGNUP: "1"
+              DATABASE_URL:
+                valueFrom:
+                  secretKeyRef:
+                    name: plane-secret
+                    key: DATABASE_URL
+              SECRET_KEY:
+                valueFrom:
+                  secretKeyRef:
+                    name: plane-secret
+                    key: SECRET_KEY
+              AWS_ACCESS_KEY_ID:
+                valueFrom:
+                  secretKeyRef:
+                    name: plane-secret
+                    key: AWS_ACCESS_KEY_ID
+              AWS_SECRET_ACCESS_KEY:
+                valueFrom:
+                  secretKeyRef:
+                    name: plane-secret
+                    key: AWS_SECRET_ACCESS_KEY
+            probes:
+              liveness: &apiProbes
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /
+                    port: 8000
+                  initialDelaySeconds: 30
+                  periodSeconds: 10
+                  timeoutSeconds: 5
+                  failureThreshold: 5
+              readiness: *apiProbes
+            resources:
+              requests:
+                cpu: 100m
+                memory: 256Mi
+              limits:
+                memory: 1Gi
+
+      worker:
+        annotations:
+          reloader.stakater.com/auto: "true"
+        containers:
+          app:
+            image:
+              repository: makeplane/plane-backend
+              tag: v0.23.0
+            command: ["./bin/docker-entrypoint-worker.sh"]
+            env:
+              DJANGO_SETTINGS_MODULE: plane.settings.production
+              REDIS_URL: redis://plane-valkey:6379/0
+              AWS_S3_ENDPOINT_URL: http://garage.volsync-system.svc.cluster.local:3900
+              AWS_STORAGE_BUCKET_NAME: plane-uploads
+              AWS_REGION: garage
+              DATABASE_URL:
+                valueFrom:
+                  secretKeyRef:
+                    name: plane-secret
+                    key: DATABASE_URL
+              SECRET_KEY:
+                valueFrom:
+                  secretKeyRef:
+                    name: plane-secret
+                    key: SECRET_KEY
+              AWS_ACCESS_KEY_ID:
+                valueFrom:
+                  secretKeyRef:
+                    name: plane-secret
+                    key: AWS_ACCESS_KEY_ID
+              AWS_SECRET_ACCESS_KEY:
+                valueFrom:
+                  secretKeyRef:
+                    name: plane-secret
+                    key: AWS_SECRET_ACCESS_KEY
+            resources:
+              requests:
+                cpu: 50m
+                memory: 256Mi
+              limits:
+                memory: 1Gi
+
+      beat:
+        annotations:
+          reloader.stakater.com/auto: "true"
+        containers:
+          app:
+            image:
+              repository: makeplane/plane-backend
+              tag: v0.23.0
+            command: ["./bin/docker-entrypoint-beat.sh"]
+            env:
+              DJANGO_SETTINGS_MODULE: plane.settings.production
+              REDIS_URL: redis://plane-valkey:6379/0
+              DATABASE_URL:
+                valueFrom:
+                  secretKeyRef:
+                    name: plane-secret
+                    key: DATABASE_URL
+              SECRET_KEY:
+                valueFrom:
+                  secretKeyRef:
+                    name: plane-secret
+                    key: SECRET_KEY
+            resources:
+              requests:
+                cpu: 10m
+                memory: 128Mi
+              limits:
+                memory: 512Mi
+
+      web:
+        containers:
+          app:
+            image:
+              repository: makeplane/plane-frontend
+              tag: v0.23.0
+            env:
+              NEXT_PUBLIC_API_BASE_URL: https://plane.00o.sh
+              NEXT_PUBLIC_SPACE_BASE_URL: https://plane.00o.sh/spaces
+              NEXT_PUBLIC_ADMIN_BASE_URL: https://plane.00o.sh/god-mode
+              NEXT_PUBLIC_ADMIN_BASE_PATH: /god-mode
+              NEXT_PUBLIC_SPACE_BASE_PATH: /spaces
+            probes:
+              liveness: &webProbes
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /
+                    port: 3000
+                  initialDelaySeconds: 15
+                  periodSeconds: 10
+                  failureThreshold: 5
+              readiness: *webProbes
+            resources:
+              requests:
+                cpu: 10m
+                memory: 128Mi
+              limits:
+                memory: 512Mi
+
+      valkey:
+        containers:
+          app:
+            image:
+              repository: valkey/valkey
+              tag: 9.0.3-alpine
+            args: ["--save", "60", "1"]
+            resources:
+              requests:
+                cpu: 10m
+                memory: 64Mi
+              limits:
+                memory: 256Mi
+
+    service:
+      api:
+        controller: api
+        ports:
+          http:
+            port: 8000
+      web:
+        controller: web
+        ports:
+          http:
+            port: 3000
+      valkey:
+        controller: valkey
+        ports:
+          redis:
+            port: 6379
+
+    route:
+      app:
+        annotations:
+          gethomepage.dev/enabled: "true"
+          gethomepage.dev/group: Utilities
+          gethomepage.dev/name: Plane
+          gethomepage.dev/icon: plane.png
+          gethomepage.dev/description: Project Management
+          gethomepage.dev/href: "https://plane.00o.sh"
+        hostnames:
+          - plane.00o.sh
+        parentRefs:
+          - name: envoy-external
+            namespace: network
+            sectionName: https
+        rules:
+          - matches:
+              - path:
+                  type: PathPrefix
+                  value: /api/
+            backendRefs:
+              - identifier: api
+                port: 8000
+          - matches:
+              - path:
+                  type: PathPrefix
+                  value: /auth/
+            backendRefs:
+              - identifier: api
+                port: 8000
+          - backendRefs:
+              - identifier: web
+                port: 3000
+
+    persistence:
+      valkey-data:
+        type: emptyDir
+        advancedMounts:
+          valkey:
+            app:
+              - path: /data
