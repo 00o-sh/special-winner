@@ -203,6 +203,62 @@ spec:
               limits:
                 memory: 1Gi
 
+      admin:
+        containers:
+          app:
+            image:
+              repository: makeplane/plane-admin
+              tag: v0.23.0
+            env:
+              NEXT_PUBLIC_API_BASE_URL: https://plane.00o.sh
+              PORT: "3001"
+            probes:
+              liveness: &adminProbes
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /god-mode/
+                    port: 3001
+                  initialDelaySeconds: 30
+                  periodSeconds: 10
+                  failureThreshold: 5
+              readiness: *adminProbes
+            resources:
+              requests:
+                cpu: 10m
+                memory: 128Mi
+              limits:
+                memory: 512Mi
+
+      space:
+        containers:
+          app:
+            image:
+              repository: makeplane/plane-space
+              tag: v0.23.0
+            env:
+              NEXT_PUBLIC_API_BASE_URL: https://plane.00o.sh
+              PORT: "3002"
+            probes:
+              liveness: &spaceProbes
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /spaces/
+                    port: 3002
+                  initialDelaySeconds: 30
+                  periodSeconds: 10
+                  failureThreshold: 5
+              readiness: *spaceProbes
+            resources:
+              requests:
+                cpu: 10m
+                memory: 128Mi
+              limits:
+                memory: 512Mi
+
       rabbitmq:
         containers:
           app:
@@ -245,6 +301,16 @@ spec:
         ports:
           http:
             port: 3000
+      admin:
+        controller: admin
+        ports:
+          http:
+            port: 3001
+      space:
+        controller: space
+        ports:
+          http:
+            port: 3002
       rabbitmq:
         controller: rabbitmq
         ports:
@@ -285,6 +351,20 @@ spec:
             backendRefs:
               - identifier: api
                 port: 8000
+          - matches:
+              - path:
+                  type: PathPrefix
+                  value: /god-mode/
+            backendRefs:
+              - identifier: admin
+                port: 3001
+          - matches:
+              - path:
+                  type: PathPrefix
+                  value: /spaces/
+            backendRefs:
+              - identifier: space
+                port: 3002
           - backendRefs:
               - identifier: web
                 port: 3000
