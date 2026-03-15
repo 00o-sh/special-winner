@@ -182,6 +182,7 @@ spec:
               repository: makeplane/plane-live
               tag: v1.2.3
             env:
+              API_BASE_URL: http://plane-api:8000
               REDIS_URL: redis://plane-valkey:6379/0
               AMQP_URL: amqp://plane:plane@plane-rabbitmq:5672/plane
               DATABASE_URL:
@@ -253,16 +254,15 @@ spec:
               tag: v1.2.3
             env:
               NEXT_PUBLIC_API_BASE_URL: https://plane.00o.sh
-              PORT: "3001"
             probes:
               liveness: &adminProbes
                 enabled: true
                 custom: true
                 spec:
                   httpGet:
-                    path: /god-mode/
-                    port: 3001
-                  initialDelaySeconds: 30
+                    path: /
+                    port: 80
+                  initialDelaySeconds: 15
                   periodSeconds: 10
                   failureThreshold: 5
               readiness: *adminProbes
@@ -281,16 +281,15 @@ spec:
               tag: v1.2.3
             env:
               NEXT_PUBLIC_API_BASE_URL: https://plane.00o.sh
-              PORT: "3002"
             probes:
               liveness: &spaceProbes
                 enabled: true
                 custom: true
                 spec:
                   httpGet:
-                    path: /spaces/
-                    port: 3002
-                  initialDelaySeconds: 30
+                    path: /
+                    port: 80
+                  initialDelaySeconds: 15
                   periodSeconds: 10
                   failureThreshold: 5
               readiness: *spaceProbes
@@ -352,12 +351,12 @@ spec:
         controller: admin
         ports:
           http:
-            port: 3001
+            port: 80
       space:
         controller: space
         ports:
           http:
-            port: 3002
+            port: 80
       rabbitmq:
         controller: rabbitmq
         ports:
@@ -411,14 +410,14 @@ spec:
                   value: /god-mode/
             backendRefs:
               - identifier: admin
-                port: 3001
+                port: 80
           - matches:
               - path:
                   type: PathPrefix
                   value: /spaces/
             backendRefs:
               - identifier: space
-                port: 3002
+                port: 80
           - backendRefs:
               - identifier: web
                 port: 3000
