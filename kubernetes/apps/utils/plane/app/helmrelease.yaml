@@ -68,6 +68,12 @@ spec:
               FILE_SIZE_LIMIT: "5242880"
               ENABLE_SIGNUP: "1"
               GUNICORN_WORKERS: "2"
+              EMAIL_HOST: smtp-relay.utils.svc.cluster.local
+              EMAIL_PORT: "25"
+              EMAIL_FROM: plane@00o.sh
+              DEFAULT_FROM_EMAIL: plane@00o.sh
+              EMAIL_USE_TLS: "0"
+              EMAIL_USE_SSL: "0"
               DATABASE_URL:
                 valueFrom:
                   secretKeyRef:
