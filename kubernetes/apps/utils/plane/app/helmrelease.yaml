@@ -427,6 +427,12 @@ spec:
               - path:
                   type: PathPrefix
                   value: /god-mode/
+            filters:
+              - type: URLRewrite
+                urlRewrite:
+                  path:
+                    type: ReplacePrefixMatch
+                    replacePrefixMatch: /
             backendRefs:
               - identifier: admin
                 port: 3000
@@ -441,6 +447,33 @@ spec:
               - identifier: web
                 port: 3000
 
+    configMaps:
+      admin-nginx:
+        data:
+          nginx.conf: |
+            worker_processes 1;
+            error_log /dev/stderr warn;
+            events {
+              worker_connections 1024;
+            }
+            http {
+              include /etc/nginx/mime.types;
+              default_type application/octet-stream;
+              access_log /dev/stdout;
+              sendfile on;
+              keepalive_timeout 65;
+              server {
+                listen 3000;
+                root /usr/share/nginx/html/god-mode;
+                index index.html;
+                add_header X-Frame-Options "DENY" always;
+                add_header X-Content-Type-Options "nosniff" always;
+                location / {
+                  try_files $uri $uri/ /index.html;
+                }
+              }
+            }
+
     persistence:
       rabbitmq-data:
         type: emptyDir
@@ -454,3 +487,11 @@ spec:
           valkey:
             app:
               - path: /data
+      admin-nginx-config:
+        type: configMap
+        name: plane-admin-nginx
+        advancedMounts:
+          admin:
+            app:
+              - path: /etc/nginx/nginx.conf
+                subPath: nginx.conf
