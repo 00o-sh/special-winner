@@ -25,15 +25,15 @@ spec:
           migrations:
             image:
               repository: makeplane/plane-backend
-              tag: v0.23.0
+              tag: v1.2.3
             command: ["./bin/docker-entrypoint-migrator.sh"]
             env:
               DJANGO_SETTINGS_MODULE: plane.settings.production
               REDIS_URL: redis://plane-valkey:6379/0
-              CELERY_BROKER_URL: amqp://plane:plane@plane-rabbitmq:5672/plane
+              AMQP_URL: amqp://plane:plane@plane-rabbitmq:5672/plane
               AWS_S3_ENDPOINT_URL: http://garage.volsync-system.svc.cluster.local:3900
               AWS_S3_ADDRESSING_STYLE: path
-              AWS_STORAGE_BUCKET_NAME: plane-uploads
+              AWS_S3_BUCKET_NAME: plane-uploads
               AWS_REGION: garage
             envFrom:
               - secretRef:
@@ -42,18 +42,19 @@ spec:
           app:
             image:
               repository: makeplane/plane-backend
-              tag: v0.23.0
+              tag: v1.2.3
             command: ["./bin/docker-entrypoint-api.sh"]
             env:
               DJANGO_SETTINGS_MODULE: plane.settings.production
               WEB_URL: https://plane.00o.sh
               CORS_ALLOWED_ORIGINS: https://plane.00o.sh
               REDIS_URL: redis://plane-valkey:6379/0
-              CELERY_BROKER_URL: amqp://plane:plane@plane-rabbitmq:5672/plane
+              AMQP_URL: amqp://plane:plane@plane-rabbitmq:5672/plane
               AWS_S3_ENDPOINT_URL: http://garage.volsync-system.svc.cluster.local:3900
               AWS_S3_ADDRESSING_STYLE: path
-              AWS_STORAGE_BUCKET_NAME: plane-uploads
+              AWS_S3_BUCKET_NAME: plane-uploads
               AWS_REGION: garage
+              USE_MINIO: "1"
               FILE_SIZE_LIMIT: "5242880"
               ENABLE_SIGNUP: "1"
               GUNICORN_WORKERS: "2"
@@ -104,16 +105,17 @@ spec:
           app:
             image:
               repository: makeplane/plane-backend
-              tag: v0.23.0
+              tag: v1.2.3
             command: ["./bin/docker-entrypoint-worker.sh"]
             env:
               DJANGO_SETTINGS_MODULE: plane.settings.production
               REDIS_URL: redis://plane-valkey:6379/0
-              CELERY_BROKER_URL: amqp://plane:plane@plane-rabbitmq:5672/plane
+              AMQP_URL: amqp://plane:plane@plane-rabbitmq:5672/plane
               AWS_S3_ENDPOINT_URL: http://garage.volsync-system.svc.cluster.local:3900
               AWS_S3_ADDRESSING_STYLE: path
-              AWS_STORAGE_BUCKET_NAME: plane-uploads
+              AWS_S3_BUCKET_NAME: plane-uploads
               AWS_REGION: garage
+              USE_MINIO: "1"
               DATABASE_URL:
                 valueFrom:
                   secretKeyRef:
@@ -148,12 +150,12 @@ spec:
           app:
             image:
               repository: makeplane/plane-backend
-              tag: v0.23.0
+              tag: v1.2.3
             command: ["./bin/docker-entrypoint-beat.sh"]
             env:
               DJANGO_SETTINGS_MODULE: plane.settings.production
               REDIS_URL: redis://plane-valkey:6379/0
-              CELERY_BROKER_URL: amqp://plane:plane@plane-rabbitmq:5672/plane
+              AMQP_URL: amqp://plane:plane@plane-rabbitmq:5672/plane
               DATABASE_URL:
                 valueFrom:
                   secretKeyRef:
@@ -171,12 +173,52 @@ spec:
               limits:
                 memory: 512Mi
 
+      live:
+        annotations:
+          reloader.stakater.com/auto: "true"
+        containers:
+          app:
+            image:
+              repository: makeplane/plane-live
+              tag: v1.2.3
+            env:
+              REDIS_URL: redis://plane-valkey:6379/0
+              AMQP_URL: amqp://plane:plane@plane-rabbitmq:5672/plane
+              DATABASE_URL:
+                valueFrom:
+                  secretKeyRef:
+                    name: plane-secret
+                    key: DATABASE_URL
+              LIVE_SERVER_SECRET_KEY:
+                valueFrom:
+                  secretKeyRef:
+                    name: plane-secret
+                    key: LIVE_SERVER_SECRET_KEY
+            probes:
+              liveness: &liveProbes
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /
+                    port: 3004
+                  initialDelaySeconds: 15
+                  periodSeconds: 10
+                  failureThreshold: 5
+              readiness: *liveProbes
+            resources:
+              requests:
+                cpu: 10m
+                memory: 128Mi
+              limits:
+                memory: 512Mi
+
       web:
         containers:
           app:
             image:
               repository: makeplane/plane-frontend
-              tag: v0.23.0
+              tag: v1.2.3
             env:
               NEXT_PUBLIC_API_BASE_URL: https://plane.00o.sh
               NEXT_PUBLIC_SPACE_BASE_URL: https://plane.00o.sh/spaces
@@ -208,7 +250,7 @@ spec:
           app:
             image:
               repository: makeplane/plane-admin
-              tag: v0.23.0
+              tag: v1.2.3
             env:
               NEXT_PUBLIC_API_BASE_URL: https://plane.00o.sh
               PORT: "3001"
@@ -236,7 +278,7 @@ spec:
           app:
             image:
               repository: makeplane/plane-space
-              tag: v0.23.0
+              tag: v1.2.3
             env:
               NEXT_PUBLIC_API_BASE_URL: https://plane.00o.sh
               PORT: "3002"
@@ -264,7 +306,7 @@ spec:
           app:
             image:
               repository: rabbitmq
-              tag: 3-alpine
+              tag: 3.13.6-alpine
             env:
               RABBITMQ_DEFAULT_USER: plane
               RABBITMQ_DEFAULT_PASS: plane
@@ -281,7 +323,7 @@ spec:
           app:
             image:
               repository: valkey/valkey
-              tag: 9.0.3-alpine
+              tag: 7.2.11-alpine
             args: ["--save", "60", "1"]
             resources:
               requests:
@@ -296,6 +338,11 @@ spec:
         ports:
           http:
             port: 8000
+      live:
+        controller: live
+        ports:
+          http:
+            port: 3004
       web:
         controller: web
         ports:
@@ -351,6 +398,13 @@ spec:
             backendRefs:
               - identifier: api
                 port: 8000
+          - matches:
+              - path:
+                  type: PathPrefix
+                  value: /live/
+            backendRefs:
+              - identifier: live
+                port: 3004
           - matches:
               - path:
                   type: PathPrefix
