@@ -322,7 +322,7 @@ spec:
           app:
             image:
               repository: valkey/valkey
-              tag: 7.2.11-alpine
+              tag: 9.0.3-alpine
             args: ["--save", "60", "1"]
             resources:
               requests:
