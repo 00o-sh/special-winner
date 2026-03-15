@@ -288,7 +288,7 @@ spec:
                 custom: true
                 spec:
                   httpGet:
-                    path: /
+                    path: /spaces/
                     port: 3000
                   initialDelaySeconds: 15
                   periodSeconds: 10
