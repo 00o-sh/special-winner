@@ -290,6 +290,9 @@
 - name: app/penpot
   color: "6f42c1"
   description: "penpot in utils"
+- name: app/plane
+  color: "6f42c1"
+  description: "plane in utils"
 - name: app/smtp-relay
   color: "6f42c1"
   description: "smtp-relay in utils"
