@@ -176,7 +176,7 @@ spec:
           app:
             image:
               repository: makeplane/plane-frontend
-              tag: v0.28.0
+              tag: v1.2.3
             env:
               NEXT_PUBLIC_API_BASE_URL: https://plane.00o.sh
               NEXT_PUBLIC_SPACE_BASE_URL: https://plane.00o.sh/spaces
