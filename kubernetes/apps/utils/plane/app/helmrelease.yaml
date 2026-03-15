@@ -208,7 +208,7 @@ spec:
           app:
             image:
               repository: makeplane/plane-admin
-              tag: v0.23.0
+              tag: v1.2.3
             env:
               NEXT_PUBLIC_API_BASE_URL: https://plane.00o.sh
               PORT: "3001"
