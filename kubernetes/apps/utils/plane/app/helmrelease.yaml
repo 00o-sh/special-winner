@@ -415,6 +415,12 @@ spec:
               - path:
                   type: PathPrefix
                   value: /god-mode/
+            filters:
+              - type: URLRewrite
+                urlRewrite:
+                  path:
+                    type: ReplacePrefixMatch
+                    replacePrefixMatch: /
             backendRefs:
               - identifier: admin
                 port: 3000
