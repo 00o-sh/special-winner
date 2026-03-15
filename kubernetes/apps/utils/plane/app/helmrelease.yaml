@@ -132,6 +132,12 @@ spec:
               AWS_S3_BUCKET_NAME: plane-uploads
               AWS_REGION: garage
               USE_MINIO: "1"
+              EMAIL_HOST: smtp-relay.utils.svc.cluster.local
+              EMAIL_PORT: "25"
+              EMAIL_FROM: plane@00o.sh
+              DEFAULT_FROM_EMAIL: plane@00o.sh
+              EMAIL_USE_TLS: "0"
+              EMAIL_USE_SSL: "0"
               DATABASE_URL:
                 valueFrom:
                   secretKeyRef:
