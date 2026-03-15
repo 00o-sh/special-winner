@@ -35,6 +35,7 @@ spec:
               AWS_S3_ADDRESSING_STYLE: path
               AWS_S3_BUCKET_NAME: plane-uploads
               AWS_REGION: garage
+              USE_MINIO: "1"
             envFrom:
               - secretRef:
                   name: plane-secret
@@ -48,6 +49,15 @@ spec:
               DJANGO_SETTINGS_MODULE: plane.settings.production
               WEB_URL: https://plane.00o.sh
               CORS_ALLOWED_ORIGINS: https://plane.00o.sh
+              COOKIE_DOMAIN: .00o.sh
+              APP_BASE_URL: https://plane.00o.sh
+              APP_BASE_PATH: /
+              ADMIN_BASE_URL: https://plane.00o.sh/god-mode
+              ADMIN_BASE_PATH: /god-mode/
+              SPACE_BASE_URL: https://plane.00o.sh/spaces
+              SPACE_BASE_PATH: /spaces/
+              LIVE_BASE_URL: https://plane.00o.sh/live
+              LIVE_BASE_PATH: /live/
               REDIS_URL: redis://plane-valkey:6379/0
               AMQP_URL: amqp://plane:plane@plane-rabbitmq:5672/plane
               AWS_S3_ENDPOINT_URL: http://garage.volsync-system.svc.cluster.local:3900
@@ -183,6 +193,8 @@ spec:
               tag: v1.2.3
             env:
               API_BASE_URL: http://plane-api:8000
+              CORS_ALLOWED_ORIGINS: https://plane.00o.sh
+              LIVE_BASE_PATH: /live
               REDIS_URL: redis://plane-valkey:6379/0
               AMQP_URL: amqp://plane:plane@plane-rabbitmq:5672/plane
               DATABASE_URL:
@@ -202,7 +214,7 @@ spec:
                 spec:
                   httpGet:
                     path: /
-                    port: 3004
+                    port: 3000
                   initialDelaySeconds: 15
                   periodSeconds: 10
                   failureThreshold: 5
@@ -220,13 +232,6 @@ spec:
             image:
               repository: makeplane/plane-frontend
               tag: v1.2.3
-            env:
-              NEXT_PUBLIC_API_BASE_URL: https://plane.00o.sh
-              NEXT_PUBLIC_SPACE_BASE_URL: https://plane.00o.sh/spaces
-              NEXT_PUBLIC_ADMIN_BASE_URL: https://plane.00o.sh/god-mode
-              NEXT_PUBLIC_ADMIN_BASE_PATH: /god-mode
-              NEXT_PUBLIC_SPACE_BASE_PATH: /spaces
-              PORT: "3000"
             probes:
               liveness: &webProbes
                 enabled: true
@@ -252,8 +257,6 @@ spec:
             image:
               repository: makeplane/plane-admin
               tag: v1.2.3
-            env:
-              NEXT_PUBLIC_API_BASE_URL: https://plane.00o.sh
             probes:
               liveness: &adminProbes
                 enabled: true
@@ -261,7 +264,7 @@ spec:
                 spec:
                   httpGet:
                     path: /
-                    port: 80
+                    port: 3000
                   initialDelaySeconds: 15
                   periodSeconds: 10
                   failureThreshold: 5
@@ -279,8 +282,6 @@ spec:
             image:
               repository: makeplane/plane-space
               tag: v1.2.3
-            env:
-              NEXT_PUBLIC_API_BASE_URL: https://plane.00o.sh
             probes:
               liveness: &spaceProbes
                 enabled: true
@@ -288,7 +289,7 @@ spec:
                 spec:
                   httpGet:
                     path: /
-                    port: 80
+                    port: 3000
                   initialDelaySeconds: 15
                   periodSeconds: 10
                   failureThreshold: 5
@@ -341,7 +342,7 @@ spec:
         controller: live
         ports:
           http:
-            port: 3004
+            port: 3000
       web:
         controller: web
         ports:
@@ -351,12 +352,12 @@ spec:
         controller: admin
         ports:
           http:
-            port: 80
+            port: 3000
       space:
         controller: space
         ports:
           http:
-            port: 80
+            port: 3000
       rabbitmq:
         controller: rabbitmq
         ports:
@@ -400,24 +401,31 @@ spec:
           - matches:
               - path:
                   type: PathPrefix
+                  value: /static/
+            backendRefs:
+              - identifier: api
+                port: 8000
+          - matches:
+              - path:
+                  type: PathPrefix
                   value: /live/
             backendRefs:
               - identifier: live
-                port: 3004
+                port: 3000
           - matches:
               - path:
                   type: PathPrefix
                   value: /god-mode/
             backendRefs:
               - identifier: admin
-                port: 80
+                port: 3000
           - matches:
               - path:
                   type: PathPrefix
                   value: /spaces/
             backendRefs:
               - identifier: space
-                port: 80
+                port: 3000
           - backendRefs:
               - identifier: web
                 port: 3000
