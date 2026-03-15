@@ -54,6 +54,7 @@ spec:
               AWS_REGION: garage
               FILE_SIZE_LIMIT: "5242880"
               ENABLE_SIGNUP: "1"
+              GUNICORN_WORKERS: "2"
               DATABASE_URL:
                 valueFrom:
                   secretKeyRef:
