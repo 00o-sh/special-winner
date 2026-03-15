@@ -32,6 +32,7 @@ spec:
               REDIS_URL: redis://plane-valkey:6379/0
               CELERY_BROKER_URL: amqp://plane:plane@plane-rabbitmq:5672/plane
               AWS_S3_ENDPOINT_URL: http://garage.volsync-system.svc.cluster.local:3900
+              AWS_S3_ADDRESSING_STYLE: path
               AWS_STORAGE_BUCKET_NAME: plane-uploads
               AWS_REGION: garage
             envFrom:
@@ -50,6 +51,7 @@ spec:
               REDIS_URL: redis://plane-valkey:6379/0
               CELERY_BROKER_URL: amqp://plane:plane@plane-rabbitmq:5672/plane
               AWS_S3_ENDPOINT_URL: http://garage.volsync-system.svc.cluster.local:3900
+              AWS_S3_ADDRESSING_STYLE: path
               AWS_STORAGE_BUCKET_NAME: plane-uploads
               AWS_REGION: garage
               FILE_SIZE_LIMIT: "5242880"
@@ -109,6 +111,7 @@ spec:
               REDIS_URL: redis://plane-valkey:6379/0
               CELERY_BROKER_URL: amqp://plane:plane@plane-rabbitmq:5672/plane
               AWS_S3_ENDPOINT_URL: http://garage.volsync-system.svc.cluster.local:3900
+              AWS_S3_ADDRESSING_STYLE: path
               AWS_STORAGE_BUCKET_NAME: plane-uploads
               AWS_REGION: garage
               DATABASE_URL:
