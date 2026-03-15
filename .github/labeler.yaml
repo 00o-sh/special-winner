@@ -480,6 +480,11 @@ app/penpot:
       - any-glob-to-any-file:
           - kubernetes/apps/utils/penpot/**/*
 
+app/plane:
+  - changed-files:
+      - any-glob-to-any-file:
+          - kubernetes/apps/utils/plane/**/*
+
 app/smtp-relay:
   - changed-files:
       - any-glob-to-any-file:
