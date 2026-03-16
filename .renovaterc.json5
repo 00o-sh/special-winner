@@ -76,6 +76,23 @@
       },
     },
     {
+      description: "Talos Group",
+      groupName: "talos",
+      matchDatasources: ["docker"],
+      matchPackageNames: ["/siderolabs/"],
+      group: {
+        commitMessageTopic: "{{{groupName}}} group",
+      },
+    },
+    {
+      description: "MariaDB Group",
+      groupName: "mariadb",
+      matchPackageNames: ["/mariadb/"],
+      group: {
+        commitMessageTopic: "{{{groupName}}} group",
+      },
+    },
+    {
       description: "Group ghcr.io pin dependencies",
       matchUpdateTypes: ["pin"],
       matchDatasources: ["docker"],
