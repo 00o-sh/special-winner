@@ -85,9 +85,10 @@
       },
     },
     {
-      description: "MariaDB Group",
-      groupName: "mariadb",
-      matchPackageNames: ["/mariadb/"],
+      description: "MariaDB Operator Group",
+      groupName: "mariadb-operator",
+      matchDatasources: ["helm"],
+      matchPackageNames: ["/mariadb-operator/"],
       group: {
         commitMessageTopic: "{{{groupName}}} group",
       },
