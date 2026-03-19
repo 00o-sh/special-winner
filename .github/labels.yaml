@@ -93,6 +93,9 @@
 - name: area/volsync-system
   color: "1d76db"
   description: "volsync-system namespace"
+- name: area/zitadel
+  color: "1d76db"
+  description: "zitadel namespace"
 
 # Area Labels - Kubernetes Apps (auto-generated)
 - name: app/actions-runner-controller
@@ -314,6 +317,9 @@
 - name: app/volsync
   color: "6f42c1"
   description: "volsync in volsync-system"
+- name: app/zitadel
+  color: "6f42c1"
+  description: "zitadel in zitadel"
 
 # Component Labels (static)
 - name: component/cilium
