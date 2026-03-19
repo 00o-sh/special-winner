@@ -45,6 +45,13 @@ spec:
       ports:
         - protocol: TCP
           port: 5432
+    # Allow Kubernetes API access (init containers, service account)
+    - to:
+        - ipBlock:
+            cidr: 172.31.0.1/32
+      ports:
+        - protocol: TCP
+          port: 443
     # Allow intra-namespace traffic (zitadel <-> login pods)
     - to:
         - podSelector: {}
