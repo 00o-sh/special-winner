@@ -1,0 +1,10 @@
+---
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: zitadel-allow-kube-api
+spec:
+  endpointSelector: {}
+  egress:
+    - toEntities:
+        - kube-apiserver
