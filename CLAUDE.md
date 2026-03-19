@@ -757,6 +757,9 @@ talosctl logs --nodes <ip> --insecure
 **voip**: VoIP and telephony
 - freepbx-b1-k3s01 (containerized FreePBX telephony platform with MariaDB backend)
 
+**zitadel**: External identity provider (SaaS development)
+- zitadel (self-hosted Zitadel identity platform at login.00o.sh, network-isolated, PostgreSQL backend, external-only access)
+
 **volsync-system**: Backup and replication
 - garage (S3-compatible storage backend)
 - kopia (backup repository)
@@ -797,6 +800,7 @@ Check `.mise.toml` for exact versions of all tools.
 
 ## Recent Notable Changes
 
+- **2026-03-19**: Added self-hosted Zitadel identity platform at login.00o.sh for SaaS development (network-isolated, external-only access, PostgreSQL backend, NetworkPolicy restricting traffic to Postgres egress and Envoy ingress only)
 - **2026-03-07**: Added ambersecurityinc runner scale set to actions-runner-system (minRunners: 1, maxRunners: 3, 25Gi storage, 1Password integration)
 - **2026-03-07**: Added ARC Grafana monitoring dashboard for runner autoscaling metrics
 - **2026-03-07**: Added VolSync mass point-in-time restore script (`scripts/volsync-restore-all.sh`) for all 16 VolSync-backed apps
