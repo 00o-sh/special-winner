@@ -154,6 +154,11 @@ area/volsync-system:
       - any-glob-to-any-file:
           - kubernetes/apps/volsync-system/**/*
 
+area/zitadel:
+  - changed-files:
+      - any-glob-to-any-file:
+          - kubernetes/apps/zitadel/**/*
+
 # App Labels - Kubernetes Apps (auto-generated)
 app/actions-runner-controller:
   - changed-files:
@@ -519,6 +524,11 @@ app/volsync:
   - changed-files:
       - any-glob-to-any-file:
           - kubernetes/apps/volsync-system/volsync/**/*
+
+app/zitadel:
+  - changed-files:
+      - any-glob-to-any-file:
+          - kubernetes/apps/zitadel/zitadel/**/*
 
 # Component Labels (static)
 component/cilium:
