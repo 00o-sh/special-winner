@@ -30,6 +30,14 @@ spec:
         ExternalPort: 443
         TLS:
           Enabled: false
+        FirstInstance:
+          Org:
+            LoginClient:
+              Machine:
+                Username: login-client
+                Name: Login Client
+              Pat:
+                ExpirationDate: "2029-01-01T00:00:00Z"
 
     initJob:
       enabled: true
