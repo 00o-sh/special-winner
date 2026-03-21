@@ -47,6 +47,15 @@ spec:
     login:
       enabled: true
       replicaCount: 1
+      gateway:
+        httpRoute:
+          enabled: true
+          parentRefs:
+            - name: envoy-external
+              namespace: network
+              sectionName: https
+          hostnames:
+            - login.00o.sh
       resources:
         requests:
           cpu: 10m
