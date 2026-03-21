@@ -79,7 +79,16 @@
       description: "Talos Group",
       groupName: "talos",
       matchDatasources: ["docker"],
-      matchPackageNames: ["/siderolabs/"],
+      matchPackageNames: ["/siderolabs/installer/", "/siderolabs/talosctl/"],
+      group: {
+        commitMessageTopic: "{{{groupName}}} group",
+      },
+    },
+    {
+      description: "Kubernetes Group",
+      groupName: "kubernetes",
+      matchDatasources: ["docker"],
+      matchPackageNames: ["/siderolabs/kubelet/"],
       group: {
         commitMessageTopic: "{{{groupName}}} group",
       },
