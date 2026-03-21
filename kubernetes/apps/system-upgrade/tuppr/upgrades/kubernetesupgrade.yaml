@@ -16,5 +16,7 @@ spec:
   healthChecks:
     - apiVersion: volsync.backube/v1alpha1
       kind: ReplicationSource
+      description: VolSync replication sources are not synchronizing
       expr: |-
         status.conditions.filter(c, c.type == "Synchronizing").all(c, c.status == "False")
+      timeout: 10m
