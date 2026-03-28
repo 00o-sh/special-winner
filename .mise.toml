@@ -42,7 +42,7 @@ TALOSCONFIG = "{{config_root}}/talos/clusterconfig/talosconfig"
 "aqua:1password/cli" = "2.33.1"             # 1Password CLI
 
 # Utilities
-"aqua:cli/cli" = "2.88.1"                     # GitHub CLI (gh)
+"aqua:cli/cli" = "2.89.0"                     # GitHub CLI (gh)
 "aqua:go-task/task" = "3.49.1"               # Task runner (Taskfile.yaml)
 "aqua:cue-lang/cue" = "0.16.0"              # CUE schema validation for config files
 "aqua:jqlang/jq" = "1.8.1"                  # JSON processor
