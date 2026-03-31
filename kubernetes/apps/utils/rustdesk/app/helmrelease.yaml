@@ -1,0 +1,97 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s-labs/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: &app rustdesk
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: rustdesk
+  interval: 1h
+  values:
+    controllers:
+      rustdesk:
+        type: statefulset
+        annotations:
+          reloader.stakater.com/auto: "true"
+        containers:
+          hbbs:
+            image:
+              repository: rustdesk/rustdesk-server
+              tag: 1.1.10-3
+            command: ["hbbs"]
+            env:
+              RELAY: &relay rustdesk.00o.sh:21117
+              ENCRYPTED_ONLY: "1"
+              DB_URL: /data/db_v2.sqlite3
+            resources:
+              requests:
+                cpu: 10m
+              limits:
+                memory: 128Mi
+            securityContext:
+              allowPrivilegeEscalation: false
+              capabilities: {drop: ["ALL"]}
+          hbbr:
+            image:
+              repository: rustdesk/rustdesk-server
+              tag: 1.1.10-3
+            command: ["hbbr"]
+            resources:
+              requests:
+                cpu: 10m
+              limits:
+                memory: 128Mi
+            securityContext:
+              allowPrivilegeEscalation: false
+              capabilities: {drop: ["ALL"]}
+
+    defaultPodOptions:
+      securityContext:
+        runAsNonRoot: false
+        runAsUser: 0
+        runAsGroup: 0
+
+    service:
+      app:
+        controller: rustdesk
+        type: LoadBalancer
+        annotations:
+          external-dns.alpha.kubernetes.io/hostname: rustdesk.00o.sh
+          lbipam.cilium.io/ips: 10.0.6.21
+          gethomepage.dev/enabled: "true"
+          gethomepage.dev/group: Utilities
+          gethomepage.dev/name: RustDesk
+          gethomepage.dev/icon: rustdesk.png
+          gethomepage.dev/description: Remote Desktop
+        externalTrafficPolicy: Cluster
+        ports:
+          api:
+            port: 21114
+            protocol: TCP
+          hbbs-tcp:
+            port: 21115
+            protocol: TCP
+          hbbs-udp:
+            port: 21116
+            protocol: UDP
+          hbbr:
+            port: 21117
+            protocol: TCP
+          hbbs-web:
+            port: 21118
+            protocol: TCP
+          hbbr-web:
+            port: 21119
+            protocol: TCP
+
+    persistence:
+      data:
+        existingClaim: *app
+        advancedMounts:
+          rustdesk:
+            hbbs:
+              - path: /data
+            hbbr:
+              - path: /data
