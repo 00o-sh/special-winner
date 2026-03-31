@@ -26,7 +26,7 @@ spec:
           app:
             image:
               repository: penpotapp/backend
-              tag: 2.13.3@sha256:dbf308a07b1991eae02dd5203ad7003347cb788509a37403ef3bfd787cabb1bd
+              tag: 2.14.1@sha256:37199f54ffeaa9ef764a51e1451560d686f28578eaa42de15ed2eb720e099fb0
             env:
               PENPOT_PUBLIC_URI: https://penpot.00o.sh
               PENPOT_FLAGS: enable-registration enable-login-with-password enable-login-with-oidc disable-email-verification
@@ -98,7 +98,7 @@ spec:
           app:
             image:
               repository: penpotapp/frontend
-              tag: 2.13.3@sha256:caefaf8ef815c3dd3b789a6709324661c089b4ee7c872838a9e0b0e9022a8e02
+              tag: 2.14.1@sha256:56ae2969ed49a163e92f108e22e4dda823ffccea692a73fbf7c42adc48bdd1d3
             env:
               PENPOT_FLAGS: enable-registration enable-login-with-password enable-login-with-oidc disable-email-verification
               PENPOT_BACKEND_URI: http://penpot-backend:6060
@@ -126,7 +126,7 @@ spec:
           app:
             image:
               repository: penpotapp/exporter
-              tag: 2.13.3@sha256:b0324003d10db63830b9fe943d86efa5c0380d86fac52cd623e2be06f12126e8
+              tag: 2.14.1@sha256:3e851f97337be7ba3c2b5c82c2720170e7847a22f49f7d1cfa1d6c207406ffc6
             env:
               PENPOT_PUBLIC_URI: https://penpot.00o.sh
               PENPOT_REDIS_URI: redis://penpot-valkey:6379/0
