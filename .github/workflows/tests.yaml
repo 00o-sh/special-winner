@@ -1,0 +1,55 @@
+---
+# Runs bats-core bash script tests and helmfile linting.
+# Triggers on PRs that change scripts, taskfiles, or bootstrap configs.
+name: "Tests"
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: ["main"]
+    paths:
+      - scripts/**
+      - .taskfiles/**
+      - bootstrap/**
+      - tests/**
+      - .github/workflows/tests.yaml
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  bats:
+    name: Bash Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Install bats
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq bats
+
+      - name: Run bats tests
+        run: bats tests/*.bats --verbose-run
+
+  helmfile-lint:
+    name: Helmfile Lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Setup mise
+        uses: jdx/mise-action@1648a7812b9aeae629881980618f079932869151 # v4.0.1
+        env:
+          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+        with:
+          cache: false
+
+      - name: Helmfile lint CRDs
+        run: helmfile --file bootstrap/helmfile.d/00-crds.yaml template --quiet > /dev/null
+
+      - name: Helmfile lint apps
+        run: helmfile --file bootstrap/helmfile.d/01-apps.yaml lint

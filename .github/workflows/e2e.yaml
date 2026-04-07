@@ -8,8 +8,6 @@ on:
   workflow_dispatch:
   pull_request:
     branches: ["main"]
-    paths-ignore:
-      - kubernetes/**
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.number || github.ref }}
@@ -17,7 +15,6 @@ concurrency:
 
 jobs:
   configure:
-    if: ${{ github.repository == 'onedr0p/cluster-template' }}
     name: configure
     runs-on: ubuntu-latest
     strategy:
@@ -37,15 +34,15 @@ jobs:
         with:
           cache: false
 
-      - name: Run init task
-        run: task init
-
       - name: Prepare files
         run: |
           cp ./.github/tests/${{ matrix.config-files }}.yaml cluster.yaml
           cp ./.github/tests/nodes.yaml nodes.yaml
           echo '{"AccountTag":"fake","TunnelSecret":"fake","TunnelID":"fake"}' > cloudflare-tunnel.json
           touch kubeconfig
+          age-keygen --output age.key
+          ssh-keygen -t ed25519 -C "deploy-key" -f github-deploy.key -q -P ""
+          echo "fake-push-token" > github-push-token.txt
 
       - name: Run configure task
         run: task configure --yes

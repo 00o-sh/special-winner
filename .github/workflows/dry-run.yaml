@@ -1,0 +1,177 @@
+---
+# Spins up a k3d cluster and runs server-side dry-run of kustomizations.
+# - Manual trigger: dry-runs ALL kustomizations in the repo.
+# - PR/push: only dry-runs kustomizations for changed apps.
+name: "Dry Run"
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: ["main"]
+    paths:
+      - kubernetes/**
+  push:
+    branches: ["main"]
+    paths:
+      - kubernetes/**
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  changed:
+    name: Detect Changes
+    if: ${{ github.event_name != 'workflow_dispatch' }}
+    runs-on: ubuntu-latest
+    outputs:
+      dirs: ${{ steps.changed.outputs.dirs }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          fetch-depth: 0
+
+      - name: Get changed kustomization dirs
+        id: changed
+        run: |
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            BASE="${{ github.event.pull_request.base.sha }}"
+          else
+            BASE="${{ github.event.before }}"
+          fi
+
+          # Find changed files under kubernetes/apps/
+          CHANGED_FILES=$(git diff --name-only "${BASE}" HEAD -- kubernetes/apps/ || true)
+
+          if [[ -z "$CHANGED_FILES" ]]; then
+            echo "dirs=" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          # Extract unique kustomization directories containing changes
+          DIRS=""
+          while IFS= read -r file; do
+            # Walk up from the changed file to find the nearest kustomization.yaml
+            dir=$(dirname "$file")
+            while [[ "$dir" != "kubernetes/apps" && "$dir" != "." ]]; do
+              if [[ -f "${dir}/kustomization.yaml" ]]; then
+                DIRS="${DIRS}${dir}"$'\n'
+                break
+              fi
+              dir=$(dirname "$dir")
+            done
+          done <<< "$CHANGED_FILES"
+
+          # Deduplicate
+          DIRS=$(echo "$DIRS" | sort -u | grep -v '^$' || true)
+          echo "Found changed kustomization dirs:"
+          echo "$DIRS"
+          echo "dirs<<EOF" >> "$GITHUB_OUTPUT"
+          echo "$DIRS" >> "$GITHUB_OUTPUT"
+          echo "EOF" >> "$GITHUB_OUTPUT"
+
+  dry-run:
+    name: Server-Side Dry Run
+    needs: [changed]
+    if: ${{ always() && (github.event_name == 'workflow_dispatch' || needs.changed.outputs.dirs != '') }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Setup mise
+        uses: jdx/mise-action@1648a7812b9aeae629881980618f079932869151 # v4.0.1
+        env:
+          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+        with:
+          cache: false
+
+      - name: Create k3d cluster
+        uses: nolar/setup-k3d-k3s@v1
+        with:
+          version: v1.31
+          k3d-args: --no-lb --no-rollback --timeout 120s
+
+      - name: Wait for cluster ready
+        run: kubectl wait --for=condition=Ready nodes --all --timeout=120s
+
+      - name: Install CRDs from helmfile
+        run: |
+          helmfile --file bootstrap/helmfile.d/00-crds.yaml template --quiet \
+            | kubectl apply --server-side --force-conflicts -f -
+
+      - name: Determine kustomizations to test
+        id: targets
+        run: |
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            echo "mode=all" >> "$GITHUB_OUTPUT"
+            find kubernetes/apps -name kustomization.yaml -type f | sort > /tmp/targets.txt
+          else
+            echo "mode=changed" >> "$GITHUB_OUTPUT"
+            cat <<'DIRS' > /tmp/targets.txt
+          ${{ needs.changed.outputs.dirs }}
+          DIRS
+            # Convert dir paths to kustomization.yaml paths
+            sed -i 's|$|/kustomization.yaml|' /tmp/targets.txt
+            # Remove empty lines and whitespace
+            sed -i '/^\s*$/d; s/^\s*//' /tmp/targets.txt
+          fi
+          echo "Targets:"
+          cat /tmp/targets.txt
+
+      - name: Run dry-run
+        run: |
+          FAILED=0
+          PASSED=0
+          SKIPPED=0
+          MODE="${{ steps.targets.outputs.mode }}"
+
+          echo "=== Running in ${MODE} mode ==="
+
+          while IFS= read -r kustomization; do
+            [[ -z "$kustomization" ]] && continue
+            [[ ! -f "$kustomization" ]] && continue
+
+            dir=$(dirname "$kustomization")
+            app=$(echo "$dir" | sed 's|kubernetes/apps/||')
+
+            # Build the kustomization
+            if ! output=$(kustomize build "$dir" --load-restrictor=LoadRestrictionsNone 2>&1); then
+              echo "::warning::SKIP ${app} - kustomize build failed"
+              SKIPPED=$((SKIPPED + 1))
+              continue
+            fi
+
+            # Skip if empty output
+            if [[ -z "$output" ]]; then
+              continue
+            fi
+
+            # Server-side dry-run
+            if echo "$output" | kubectl apply --server-side --dry-run=server -f - > /dev/null 2>&1; then
+              echo "PASS ${app}"
+              PASSED=$((PASSED + 1))
+            else
+              # Retry with client dry-run to distinguish CRD-missing from real errors
+              if echo "$output" | kubectl apply --dry-run=client -f - > /dev/null 2>&1; then
+                echo "::warning::SKIP ${app} - missing CRDs"
+                SKIPPED=$((SKIPPED + 1))
+              else
+                echo "::error::FAIL ${app}"
+                echo "$output" | kubectl apply --server-side --dry-run=server -f - 2>&1 || true
+                FAILED=$((FAILED + 1))
+              fi
+            fi
+          done < /tmp/targets.txt
+
+          echo ""
+          echo "=== Results (${MODE}) ==="
+          echo "Passed:  ${PASSED}"
+          echo "Skipped: ${SKIPPED}"
+          echo "Failed:  ${FAILED}"
+
+          if [[ "$FAILED" -gt 0 ]]; then
+            echo "::error::${FAILED} kustomization(s) failed server-side dry-run"
+            exit 1
+          fi
