@@ -490,6 +490,11 @@ app/plane:
       - any-glob-to-any-file:
           - kubernetes/apps/utils/plane/**/*
 
+app/rustdesk:
+  - changed-files:
+      - any-glob-to-any-file:
+          - kubernetes/apps/utils/rustdesk/**/*
+
 app/smtp-relay:
   - changed-files:
       - any-glob-to-any-file:
