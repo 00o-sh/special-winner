@@ -96,9 +96,18 @@ jobs:
       - name: Wait for cluster ready
         run: kubectl wait --for=condition=Ready nodes --all --timeout=120s
 
+      - name: Create namespaces
+        run: |
+          for ns_dir in kubernetes/apps/*/; do
+            ns=$(basename "$ns_dir")
+            kubectl create namespace "$ns" --dry-run=client -o yaml | kubectl apply -f -
+          done
+
       - name: Install CRDs from helmfile
         run: |
+          # Extract only CRDs from helmfile output (skip instances like Alertmanager, PrometheusRule, etc.)
           helmfile --file bootstrap/helmfile.d/00-crds.yaml template --quiet \
+            | yq eval-all 'select(.kind == "CustomResourceDefinition")' - \
             | kubectl apply --server-side --force-conflicts -f -
 
       - name: Determine kustomizations to test
