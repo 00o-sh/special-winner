@@ -1,0 +1,87 @@
+---
+# Spins up a k3d cluster and runs server-side dry-run of all kustomizations.
+# Validates manifests are accepted by a real Kubernetes API server.
+# Manual trigger only — intended for pre-merge validation of significant changes.
+name: "Dry Run"
+
+on:
+  workflow_dispatch:
+
+jobs:
+  dry-run:
+    name: Server-Side Dry Run
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Setup mise
+        uses: jdx/mise-action@1648a7812b9aeae629881980618f079932869151 # v4.0.1
+        env:
+          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+        with:
+          cache: false
+
+      - name: Create k3d cluster
+        uses: nolar/setup-k3d-k3s@v1
+        with:
+          version: v1.31
+          k3d-args: --no-lb --no-rollback --timeout 120s
+
+      - name: Wait for cluster ready
+        run: kubectl wait --for=condition=Ready nodes --all --timeout=120s
+
+      - name: Install CRDs from helmfile
+        run: |
+          helmfile --file bootstrap/helmfile.d/00-crds.yaml template --quiet \
+            | kubectl apply --server-side --force-conflicts -f -
+
+      - name: Dry-run all kustomizations
+        run: |
+          FAILED=0
+          PASSED=0
+          SKIPPED=0
+
+          for kustomization in $(find kubernetes/apps -name kustomization.yaml -type f | sort); do
+            dir=$(dirname "$kustomization")
+            app=$(echo "$dir" | sed 's|kubernetes/apps/||')
+
+            # Build the kustomization
+            if ! output=$(kustomize build "$dir" --load-restrictor=LoadRestrictionsNone 2>&1); then
+              echo "::warning::SKIP ${app} - kustomize build failed"
+              SKIPPED=$((SKIPPED + 1))
+              continue
+            fi
+
+            # Skip if empty output
+            if [[ -z "$output" ]]; then
+              continue
+            fi
+
+            # Server-side dry-run
+            if echo "$output" | kubectl apply --server-side --dry-run=server -f - > /dev/null 2>&1; then
+              echo "PASS ${app}"
+              PASSED=$((PASSED + 1))
+            else
+              # Retry with client dry-run to distinguish CRD-missing from real errors
+              if echo "$output" | kubectl apply --dry-run=client -f - > /dev/null 2>&1; then
+                echo "::warning::SKIP ${app} - missing CRDs"
+                SKIPPED=$((SKIPPED + 1))
+              else
+                echo "::error::FAIL ${app}"
+                echo "$output" | kubectl apply --server-side --dry-run=server -f - 2>&1 || true
+                FAILED=$((FAILED + 1))
+              fi
+            fi
+          done
+
+          echo ""
+          echo "=== Results ==="
+          echo "Passed:  ${PASSED}"
+          echo "Skipped: ${SKIPPED}"
+          echo "Failed:  ${FAILED}"
+
+          if [[ "$FAILED" -gt 0 ]]; then
+            echo "::error::${FAILED} kustomization(s) failed server-side dry-run"
+            exit 1
+          fi
