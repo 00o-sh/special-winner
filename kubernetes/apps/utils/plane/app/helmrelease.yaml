@@ -25,7 +25,7 @@ spec:
           migrations:
             image:
               repository: makeplane/plane-backend
-              tag: v1.2.3
+              tag: v1.3.0
             command: ["./bin/docker-entrypoint-migrator.sh"]
             env:
               DJANGO_SETTINGS_MODULE: plane.settings.production
@@ -43,7 +43,7 @@ spec:
           app:
             image:
               repository: makeplane/plane-backend
-              tag: v1.2.3
+              tag: v1.3.0
             command: ["./bin/docker-entrypoint-api.sh"]
             env:
               DJANGO_SETTINGS_MODULE: plane.settings.production
@@ -121,7 +121,7 @@ spec:
           app:
             image:
               repository: makeplane/plane-backend
-              tag: v1.2.3
+              tag: v1.3.0
             command: ["./bin/docker-entrypoint-worker.sh"]
             env:
               DJANGO_SETTINGS_MODULE: plane.settings.production
@@ -172,7 +172,7 @@ spec:
           app:
             image:
               repository: makeplane/plane-backend
-              tag: v1.2.3
+              tag: v1.3.0
             command: ["./bin/docker-entrypoint-beat.sh"]
             env:
               DJANGO_SETTINGS_MODULE: plane.settings.production
@@ -202,7 +202,7 @@ spec:
           app:
             image:
               repository: makeplane/plane-live
-              tag: v1.2.3
+              tag: v1.3.0
             env:
               API_BASE_URL: http://plane-api:8000
               CORS_ALLOWED_ORIGINS: https://plane.00o.sh
@@ -242,7 +242,7 @@ spec:
           app:
             image:
               repository: makeplane/plane-frontend
-              tag: v1.2.3
+              tag: v1.3.0
             probes:
               liveness: &webProbes
                 enabled: true
@@ -267,7 +267,7 @@ spec:
           app:
             image:
               repository: makeplane/plane-admin
-              tag: v1.2.3
+              tag: v1.3.0
             probes:
               liveness: &adminProbes
                 enabled: true
@@ -292,7 +292,7 @@ spec:
           app:
             image:
               repository: makeplane/plane-space
-              tag: v1.2.3
+              tag: v1.3.0
             probes:
               liveness: &spaceProbes
                 enabled: true
