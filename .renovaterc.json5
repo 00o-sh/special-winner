@@ -94,6 +94,15 @@
       },
     },
     {
+      description: "Plane Group",
+      groupName: "plane",
+      matchDatasources: ["docker"],
+      matchPackageNames: ["/makeplane/"],
+      group: {
+        commitMessageTopic: "{{{groupName}}} group",
+      },
+    },
+    {
       description: "MariaDB Operator Group",
       groupName: "mariadb-operator",
       matchDatasources: ["helm"],
