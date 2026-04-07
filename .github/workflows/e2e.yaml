@@ -8,8 +8,6 @@ on:
   workflow_dispatch:
   pull_request:
     branches: ["main"]
-    paths-ignore:
-      - kubernetes/**
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.number || github.ref }}
