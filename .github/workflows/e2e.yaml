@@ -17,7 +17,6 @@ concurrency:
 
 jobs:
   configure:
-    if: ${{ github.repository == 'onedr0p/cluster-template' }}
     name: configure
     runs-on: ubuntu-latest
     strategy:
