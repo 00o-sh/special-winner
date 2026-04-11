@@ -10,7 +10,7 @@ TALOSCONFIG = "{{config_root}}/talos/clusterconfig/talosconfig"
 
 [tools]
 # Language runtimes
-"python" = "3.14.3"                            # Required for makejinja template rendering
+"python" = "3.14.4"                            # Required for makejinja template rendering
 
 # Container tools
 "crane" = "0.20.7"                             # Container image inspection and management
