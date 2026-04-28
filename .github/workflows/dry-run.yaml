@@ -88,7 +88,7 @@ jobs:
           cache: false
 
       - name: Create k3d cluster
-        uses: nolar/setup-k3d-k3s@v1
+        uses: nolar/setup-k3d-k3s@62c9d1bd2bc843275c85d2e7dcd696edc1160eee # v1.1.0
         with:
           version: v1.31
           k3d-args: --no-lb --no-rollback --timeout 120s
@@ -103,12 +103,28 @@ jobs:
             kubectl create namespace "$ns" --dry-run=client -o yaml | kubectl apply -f -
           done
 
-      - name: Install CRDs from helmfile
+      - name: Install CRDs from bootstrap helmfile
         run: |
           # Extract only CRDs from helmfile output (skip instances like Alertmanager, PrometheusRule, etc.)
           helmfile --file bootstrap/helmfile.d/00-crds.yaml template --quiet \
             | yq eval-all 'select(.kind == "CustomResourceDefinition")' - \
             | kubectl apply --server-side --force-conflicts -f -
+
+      - name: Install CRDs from kubernetes/apps charts
+        env:
+          # renovate: datasource=github-releases depName=kubernetes-sigs/gateway-api
+          GATEWAY_API_VERSION: v1.2.1
+        run: |
+          # Auto-discover every OCIRepository / HelmRepository-backed chart
+          # used in kubernetes/apps/, render --include-crds, and apply only
+          # the CustomResourceDefinitions. Avoids maintaining a separate
+          # chart list in CI - the manifests already are the source of truth.
+          ./.github/dry-run/extract-crds.sh \
+            | kubectl apply --server-side --force-conflicts -f -
+
+          # Gateway API CRDs (HTTPRoute, Gateway) - upstream YAML, no chart
+          kubectl apply --server-side --force-conflicts \
+            -f "https://github.com/kubernetes-sigs/gateway-api/releases/download/${GATEWAY_API_VERSION}/standard-install.yaml"
 
       - name: Determine kustomizations to test
         id: targets
@@ -157,20 +173,18 @@ jobs:
               continue
             fi
 
-            # Server-side dry-run
-            if echo "$output" | kubectl apply --server-side --dry-run=server -f - > /dev/null 2>&1; then
+            # Server-side dry-run; capture output once so we can classify the result
+            if err=$(echo "$output" | kubectl apply --server-side --dry-run=server -f - 2>&1); then
               echo "PASS ${app}"
               PASSED=$((PASSED + 1))
+            elif echo "$err" | grep -qE 'no matches for kind|unable to recognize|ensure CRDs are installed'; then
+              # Resource type not registered in the cluster — can't validate, but not a real failure
+              echo "::warning::SKIP ${app} - missing CRDs"
+              SKIPPED=$((SKIPPED + 1))
             else
-              # Retry with client dry-run to distinguish CRD-missing from real errors
-              if echo "$output" | kubectl apply --dry-run=client -f - > /dev/null 2>&1; then
-                echo "::warning::SKIP ${app} - missing CRDs"
-                SKIPPED=$((SKIPPED + 1))
-              else
-                echo "::error::FAIL ${app}"
-                echo "$output" | kubectl apply --server-side --dry-run=server -f - 2>&1 || true
-                FAILED=$((FAILED + 1))
-              fi
+              echo "::error::FAIL ${app}"
+              echo "$err"
+              FAILED=$((FAILED + 1))
             fi
           done < /tmp/targets.txt
 
