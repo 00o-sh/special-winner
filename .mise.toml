@@ -13,7 +13,7 @@ TALOSCONFIG = "{{config_root}}/talos/clusterconfig/talosconfig"
 "python" = "3.14.4"                            # Required for makejinja template rendering
 
 # Container tools
-"crane" = "0.20.7"                             # Container image inspection and management
+"crane" = "0.21.5"                             # Container image inspection and management
 
 # Template rendering
 "pipx:makejinja" = "2.8.2"                     # Jinja2 template engine for cluster configuration
