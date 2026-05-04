@@ -445,6 +445,11 @@ app/silence-operator:
       - any-glob-to-any-file:
           - kubernetes/apps/observability/silence-operator/**/*
 
+app/teslamate:
+  - changed-files:
+      - any-glob-to-any-file:
+          - kubernetes/apps/observability/teslamate/**/*
+
 app/victoria-logs:
   - changed-files:
       - any-glob-to-any-file:
