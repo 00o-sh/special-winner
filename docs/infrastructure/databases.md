@@ -116,8 +116,31 @@ initContainers:
           -U postgres \
           -d "$INIT_POSTGRES_DBNAME" \
           -v ON_ERROR_STOP=1 \
-          -c "CREATE EXTENSION IF NOT EXISTS cube;" \
-          -c "CREATE EXTENSION IF NOT EXISTS earthdistance;"
+          -v app_user="$INIT_POSTGRES_USER" <<'SQL'
+        CREATE EXTENSION IF NOT EXISTS cube;
+        CREATE EXTENSION IF NOT EXISTS earthdistance;
+
+        DO $do$
+        DECLARE stmt text;
+        BEGIN
+          SELECT string_agg(
+                   format('ALTER FUNCTION %s OWNER TO %I',
+                          p.oid::regprocedure::text, :'app_user'),
+                   E';\n') || ';'
+            INTO stmt
+          FROM pg_proc p
+          JOIN pg_depend d
+            ON d.classid = 'pg_proc'::regclass
+           AND d.objid   = p.oid
+           AND d.deptype = 'e'
+          JOIN pg_extension e ON e.oid = d.refobjid
+          WHERE e.extname IN ('cube', 'earthdistance');
+
+          IF stmt IS NOT NULL THEN
+            EXECUTE stmt;
+          END IF;
+        END $do$;
+        SQL
     envFrom:
       - secretRef:
           name: teslamate-secret
@@ -129,6 +152,7 @@ Notes:
 - Connect as **`-U postgres`**, not as the app's role, so the `CREATE EXTENSION` succeeds.
 - Use `CREATE EXTENSION IF NOT EXISTS` so the container is idempotent (Flux will reschedule it on every pod restart).
 - Set `-v ON_ERROR_STOP=1` so a failed `CREATE EXTENSION` aborts the init and surfaces the error in pod events instead of silently letting the app start with a broken schema.
+- **If the app's migrations also `ALTER FUNCTION` on extension members** (TeslaMate's `CreateGeoExtensions` does this for the `earthdistance` helpers), the postgres role that ran `CREATE EXTENSION` owns those functions — not the app role — so subsequent `ALTER FUNCTION` calls fail with `must be owner of function …`. Transfer ownership of every function attached to the extension to the app role, like the `DO` block above. Walking `pg_depend` rather than hard-coding function names keeps it forward-compatible with future extension upgrades.
 
 ## MariaDB Operator (MariaDB Galera)
 
