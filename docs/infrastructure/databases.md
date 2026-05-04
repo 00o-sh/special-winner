@@ -120,26 +120,16 @@ initContainers:
         CREATE EXTENSION IF NOT EXISTS cube;
         CREATE EXTENSION IF NOT EXISTS earthdistance;
 
-        DO $do$
-        DECLARE stmt text;
-        BEGIN
-          SELECT string_agg(
-                   format('ALTER FUNCTION %s OWNER TO %I',
-                          p.oid::regprocedure::text, :'app_user'),
-                   E';\n') || ';'
-            INTO stmt
-          FROM pg_proc p
-          JOIN pg_depend d
-            ON d.classid = 'pg_proc'::regclass
-           AND d.objid   = p.oid
-           AND d.deptype = 'e'
-          JOIN pg_extension e ON e.oid = d.refobjid
-          WHERE e.extname IN ('cube', 'earthdistance');
-
-          IF stmt IS NOT NULL THEN
-            EXECUTE stmt;
-          END IF;
-        END $do$;
+        SELECT format('ALTER FUNCTION %s OWNER TO %I;',
+                      p.oid::regprocedure::text, :'app_user')
+        FROM pg_proc p
+        JOIN pg_depend d
+          ON d.classid = 'pg_proc'::regclass
+         AND d.objid   = p.oid
+         AND d.deptype = 'e'
+        JOIN pg_extension e ON e.oid = d.refobjid
+        WHERE e.extname IN ('cube', 'earthdistance')
+        \gexec
         SQL
     envFrom:
       - secretRef:
@@ -152,7 +142,8 @@ Notes:
 - Connect as **`-U postgres`**, not as the app's role, so the `CREATE EXTENSION` succeeds.
 - Use `CREATE EXTENSION IF NOT EXISTS` so the container is idempotent (Flux will reschedule it on every pod restart).
 - Set `-v ON_ERROR_STOP=1` so a failed `CREATE EXTENSION` aborts the init and surfaces the error in pod events instead of silently letting the app start with a broken schema.
-- **If the app's migrations also `ALTER FUNCTION` on extension members** (TeslaMate's `CreateGeoExtensions` does this for the `earthdistance` helpers), the postgres role that ran `CREATE EXTENSION` owns those functions — not the app role — so subsequent `ALTER FUNCTION` calls fail with `must be owner of function …`. Transfer ownership of every function attached to the extension to the app role, like the `DO` block above. Walking `pg_depend` rather than hard-coding function names keeps it forward-compatible with future extension upgrades.
+- **If the app's migrations also `ALTER FUNCTION` on extension members** (TeslaMate's `CreateGeoExtensions` does this for the `earthdistance` helpers), the postgres role that ran `CREATE EXTENSION` owns those functions — not the app role — so subsequent `ALTER FUNCTION` calls fail with `must be owner of function …`. Transfer ownership of every function attached to the extension to the app role using `\gexec` to expand the result rows into executable statements. Walking `pg_depend` rather than hard-coding function names keeps it forward-compatible with future extension upgrades.
+- **Don't wrap the ownership transfer in a `DO $$ … $$` block.** psql's `:'var'` interpolation doesn't run inside dollar-quoted strings, so `:'app_user'` ends up on the server verbatim and the function fails to parse. `\gexec` runs each generated row as a top-level statement where psql interpolation does work.
 
 ## MariaDB Operator (MariaDB Galera)
 
