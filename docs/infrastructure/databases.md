@@ -117,10 +117,36 @@ initContainers:
           -d "$INIT_POSTGRES_DBNAME" \
           -v ON_ERROR_STOP=1 \
           -v app_user="$INIT_POSTGRES_USER" <<'SQL'
-        CREATE EXTENSION IF NOT EXISTS cube;
-        CREATE EXTENSION IF NOT EXISTS earthdistance;
+        -- 1. Install + upgrade the non-trusted geo extensions as superuser.
+        CREATE EXTENSION IF NOT EXISTS cube WITH SCHEMA public;
+        CREATE EXTENSION IF NOT EXISTS earthdistance WITH SCHEMA public;
+        ALTER EXTENSION earthdistance UPDATE;
 
-        GRANT postgres TO :"app_user";
+        -- 2. Transfer ownership of every cube/earthdistance member
+        --    function to the app role so the migration's ALTER FUNCTION
+        --    calls succeed when the app runs them as itself.
+        SELECT 'ALTER FUNCTION ' || objid::regprocedure::text
+               || ' OWNER TO ' || quote_ident(:'app_user') || ';'
+        FROM pg_depend
+        WHERE classid='pg_proc'::regclass AND deptype='e'
+          AND refclassid='pg_extension'::regclass
+          AND refobjid IN (SELECT oid FROM pg_extension
+                           WHERE extname IN ('cube','earthdistance'))
+        \gexec
+
+        -- 3. Pre-create Ecto's schema_migrations table and stamp the
+        --    superuser-only migrations as already applied so the app
+        --    skips them. The DDL they would run has been done above.
+        CREATE TABLE IF NOT EXISTS public.schema_migrations (
+          version     bigint       PRIMARY KEY,
+          inserted_at timestamp(0) WITHOUT TIME ZONE NOT NULL
+        );
+        ALTER TABLE public.schema_migrations OWNER TO :"app_user";
+
+        INSERT INTO public.schema_migrations (version, inserted_at) VALUES
+          (20240929084639, NOW()),  -- recreate_geo_extensions
+          (20250407155134, NOW())   -- upgrade_earthdistance
+        ON CONFLICT (version) DO NOTHING;
         SQL
     envFrom:
       - secretRef:
@@ -129,12 +155,17 @@ initContainers:
 
 Notes:
 
-- Reuse the `postgres-init` image — it already ships `psql` and matches the existing pattern.
+- Reuse the `postgres-init` image — it ships `psql` and matches the existing pattern.
 - Connect as **`-U postgres`**, not as the app's role, so the `CREATE EXTENSION` succeeds.
-- Use `CREATE EXTENSION IF NOT EXISTS` so the container is idempotent (Flux will reschedule it on every pod restart). `GRANT postgres TO ...` is also a no-op when the membership already exists, so the whole script is safe to re-run.
-- Set `-v ON_ERROR_STOP=1` so a failed `CREATE EXTENSION` aborts the init and surfaces the error in pod events instead of silently letting the app start with a broken schema.
-- **PostgreSQL has no `ALTER EXTENSION ... OWNER TO`.** Extensions inherit ownership from whichever role ran `CREATE EXTENSION` and there is no syntax to reassign it later. If the app's migrations need to `ALTER EXTENSION` (TeslaMate's `update_geo_extensions` runs `ALTER EXTENSION cube UPDATE`), grant the app role membership in `postgres` so it inherits postgres's ownership for permission checks. This effectively gives the app role superuser inside its own database — fine for single-tenant homelab apps; revisit if you ever multi-tenant a CNPG database.
-- Per-object `ALTER FUNCTION ... OWNER TO ...` transfers via `\gexec` were tried earlier; they cleared the function-level errors but couldn't help with `ALTER EXTENSION` itself, since extensions aren't in `pg_depend.refclassid='pg_extension'` as transferable members. `GRANT postgres TO ...` is the simpler and complete fix.
+- The whole script is **idempotent**: `CREATE EXTENSION IF NOT EXISTS`, `ALTER EXTENSION ... UPDATE` (no-op when current), `\gexec`-driven ownership transfer (no-op when the role already owns it), `CREATE TABLE IF NOT EXISTS`, and `INSERT ... ON CONFLICT DO NOTHING`. Safe to re-run on every pod restart.
+- Set `-v ON_ERROR_STOP=1` so a failed step aborts the init and surfaces the error in pod events instead of silently letting the app start with a broken schema.
+- **Don't promote the app role to SUPERUSER.** It looks tempting but PostgreSQL's SUPERUSER attribute is **cluster-wide**, not per-database — the app role would gain read/write access to every other CNPG-backed database in the same cluster (n8n, plane, penpot, …). In a shared-cluster setup that's an unacceptable blast radius.
+- **`GRANT postgres TO app` doesn't help** for `CREATE EXTENSION`. Role membership inherits *privileges* (table GRANTs, etc.) but **not role attributes** like `SUPERUSER`, and `CREATE EXTENSION` on non-trusted extensions checks the SUPERUSER attribute.
+- **Why the fake-stamp pattern works:** Ecto records applied migrations in `schema_migrations`. If a migration's version is already in that table when the migrator boots, Ecto skips it. Pre-create the table (matching the DDL Ecto would emit), do the superuser DDL yourself as postgres, and `INSERT` the version. The app then sees no work to do.
+- **What you must keep in sync** when the upstream app adds a new superuser-requiring migration: replicate its DDL in step 1/2 above, and add its version to the `INSERT` in step 3. The migration list as of TeslaMate 3.0.0:
+  - `20190925152807_create_geo_extensions` — *not* skipped; runs fine as the app role once function ownership is transferred (the inner `CREATE EXTENSION IF NOT EXISTS` short-circuits before its privilege check, the `ALTER FUNCTION` calls succeed because of the ownership transfer, and the `CREATE INDEX` runs as the table owner).
+  - `20240929084639_recreate_geo_extensions` — skipped; `DROP EXTENSION cube CASCADE` requires extension ownership which can't be granted.
+  - `20250407155134_upgrade_earthdistance` — skipped; we run the same `ALTER EXTENSION earthdistance UPDATE` as postgres in step 1.
 
 ## MariaDB Operator (MariaDB Galera)
 
