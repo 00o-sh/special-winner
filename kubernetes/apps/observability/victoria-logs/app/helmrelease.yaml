@@ -12,6 +12,13 @@ spec:
   values:
     fullnameOverride: victoria-logs
     server:
+      podSecurityContext:
+        # Skip the recursive volume chown on every pod start - kubelet
+        # only walks the volume when the root dir's owner doesn't match.
+        # Without this, a chart upgrade that nudges fsGroup re-chowns
+        # every file on the 20Gi NFS PVC and the pod sits in
+        # "fixing permissions" for hours.
+        fsGroupChangePolicy: OnRootMismatch
       persistentVolume:
         enabled: true
         storageClassName: nfs-fast
