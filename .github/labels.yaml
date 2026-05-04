@@ -269,6 +269,9 @@
 - name: app/silence-operator
   color: "6f42c1"
   description: "silence-operator in observability"
+- name: app/teslamate
+  color: "6f42c1"
+  description: "teslamate in observability"
 - name: app/victoria-logs
   color: "6f42c1"
   description: "victoria-logs in observability"
