@@ -46,30 +46,18 @@ spec:
                 CREATE EXTENSION IF NOT EXISTS cube;
                 CREATE EXTENSION IF NOT EXISTS earthdistance;
 
-                DO $do$
-                DECLARE
-                  stmt text;
-                BEGIN
-                  SELECT string_agg(
-                           format('ALTER FUNCTION %s OWNER TO %I',
-                                  p.oid::regprocedure::text,
-                                  :'app_user'),
-                           E';\n'
-                         ) || ';'
-                    INTO stmt
-                  FROM pg_proc p
-                  JOIN pg_depend d
-                    ON d.classid = 'pg_proc'::regclass
-                   AND d.objid   = p.oid
-                   AND d.deptype = 'e'
-                  JOIN pg_extension e
-                    ON e.oid = d.refobjid
-                  WHERE e.extname IN ('cube', 'earthdistance');
-
-                  IF stmt IS NOT NULL THEN
-                    EXECUTE stmt;
-                  END IF;
-                END $do$;
+                SELECT format('ALTER FUNCTION %s OWNER TO %I;',
+                              p.oid::regprocedure::text,
+                              :'app_user')
+                FROM pg_proc p
+                JOIN pg_depend d
+                  ON d.classid = 'pg_proc'::regclass
+                 AND d.objid   = p.oid
+                 AND d.deptype = 'e'
+                JOIN pg_extension e
+                  ON e.oid = d.refobjid
+                WHERE e.extname IN ('cube', 'earthdistance')
+                \gexec
                 SQL
             envFrom:
               - secretRef:
