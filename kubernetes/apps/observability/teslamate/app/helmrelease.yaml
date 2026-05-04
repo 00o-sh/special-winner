@@ -23,20 +23,18 @@ spec:
               - secretRef:
                   name: teslamate-secret
           init-extensions:
-            # TeslaMate's geo migrations install cube/earthdistance
-            # (superuser-only) and then run ALTER EXTENSION / ALTER FUNCTION
-            # on them, which require the migration role to be the extension
-            # owner. PostgreSQL has no `ALTER EXTENSION ... OWNER TO`
-            # syntax - extensions inherit ownership from the role that ran
-            # CREATE EXTENSION (postgres, in our case) and there's no way
-            # to reassign it after the fact.
+            # TeslaMate's migrations need to CREATE / ALTER non-trusted
+            # extensions (cube, earthdistance, plus whatever the next
+            # migration adds) and ALTER EXTENSION on them. Both operations
+            # require the SUPERUSER role attribute, which is NOT inherited
+            # via GRANT role-membership - only privileges (GRANTed perms)
+            # are. Pre-installing the known extensions here is a moving
+            # target as TeslaMate adds more.
             #
-            # The supported workaround is role membership: GRANT postgres
-            # TO teslamate makes the app role inherit postgres's ownership
-            # for permission checks, so the migration's ALTER EXTENSION /
-            # ALTER FUNCTION calls succeed without us needing to chase
-            # individual member objects (functions, types, operators, ...).
-            # Acceptable in this single-tenant homelab cluster.
+            # Make the teslamate role itself a SUPERUSER so the app's
+            # migrations can do whatever they need. Acceptable in this
+            # single-tenant homelab cluster; revisit if multi-tenancy
+            # ever lands on this CNPG cluster.
             image:
               repository: ghcr.io/home-operations/postgres-init
               tag: 18@sha256:6fa1f331cddd2eb0b6afa7b8d3685c864127a81ab01c3d9400bc3ff5263a51cf
@@ -51,10 +49,7 @@ spec:
                   -d "$INIT_POSTGRES_DBNAME" \
                   -v ON_ERROR_STOP=1 \
                   -v app_user="$INIT_POSTGRES_USER" <<'SQL'
-                CREATE EXTENSION IF NOT EXISTS cube;
-                CREATE EXTENSION IF NOT EXISTS earthdistance;
-
-                GRANT postgres TO :"app_user";
+                ALTER ROLE :"app_user" WITH SUPERUSER;
                 SQL
             envFrom:
               - secretRef:

@@ -117,10 +117,7 @@ initContainers:
           -d "$INIT_POSTGRES_DBNAME" \
           -v ON_ERROR_STOP=1 \
           -v app_user="$INIT_POSTGRES_USER" <<'SQL'
-        CREATE EXTENSION IF NOT EXISTS cube;
-        CREATE EXTENSION IF NOT EXISTS earthdistance;
-
-        GRANT postgres TO :"app_user";
+        ALTER ROLE :"app_user" WITH SUPERUSER;
         SQL
     envFrom:
       - secretRef:
@@ -130,11 +127,11 @@ initContainers:
 Notes:
 
 - Reuse the `postgres-init` image — it already ships `psql` and matches the existing pattern.
-- Connect as **`-U postgres`**, not as the app's role, so the `CREATE EXTENSION` succeeds.
-- Use `CREATE EXTENSION IF NOT EXISTS` so the container is idempotent (Flux will reschedule it on every pod restart). `GRANT postgres TO ...` is also a no-op when the membership already exists, so the whole script is safe to re-run.
-- Set `-v ON_ERROR_STOP=1` so a failed `CREATE EXTENSION` aborts the init and surfaces the error in pod events instead of silently letting the app start with a broken schema.
-- **PostgreSQL has no `ALTER EXTENSION ... OWNER TO`.** Extensions inherit ownership from whichever role ran `CREATE EXTENSION` and there is no syntax to reassign it later. If the app's migrations need to `ALTER EXTENSION` (TeslaMate's `update_geo_extensions` runs `ALTER EXTENSION cube UPDATE`), grant the app role membership in `postgres` so it inherits postgres's ownership for permission checks. This effectively gives the app role superuser inside its own database — fine for single-tenant homelab apps; revisit if you ever multi-tenant a CNPG database.
-- Per-object `ALTER FUNCTION ... OWNER TO ...` transfers via `\gexec` were tried earlier; they cleared the function-level errors but couldn't help with `ALTER EXTENSION` itself, since extensions aren't in `pg_depend.refclassid='pg_extension'` as transferable members. `GRANT postgres TO ...` is the simpler and complete fix.
+- Connect as **`-U postgres`** (the cluster superuser); only a superuser can grant the SUPERUSER attribute to another role.
+- `ALTER ROLE ... WITH SUPERUSER` is idempotent — re-running it on a role that already has SUPERUSER is a no-op, so the init container is safe on every pod restart.
+- Set `-v ON_ERROR_STOP=1` so any failure aborts the init and surfaces the error in pod events instead of silently letting the app start with a broken setup.
+- **Why we promote the app role to SUPERUSER instead of pre-creating extensions:** PostgreSQL has no `ALTER EXTENSION ... OWNER TO` syntax. Extensions inherit ownership from whichever role ran `CREATE EXTENSION` and there is no way to reassign it later. If the app's migrations need to `CREATE EXTENSION` (cube/earthdistance for TeslaMate), `ALTER EXTENSION cube UPDATE`, `ALTER FUNCTION` on extension members, or any other superuser operation, the migration role itself must hold SUPERUSER. Role membership (`GRANT postgres TO ...`) inherits *privileges* but **not** role attributes like SUPERUSER, so it doesn't help here. Pre-installing every extension the app might want is whack-a-mole as upstream evolves. Promoting the app role is the simplest durable fix.
+- **Trade-off:** the app role becomes a database-wide superuser. Acceptable in a single-tenant homelab; revisit if a CNPG database is ever shared across apps.
 
 ## MariaDB Operator (MariaDB Galera)
 
