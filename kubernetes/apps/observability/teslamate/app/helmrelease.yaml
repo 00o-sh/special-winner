@@ -1,0 +1,171 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s-labs/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: teslamate
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: teslamate
+  interval: 1h
+  values:
+    controllers:
+      teslamate:
+        annotations:
+          reloader.stakater.com/auto: "true"
+        initContainers:
+          init-db:
+            image:
+              repository: ghcr.io/home-operations/postgres-init
+              tag: 18@sha256:6fa1f331cddd2eb0b6afa7b8d3685c864127a81ab01c3d9400bc3ff5263a51cf
+            envFrom:
+              - secretRef:
+                  name: teslamate-secret
+        containers:
+          app:
+            image:
+              repository: docker.io/teslamate/teslamate
+              tag: 1.32.0@sha256:8c282ada5c72b7b0cbd316ec7bc010a9214d5943cf1e1b36ab9b7a98f45a5809
+            env:
+              TZ: America/New_York
+              VIRTUAL_HOST: teslamate.00o.sh
+              CHECK_ORIGIN: "true"
+              PORT: &port 4000
+              DISABLE_MQTT: "false"
+              MQTT_HOST: localhost
+              MQTT_PORT: "1883"
+              DATABASE_HOST: postgres-rw.database.svc.cluster.local
+              DATABASE_PORT: "5432"
+              DATABASE_NAME:
+                valueFrom:
+                  secretKeyRef:
+                    name: teslamate-secret
+                    key: INIT_POSTGRES_DBNAME
+              DATABASE_USER:
+                valueFrom:
+                  secretKeyRef:
+                    name: teslamate-secret
+                    key: INIT_POSTGRES_USER
+              DATABASE_PASS:
+                valueFrom:
+                  secretKeyRef:
+                    name: teslamate-secret
+                    key: INIT_POSTGRES_PASS
+              ENCRYPTION_KEY:
+                valueFrom:
+                  secretKeyRef:
+                    name: teslamate-secret
+                    key: ENCRYPTION_KEY
+            probes:
+              liveness: &probes
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /
+                    port: *port
+                  initialDelaySeconds: 30
+                  periodSeconds: 10
+                  timeoutSeconds: 5
+                  failureThreshold: 3
+              readiness: *probes
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities: { drop: ["ALL"] }
+            resources:
+              requests:
+                cpu: 25m
+                memory: 256Mi
+              limits:
+                memory: 1Gi
+          mosquitto:
+            image:
+              repository: docker.io/library/eclipse-mosquitto
+              tag: 2.0.21@sha256:94f5a3d7deafa59fa3440d227ddad558f59d293c612138de841eec61bfa4d353
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities: { drop: ["ALL"] }
+            resources:
+              requests:
+                cpu: 10m
+                memory: 32Mi
+              limits:
+                memory: 128Mi
+
+    defaultPodOptions:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10000
+        runAsGroup: 10000
+        fsGroup: 10000
+        fsGroupChangePolicy: OnRootMismatch
+        seccompProfile:
+          type: RuntimeDefault
+
+    service:
+      app:
+        controller: teslamate
+        ports:
+          http:
+            port: *port
+
+    route:
+      app:
+        annotations:
+          gethomepage.dev/enabled: "true"
+          gethomepage.dev/group: Observability
+          gethomepage.dev/name: TeslaMate
+          gethomepage.dev/icon: teslamate.png
+          gethomepage.dev/description: Tesla Data Logger
+          gethomepage.dev/href: "https://teslamate.00o.sh"
+        hostnames:
+          - teslamate.00o.sh
+        parentRefs:
+          - name: envoy-internal
+            namespace: network
+        rules:
+          - backendRefs:
+              - identifier: app
+                port: *port
+
+    configMaps:
+      mosquitto:
+        data:
+          mosquitto.conf: |
+            listener 1883
+            allow_anonymous true
+            persistence true
+            persistence_location /mosquitto/data/
+            log_dest stdout
+
+    persistence:
+      mosquitto-config:
+        type: configMap
+        name: teslamate-mosquitto
+        advancedMounts:
+          teslamate:
+            mosquitto:
+              - path: /mosquitto/config/mosquitto.conf
+                subPath: mosquitto.conf
+                readOnly: true
+      mosquitto-data:
+        type: emptyDir
+        advancedMounts:
+          teslamate:
+            mosquitto:
+              - path: /mosquitto/data
+      mosquitto-log:
+        type: emptyDir
+        advancedMounts:
+          teslamate:
+            mosquitto:
+              - path: /mosquitto/log
+      tmp:
+        type: emptyDir
+        advancedMounts:
+          teslamate:
+            app:
+              - path: /tmp

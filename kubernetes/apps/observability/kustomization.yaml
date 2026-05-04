@@ -18,4 +18,5 @@ resources:
   - ./kube-prometheus-stack/ks.yaml
   - ./opencost/ks.yaml
   - ./silence-operator/ks.yaml
+  - ./teslamate/ks.yaml
   - ./victoria-logs/ks.yaml
