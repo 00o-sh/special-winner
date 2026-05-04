@@ -120,15 +120,32 @@ initContainers:
         CREATE EXTENSION IF NOT EXISTS cube;
         CREATE EXTENSION IF NOT EXISTS earthdistance;
 
-        SELECT format('ALTER FUNCTION %s OWNER TO %I;',
-                      p.oid::regprocedure::text, :'app_user')
-        FROM pg_proc p
-        JOIN pg_depend d
-          ON d.classid = 'pg_proc'::regclass
-         AND d.objid   = p.oid
-         AND d.deptype = 'e'
-        JOIN pg_extension e ON e.oid = d.refobjid
-        WHERE e.extname IN ('cube', 'earthdistance')
+        ALTER EXTENSION cube OWNER TO :"app_user";
+        ALTER EXTENSION earthdistance OWNER TO :"app_user";
+
+        -- Hand every member object to the app role. Walking pg_depend keeps
+        -- this forward-compatible with future extension upgrades that add
+        -- new objects.
+        SELECT 'ALTER FUNCTION ' || objid::regprocedure::text
+               || ' OWNER TO ' || quote_ident(:'app_user') || ';'
+        FROM pg_depend
+        WHERE classid='pg_proc'::regclass AND deptype='e'
+          AND refobjid IN (SELECT oid FROM pg_extension
+                           WHERE extname IN ('cube','earthdistance'))
+        UNION ALL
+        SELECT 'ALTER TYPE ' || objid::regtype::text
+               || ' OWNER TO ' || quote_ident(:'app_user') || ';'
+        FROM pg_depend
+        WHERE classid='pg_type'::regclass AND deptype='e'
+          AND refobjid IN (SELECT oid FROM pg_extension
+                           WHERE extname IN ('cube','earthdistance'))
+        UNION ALL
+        SELECT 'ALTER OPERATOR ' || objid::regoperator::text
+               || ' OWNER TO ' || quote_ident(:'app_user') || ';'
+        FROM pg_depend
+        WHERE classid='pg_operator'::regclass AND deptype='e'
+          AND refobjid IN (SELECT oid FROM pg_extension
+                           WHERE extname IN ('cube','earthdistance'))
         \gexec
         SQL
     envFrom:
@@ -140,9 +157,9 @@ Notes:
 
 - Reuse the `postgres-init` image — it already ships `psql` and matches the existing pattern.
 - Connect as **`-U postgres`**, not as the app's role, so the `CREATE EXTENSION` succeeds.
-- Use `CREATE EXTENSION IF NOT EXISTS` so the container is idempotent (Flux will reschedule it on every pod restart).
+- Use `CREATE EXTENSION IF NOT EXISTS` so the container is idempotent (Flux will reschedule it on every pod restart). `ALTER EXTENSION ... OWNER TO` is also a no-op if the role is already the owner, so the whole script is safe to re-run.
 - Set `-v ON_ERROR_STOP=1` so a failed `CREATE EXTENSION` aborts the init and surfaces the error in pod events instead of silently letting the app start with a broken schema.
-- **If the app's migrations also `ALTER FUNCTION` on extension members** (TeslaMate's `CreateGeoExtensions` does this for the `earthdistance` helpers), the postgres role that ran `CREATE EXTENSION` owns those functions — not the app role — so subsequent `ALTER FUNCTION` calls fail with `must be owner of function …`. Transfer ownership of every function attached to the extension to the app role using `\gexec` to expand the result rows into executable statements. Walking `pg_depend` rather than hard-coding function names keeps it forward-compatible with future extension upgrades.
+- **`ALTER EXTENSION ... OWNER TO` does NOT cascade to member objects.** Transfer ownership of every member (functions, types, operators, opclasses, opfamilies) separately. Otherwise migrations that run `ALTER FUNCTION` / `ALTER TYPE` / `ALTER OPERATOR` on extension members fail with `must be owner of …`.
 - **Don't wrap the ownership transfer in a `DO $$ … $$` block.** psql's `:'var'` interpolation doesn't run inside dollar-quoted strings, so `:'app_user'` ends up on the server verbatim and the function fails to parse. `\gexec` runs each generated row as a top-level statement where psql interpolation does work.
 
 ## MariaDB Operator (MariaDB Galera)
