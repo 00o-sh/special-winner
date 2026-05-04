@@ -32,9 +32,7 @@ spec:
               VIRTUAL_HOST: teslamate.00o.sh
               CHECK_ORIGIN: "true"
               PORT: &port 4000
-              DISABLE_MQTT: "false"
-              MQTT_HOST: localhost
-              MQTT_PORT: "1883"
+              DISABLE_MQTT: "true"
               DATABASE_HOST: postgres-rw.database.svc.cluster.local
               DATABASE_PORT: "5432"
               DATABASE_NAME:
@@ -80,20 +78,6 @@ spec:
                 memory: 256Mi
               limits:
                 memory: 1Gi
-          mosquitto:
-            image:
-              repository: docker.io/library/eclipse-mosquitto
-              tag: 2.0.21@sha256:94f5a3d7deafa59fa3440d227ddad558f59d293c612138de841eec61bfa4d353
-            securityContext:
-              allowPrivilegeEscalation: false
-              readOnlyRootFilesystem: true
-              capabilities: { drop: ["ALL"] }
-            resources:
-              requests:
-                cpu: 10m
-                memory: 32Mi
-              limits:
-                memory: 128Mi
 
     defaultPodOptions:
       securityContext:
@@ -131,38 +115,7 @@ spec:
               - identifier: app
                 port: *port
 
-    configMaps:
-      mosquitto:
-        data:
-          mosquitto.conf: |
-            listener 1883
-            allow_anonymous true
-            persistence true
-            persistence_location /mosquitto/data/
-            log_dest stdout
-
     persistence:
-      mosquitto-config:
-        type: configMap
-        name: teslamate-mosquitto
-        advancedMounts:
-          teslamate:
-            mosquitto:
-              - path: /mosquitto/config/mosquitto.conf
-                subPath: mosquitto.conf
-                readOnly: true
-      mosquitto-data:
-        type: emptyDir
-        advancedMounts:
-          teslamate:
-            mosquitto:
-              - path: /mosquitto/data
-      mosquitto-log:
-        type: emptyDir
-        advancedMounts:
-          teslamate:
-            mosquitto:
-              - path: /mosquitto/log
       tmp:
         type: emptyDir
         advancedMounts:
