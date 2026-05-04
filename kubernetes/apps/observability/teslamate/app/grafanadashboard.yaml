@@ -31,10 +31,10 @@ spec:
     type: grafana-postgresql-datasource
     access: proxy
     url: postgres-rw.database.svc.cluster.local:5432
-    user: ${user}
-    database: ${database}
+    user: $${user}
+    database: $${database}
     secureJsonData:
-      password: ${password}
+      password: $${password}
     jsonData:
       sslmode: disable
       postgresVersion: 1700
