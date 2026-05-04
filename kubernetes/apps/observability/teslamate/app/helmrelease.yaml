@@ -25,10 +25,12 @@ spec:
           init-extensions:
             # TeslaMate's CreateGeoExtensions migration installs cube /
             # earthdistance (superuser-only) and then runs ALTER FUNCTION on
-            # the geo helpers (owner-only). Install the extensions as the
-            # postgres superuser, then transfer ownership of every function
-            # belonging to those two extensions to the teslamate role so the
-            # subsequent ALTER FUNCTION calls in the app's migration succeed.
+            # the geo helpers (owner-only). Later migrations may ALTER
+            # EXTENSION (e.g. UPDATE) which also requires owner. Install the
+            # extensions as the postgres superuser, then hand the extensions
+            # AND every member object (functions, types, operators, opclasses,
+            # operator families) over to the teslamate role so the app role
+            # can run any ALTER variant without tripping on ownership.
             image:
               repository: ghcr.io/home-operations/postgres-init
               tag: 18@sha256:6fa1f331cddd2eb0b6afa7b8d3685c864127a81ab01c3d9400bc3ff5263a51cf
@@ -46,17 +48,62 @@ spec:
                 CREATE EXTENSION IF NOT EXISTS cube;
                 CREATE EXTENSION IF NOT EXISTS earthdistance;
 
-                SELECT format('ALTER FUNCTION %s OWNER TO %I;',
-                              p.oid::regprocedure::text,
-                              :'app_user')
-                FROM pg_proc p
-                JOIN pg_depend d
-                  ON d.classid = 'pg_proc'::regclass
-                 AND d.objid   = p.oid
-                 AND d.deptype = 'e'
-                JOIN pg_extension e
-                  ON e.oid = d.refobjid
-                WHERE e.extname IN ('cube', 'earthdistance')
+                ALTER EXTENSION cube OWNER TO :"app_user";
+                ALTER EXTENSION earthdistance OWNER TO :"app_user";
+
+                -- Hand every extension member object (regardless of kind)
+                -- to the app role. Walk pg_depend so future cube /
+                -- earthdistance upgrades that add new objects keep working.
+                SELECT 'ALTER FUNCTION ' || objid::regprocedure::text
+                       || ' OWNER TO ' || quote_ident(:'app_user') || ';'
+                FROM pg_depend
+                WHERE classid    = 'pg_proc'::regclass
+                  AND deptype    = 'e'
+                  AND refclassid = 'pg_extension'::regclass
+                  AND refobjid IN (SELECT oid FROM pg_extension
+                                   WHERE extname IN ('cube','earthdistance'))
+                UNION ALL
+                SELECT 'ALTER TYPE ' || objid::regtype::text
+                       || ' OWNER TO ' || quote_ident(:'app_user') || ';'
+                FROM pg_depend
+                WHERE classid    = 'pg_type'::regclass
+                  AND deptype    = 'e'
+                  AND refclassid = 'pg_extension'::regclass
+                  AND refobjid IN (SELECT oid FROM pg_extension
+                                   WHERE extname IN ('cube','earthdistance'))
+                UNION ALL
+                SELECT 'ALTER OPERATOR ' || objid::regoperator::text
+                       || ' OWNER TO ' || quote_ident(:'app_user') || ';'
+                FROM pg_depend
+                WHERE classid    = 'pg_operator'::regclass
+                  AND deptype    = 'e'
+                  AND refclassid = 'pg_extension'::regclass
+                  AND refobjid IN (SELECT oid FROM pg_extension
+                                   WHERE extname IN ('cube','earthdistance'))
+                UNION ALL
+                SELECT 'ALTER OPERATOR CLASS ' || quote_ident(opc.opcname)
+                       || ' USING ' || quote_ident(am.amname)
+                       || ' OWNER TO ' || quote_ident(:'app_user') || ';'
+                FROM pg_depend d
+                JOIN pg_opclass opc ON opc.oid = d.objid
+                JOIN pg_am am       ON am.oid  = opc.opcmethod
+                WHERE d.classid    = 'pg_opclass'::regclass
+                  AND d.deptype    = 'e'
+                  AND d.refclassid = 'pg_extension'::regclass
+                  AND d.refobjid IN (SELECT oid FROM pg_extension
+                                     WHERE extname IN ('cube','earthdistance'))
+                UNION ALL
+                SELECT 'ALTER OPERATOR FAMILY ' || quote_ident(opf.opfname)
+                       || ' USING ' || quote_ident(am.amname)
+                       || ' OWNER TO ' || quote_ident(:'app_user') || ';'
+                FROM pg_depend d
+                JOIN pg_opfamily opf ON opf.oid = d.objid
+                JOIN pg_am am        ON am.oid  = opf.opfmethod
+                WHERE d.classid    = 'pg_opfamily'::regclass
+                  AND d.deptype    = 'e'
+                  AND d.refclassid = 'pg_extension'::regclass
+                  AND d.refobjid IN (SELECT oid FROM pg_extension
+                                     WHERE extname IN ('cube','earthdistance'))
                 \gexec
                 SQL
             envFrom:
