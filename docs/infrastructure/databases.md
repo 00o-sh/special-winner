@@ -52,6 +52,84 @@ postgres-rw.database.svc.cluster.local:5432
 
 A recovery cluster definition exists at `kubernetes/apps/database/cloudnative-pg/recovery/cluster.yaml` for disaster recovery scenarios.
 
+### Onboarding a new app
+
+The repository's standard pattern is **one shared cluster, per-app database + role**, provisioned by an `init-db` initContainer using `ghcr.io/home-operations/postgres-init`. The init container reads `INIT_POSTGRES_SUPER_PASS` (from the `cloudnative-pg` 1Password item) and creates the database and a non-superuser role for the app.
+
+```yaml
+initContainers:
+  init-db:
+    image:
+      repository: ghcr.io/home-operations/postgres-init
+      tag: 18@sha256:...
+    envFrom:
+      - secretRef:
+          name: <app>-secret
+```
+
+The matching `ExternalSecret` template:
+
+```yaml
+template:
+  data:
+    INIT_POSTGRES_DBNAME: "{{ .APP_POSTGRES_DB }}"
+    INIT_POSTGRES_HOST: postgres-rw.database.svc.cluster.local
+    INIT_POSTGRES_PORT: "5432"
+    INIT_POSTGRES_USER: "{{ .APP_POSTGRES_USER }}"
+    INIT_POSTGRES_PASS: "{{ .APP_POSTGRES_PASSWORD }}"
+    INIT_POSTGRES_SUPER_PASS: "{{ .POSTGRES_SUPER_PASS }}"
+```
+
+Apps then connect with their own role (`DATABASE_USER`/`DATABASE_PASS`).
+
+### Apps that need PostgreSQL extensions
+
+`CREATE EXTENSION` for "trusted" extensions like `pgcrypto` or `uuid-ossp` works as a regular role, but **`cube`, `earthdistance`, `postgis`, `pg_stat_statements`, etc. require superuser**. The per-app role created by `init-db` is intentionally **not** a superuser, so any migration that tries to install these extensions will fail with:
+
+```
+ERROR 42501 (insufficient_privilege) permission denied to create extension "earthdistance"
+hint: Must be superuser to create this extension.
+```
+
+Pre-create the extensions in a second initContainer that connects as the postgres superuser. Example from TeslaMate (`kubernetes/apps/observability/teslamate/app/helmrelease.yaml`):
+
+```yaml
+initContainers:
+  init-db:
+    image:
+      repository: ghcr.io/home-operations/postgres-init
+      tag: 18@sha256:...
+    envFrom:
+      - secretRef:
+          name: teslamate-secret
+  init-extensions:
+    image:
+      repository: ghcr.io/home-operations/postgres-init
+      tag: 18@sha256:...
+    command:
+      - /bin/sh
+      - -c
+      - |
+        PGPASSWORD="$INIT_POSTGRES_SUPER_PASS" psql \
+          -h "$INIT_POSTGRES_HOST" \
+          -p "$INIT_POSTGRES_PORT" \
+          -U postgres \
+          -d "$INIT_POSTGRES_DBNAME" \
+          -v ON_ERROR_STOP=1 \
+          -c "CREATE EXTENSION IF NOT EXISTS cube;" \
+          -c "CREATE EXTENSION IF NOT EXISTS earthdistance;"
+    envFrom:
+      - secretRef:
+          name: teslamate-secret
+```
+
+Notes:
+
+- Reuse the `postgres-init` image — it already ships `psql` and matches the existing pattern.
+- Connect as **`-U postgres`**, not as the app's role, so the `CREATE EXTENSION` succeeds.
+- Use `CREATE EXTENSION IF NOT EXISTS` so the container is idempotent (Flux will reschedule it on every pod restart).
+- Set `-v ON_ERROR_STOP=1` so a failed `CREATE EXTENSION` aborts the init and surfaces the error in pod events instead of silently letting the app start with a broken schema.
+
 ## MariaDB Operator (MariaDB Galera)
 
 [MariaDB Operator](https://github.com/mariadb-operator/mariadb-operator) runs a **MariaDB 11.7** high-availability Galera cluster with 3 instances.
