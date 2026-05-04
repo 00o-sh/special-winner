@@ -113,7 +113,7 @@ jobs:
       - name: Install CRDs from kubernetes/apps charts
         env:
           # renovate: datasource=github-releases depName=kubernetes-sigs/gateway-api
-          GATEWAY_API_VERSION: v1.2.1
+          GATEWAY_API_VERSION: v1.5.1
         run: |
           # Auto-discover every OCIRepository / HelmRepository-backed chart
           # used in kubernetes/apps/, render --include-crds, and apply only
