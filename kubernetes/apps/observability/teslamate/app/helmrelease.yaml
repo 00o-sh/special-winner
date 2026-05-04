@@ -23,9 +23,12 @@ spec:
               - secretRef:
                   name: teslamate-secret
           init-extensions:
-            # TeslaMate's CreateGeoExtensions migration runs CREATE EXTENSION
-            # cube/earthdistance, which requires superuser. Pre-create them as
-            # the postgres superuser so the migration is a no-op.
+            # TeslaMate's CreateGeoExtensions migration installs cube /
+            # earthdistance (superuser-only) and then runs ALTER FUNCTION on
+            # the geo helpers (owner-only). Install the extensions as the
+            # postgres superuser, then transfer ownership of every function
+            # belonging to those two extensions to the teslamate role so the
+            # subsequent ALTER FUNCTION calls in the app's migration succeed.
             image:
               repository: ghcr.io/home-operations/postgres-init
               tag: 18@sha256:6fa1f331cddd2eb0b6afa7b8d3685c864127a81ab01c3d9400bc3ff5263a51cf
@@ -39,8 +42,35 @@ spec:
                   -U postgres \
                   -d "$INIT_POSTGRES_DBNAME" \
                   -v ON_ERROR_STOP=1 \
-                  -c "CREATE EXTENSION IF NOT EXISTS cube;" \
-                  -c "CREATE EXTENSION IF NOT EXISTS earthdistance;"
+                  -v app_user="$INIT_POSTGRES_USER" <<'SQL'
+                CREATE EXTENSION IF NOT EXISTS cube;
+                CREATE EXTENSION IF NOT EXISTS earthdistance;
+
+                DO $do$
+                DECLARE
+                  stmt text;
+                BEGIN
+                  SELECT string_agg(
+                           format('ALTER FUNCTION %s OWNER TO %I',
+                                  p.oid::regprocedure::text,
+                                  :'app_user'),
+                           E';\n'
+                         ) || ';'
+                    INTO stmt
+                  FROM pg_proc p
+                  JOIN pg_depend d
+                    ON d.classid = 'pg_proc'::regclass
+                   AND d.objid   = p.oid
+                   AND d.deptype = 'e'
+                  JOIN pg_extension e
+                    ON e.oid = d.refobjid
+                  WHERE e.extname IN ('cube', 'earthdistance');
+
+                  IF stmt IS NOT NULL THEN
+                    EXECUTE stmt;
+                  END IF;
+                END $do$;
+                SQL
             envFrom:
               - secretRef:
                   name: teslamate-secret
