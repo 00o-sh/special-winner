@@ -11,8 +11,8 @@ resources:
   - ./namespace.yaml
   - ./forgejo/ks.yaml
   - ./homepage/ks.yaml
-  - ./n8n/ks.yaml
-  - ./penpot/ks.yaml
+#  - ./n8n/ks.yaml
+#  - ./penpot/ks.yaml
   - ./plane/ks.yaml
-  - ./rustdesk/ks.yaml
+#  - ./rustdesk/ks.yaml
   - ./smtp-relay/ks.yaml
