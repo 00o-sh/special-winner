@@ -23,7 +23,7 @@ spec:
           app:
             image:
               repository: ghcr.io/tarampampam/error-pages
-              tag: 4.0.0@sha256:19989c478e900898cd556befc71bb71c5c0d2eae11678b26b8cac3df0c6805fb
+              tag: 4.2.0@sha256:7c57706501e6ad4ed91031c5b529591395d7cbd509a311f8210236bb608f6557
             env:
               TEMPLATE_NAME: hacker-terminal
               SHOW_DETAILS: "true"
