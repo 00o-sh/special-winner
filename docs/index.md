@@ -8,31 +8,30 @@ Built on the [onedr0p/cluster-template](https://github.com/onedr0p/cluster-templ
 
 | Component | Technology | Version |
 |-----------|-----------|---------|
-| OS | Talos Linux | 1.12.4 |
-| Orchestration | Kubernetes | 1.34.0 |
-| GitOps | Flux CD | 2.7.5 |
-| CNI | Cilium | 1.19.0 |
-| Ingress | Envoy Gateway | v1.6.3 |
-| Secrets | SOPS + Age | 3.12.1 / 1.3.1 |
+| OS | Talos Linux | 1.13.0 |
+| Orchestration | Kubernetes | 1.35.4 |
+| GitOps | Flux CD | 2.8.6 |
+| CNI | Cilium | 1.19.3 |
+| Ingress | Envoy Gateway | v1.7.2 |
+| Secrets | SOPS + Age | 3.13.0 / 1.3.1 |
 | Identity | Kanidm | SSO/OAuth2 |
-| Packages | Helm | 4.1.1 (v4) |
+| Packages | Helm | 4.1.4 (v4) |
 | Database | CloudNative-PG | PostgreSQL 17.7 |
 | Virtualization | KubeVirt | 1.7.0 |
 
 ## What's Deployed
 
-**65+ applications** across **17 namespaces** covering:
+**60+ applications** across **17 namespaces** covering:
 
 - **Media** -- Plex, Radarr, Sonarr, Prowlarr, Bazarr, qBittorrent, and more
-- **Virtualization** -- KubeVirt with Debian, Ubuntu, Windows, and FreePBX VMs
+- **Virtualization** -- KubeVirt with Debian, Ubuntu, and Windows VMs
 - **Identity** -- Kanidm SSO with OAuth2 integrations
-- **Observability** -- Prometheus, Grafana, Victoria Logs, Gatus, OpenCost
-- **Databases** -- PostgreSQL 17.7 HA cluster (3 instances) + Dragonfly
-- **Networking** -- Cilium, Envoy Gateway, Cloudflare Tunnel, Multus
+- **Observability** -- Prometheus, Grafana, Victoria Logs, Gatus, OpenCost, TeslaMate
+- **Databases** -- PostgreSQL 17.7 HA cluster (3 instances) + MariaDB 11.7 Galera + Dragonfly
+- **Networking** -- Cilium, Envoy Gateway, Cloudflare Tunnel, Multus, Macvtap
 - **Storage** -- OpenEBS, VolSync, Garage S3, NFS
 - **CI/CD** -- GitHub Actions runners, Forgejo with CI runners
-- **Networking** -- LibreSpeed multi-path speed test
-- **Utilities** -- Penpot, Homepage, SMTP relay, and more
+- **Utilities** -- Plane, Homepage, Forgejo, SMTP relay, and more
 
 ## Quick Links
 

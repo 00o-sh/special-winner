@@ -21,12 +21,12 @@ A Kubernetes cluster deployed with [Talos Linux](https://github.com/siderolabs/t
 ### Core Infrastructure
 
 **Operating System & Orchestration:**
-- [Talos Linux](https://github.com/siderolabs/talos) 1.12.4 - Immutable Kubernetes OS
-- [Kubernetes](https://kubernetes.io/) 1.34.0 - Container orchestration
-- [Flux CD](https://github.com/fluxcd/flux2) 2.8.1 - GitOps continuous delivery
+- [Talos Linux](https://github.com/siderolabs/talos) 1.13.0 - Immutable Kubernetes OS
+- [Kubernetes](https://kubernetes.io/) 1.35.4 - Container orchestration
+- [Flux CD](https://github.com/fluxcd/flux2) 2.8.6 - GitOps continuous delivery
 
 **Networking:**
-- [Cilium](https://github.com/cilium/cilium) 1.19.0 - eBPF-based CNI
+- [Cilium](https://github.com/cilium/cilium) 1.19.3 - eBPF-based CNI
 - [CoreDNS](https://coredns.io/) - Cluster DNS
 - [Envoy Gateway](https://github.com/envoyproxy/gateway) - HTTP routing and ingress
 - [Error Pages](https://github.com/tarampampam/error-pages) - Custom error pages for Envoy Gateway
@@ -43,7 +43,7 @@ A Kubernetes cluster deployed with [Talos Linux](https://github.com/siderolabs/t
 - [cert-manager](https://github.com/cert-manager/cert-manager) - TLS certificate automation
 - [External Secrets Operator](https://external-secrets.io/) - External secret management
 - [1Password](https://1password.com/) - Secret storage backend
-- [SOPS](https://github.com/getsops/sops) 3.12.1 - Encrypted secrets in Git
+- [SOPS](https://github.com/getsops/sops) 3.13.0 - Encrypted secrets in Git
 
 **Storage:**
 - [OpenEBS](https://github.com/openebs/openebs) - Cloud-native storage
@@ -70,6 +70,7 @@ A Kubernetes cluster deployed with [Talos Linux](https://github.com/siderolabs/t
 - [Kromgo](https://github.com/kashalls/kromgo) - Custom metrics publishing
 - [Silence Operator](https://github.com/kbudde/silence-operator) - Alert silencing automation
 - [OpenCost](https://www.opencost.io/) - Kubernetes cost monitoring and analysis
+- [TeslaMate](https://github.com/teslamate-org/teslamate) - Self-hosted Tesla data logger with Grafana dashboards
 
 **Virtualization:**
 - [KubeVirt](https://kubevirt.io/) - Virtual machine management on Kubernetes
@@ -98,18 +99,13 @@ A Kubernetes cluster deployed with [Talos Linux](https://github.com/siderolabs/t
 - [FlareSolverr](https://github.com/FlareSolverr/FlareSolverr) - Cloudflare bypass proxy
 - [TheLounge](https://thelounge.chat/) - Self-hosted IRC client
 
-**VoIP & Telephony:**
-- [FreePBX](https://www.freepbx.org/) - Containerized telephony platform (MariaDB backend)
-
-**Low-Code Platform:**
-- [UI Bakery](https://uibakery.io/) - Internal tool builder (7 microservices, MariaDB backend)
+**Project Management:**
+- [Plane](https://plane.so/) - Open-source project management platform (PostgreSQL backend)
 
 **Infrastructure & Utilities:**
 - [GitHub Actions Runner Controller](https://github.com/actions/actions-runner-controller) - Self-hosted GitHub Actions runners (special-winner + ambersecurityinc scale sets)
 - [Forgejo](https://forgejo.org/) - Self-hosted Git repository service with CI/CD runners
 - [SMTP Relay](https://github.com/foxcpp/maddy) - Outbound email relay using Maddy
-- [n8n](https://n8n.io/) - Workflow automation platform
-- [Penpot](https://penpot.app/) - Open-source design and prototyping platform
 - [Homepage](https://gethomepage.dev/) - Cluster dashboard for all services
 
 **Additional DNS:**
@@ -561,7 +557,7 @@ Community member [@whazor](https://github.com/whazor) created [Kubesearch](https
 - [x] Test Debian Server VM
 - [x] Test Debian Desktop VM (Debian 13 w/ XFCE4)
 - [ ] Test Kali Linux VM
-- [x] Deploy FreePBX telephony VMs (3 instances: b1, b2, b3)
+- [ ] Deploy FreePBX telephony VMs (3 instances: b1, b2, b3) - manifests staged, currently disabled
 
 **Security & Observability**
 - [ ] Kyverno or OPA Gatekeeper for policy enforcement
@@ -672,11 +668,11 @@ If this repo is too hot to handle or too cold to hold check out these following 
 
 | Metric | Value |
 |--------|-------|
-| **Deployed Components** | 70+ applications across 18 namespaces |
+| **Deployed Components** | 60+ applications across 17 namespaces |
 | **Template Source** | [onedr0p/cluster-template](https://github.com/onedr0p/cluster-template) |
 | **Infrastructure** | GitOps with Flux CD + Talos Linux |
 | **Documentation** | [docs.00o.sh](https://docs.00o.sh) |
-| **Last Updated** | 2026-03-07 |
+| **Last Updated** | 2026-05-14 |
 
 ---
 
