@@ -10,19 +10,19 @@ This document provides comprehensive guidance for AI assistants working with thi
 
 ### Core Components
 
-- **OS**: Talos Linux 1.12.4 (immutable Kubernetes OS)
-- **Orchestration**: Kubernetes 1.34.0
-- **GitOps**: Flux CD 2.8.1 (declarative continuous delivery)
-- **CNI**: Cilium 1.19.0 (eBPF-based networking)
-- **Ingress**: Envoy Gateway v1.6.3 (HTTP routing)
-- **Secrets**: SOPS 3.12.1 + Age 1.3.1 encryption
+- **OS**: Talos Linux 1.13.0 (immutable Kubernetes OS)
+- **Orchestration**: Kubernetes 1.35.4
+- **GitOps**: Flux CD 2.8.6 (declarative continuous delivery)
+- **CNI**: Cilium 1.19.3 (eBPF-based networking)
+- **Ingress**: Envoy Gateway v1.7.2 (HTTP routing)
+- **Secrets**: SOPS 3.13.0 + Age 1.3.1 encryption
 - **Identity**: Kanidm (SSO/OAuth2 identity provider)
 - **DNS**: k8s_gateway + CoreDNS + External-DNS
-- **Certificates**: cert-manager with Cloudflare integration
-- **Package Management**: Helm 4.1.1 (Helm v4 for chart management)
+- **Certificates**: cert-manager v1.20.2 with Cloudflare integration
+- **Package Management**: Helm 4.1.4 (Helm v4 for chart management)
 - **Database**: CloudNative-PG (PostgreSQL 17.7) + Dragonfly (Redis-compatible) + MariaDB Operator (MariaDB 11.7 Galera)
 - **Virtualization**: KubeVirt 1.7.0 (virtual machine management)
-- **External Secrets**: External Secrets Operator 2.0.0 + 1Password Connect (reads) + 1Password SDK (writes)
+- **External Secrets**: External Secrets Operator 2.4.1 + 1Password Connect (reads) + 1Password SDK (writes)
 
 ## Directory Structure
 
@@ -670,6 +670,8 @@ talosctl logs --nodes <ip> --insecure
 - echo (test application)
 - librespeed (multi-path speed test with per-route Envoy tuning)
 
+> **Note:** The `voip` namespace exists but the FreePBX HelmReleases are currently disabled (commented out in `kubernetes/apps/voip/kustomization.yaml`). The `kubernetes/apps/kubevirt/virtualmachines/` directory likewise no longer ships the FreePBX VM manifests; only the Debian, Ubuntu and Windows VMs remain active.
+
 **external-secrets**: Secret management
 - discord-webhook (Discord integration)
 - external-secrets (operator)
@@ -699,7 +701,7 @@ talosctl logs --nodes <ip> --insecure
 - cdi (Containerized Data Importer for VM disk management)
 - kubevirt (KubeVirt operator)
 - kubevirt-manager (web UI for VM management)
-- virtualmachines (VM instances: debian-desktop, debian-server, ubuntu-server, windows-server, freepbx-b1-k3s01, freepbx-b2-k3s01, freepbx-b3-k3s01)
+- virtualmachines (VM instances: debian-desktop, debian-server, ubuntu-server, windows-server)
 
 **media**: Media applications
 - autobrr (automation for torrent trackers)
@@ -710,11 +712,11 @@ talosctl logs --nodes <ip> --insecure
 - qbittorrent (torrent client)
 - qui (qBittorrent web UI)
 - radarr (movie collection manager)
-- recyclarr (quality profile management for *arr apps)
 - seerr (media request and discovery)
 - sonarr (TV series collection manager)
 - tautulli (Plex monitoring and statistics)
 - thelounge (IRC client)
+- recyclarr (currently disabled — manifests retained, kustomization entry commented out)
 
 **network**: Network infrastructure
 - cloudflare-dns
@@ -736,6 +738,7 @@ talosctl logs --nodes <ip> --insecure
 - kube-prometheus-stack (Prometheus, AlertManager, Grafana)
 - opencost (Kubernetes cost monitoring and analysis)
 - silence-operator (alert silencing)
+- teslamate (Tesla data logger with Grafana dashboards, PostgreSQL backend)
 - victoria-logs (log aggregation)
 
 **openebs-system**: Storage
@@ -744,21 +747,14 @@ talosctl logs --nodes <ip> --insecure
 **system-upgrade**: System management
 - tuppr (automated upgrades)
 
-**ui-bakery**: Low-code platform
-- ui-bakery (low-code internal tool builder with MariaDB backend, ExternalSecrets, Envoy Gateway ingress)
-
 **utils**: Utility services
 - forgejo (self-hosted Git repository service)
 - homepage (cluster dashboard)
-- n8n (workflow automation platform)
-- penpot (open-source design and prototyping platform)
+- plane (open-source project management platform with PostgreSQL backend)
 - smtp-relay (SMTP relay for outbound email using Maddy)
+- n8n, penpot, rustdesk (manifests retained but currently disabled in `kustomization.yaml`)
 
-**voip**: VoIP and telephony
-- freepbx-b1-k3s01 (containerized FreePBX telephony platform with MariaDB backend)
-
-**zitadel**: External identity provider (SaaS development)
-- zitadel (self-hosted Zitadel identity platform at login.00o.sh, network-isolated, PostgreSQL backend, external-only access)
+**voip**: VoIP and telephony (currently inactive — namespace exists but all HelmReleases commented out)
 
 **volsync-system**: Backup and replication
 - garage (S3-compatible storage backend)
@@ -783,14 +779,16 @@ talosctl logs --nodes <ip> --insecure
 ## Version Information
 
 This documentation applies to:
-- Talos Linux: 1.12.4
-- Kubernetes: 1.34.0
-- Flux CD: 2.8.1
-- Cilium: 1.19.0
-- Helm: 4.1.1
-- Python: 3.14.3
-- Envoy Gateway: v1.6.3
-- External Secrets: 2.0.0
+- Talos Linux: 1.13.0
+- Kubernetes: 1.35.4
+- Flux CD: 2.8.6
+- Cilium: 1.19.3
+- Helm: 4.1.4
+- Python: 3.14.5
+- Envoy Gateway: v1.7.2
+- External Secrets: 2.4.1
+- cert-manager: v1.20.2
+- SOPS: 3.13.0
 - CloudNative-PG: PostgreSQL 17.7
 - KubeVirt: 1.7.0
 - kGuardian: 1.7.0
@@ -800,7 +798,13 @@ Check `.mise.toml` for exact versions of all tools.
 
 ## Recent Notable Changes
 
-- **2026-03-19**: Added self-hosted Zitadel identity platform at login.00o.sh for SaaS development (network-isolated, external-only access, PostgreSQL backend, NetworkPolicy restricting traffic to Postgres egress and Envoy ingress only)
+- **2026-05-14**: Documentation refresh — version bumps across README/docs/CLAUDE.md (Talos 1.13.0, Kubernetes 1.35.4, Flux 2.8.6, Cilium 1.19.3, Helm 4.1.4, SOPS 3.13.0, Python 3.14.5, Envoy Gateway v1.7.2) and updated deployed-applications listings
+- **2026-05-14**: Removed `ui-bakery` and `zitadel` namespaces from the cluster
+- **2026-05-14**: Disabled FreePBX HelmReleases in the `voip` namespace and removed the FreePBX KubeVirt VM manifests; `voip` namespace remains
+- **2026-05-14**: Disabled `recyclarr` (media), `n8n`, `penpot`, and `rustdesk` (utils) in their respective kustomizations
+- **2026-04**: Added `plane` (open-source project management platform) to the `utils` namespace with PostgreSQL backend
+- **2026-04**: Added `teslamate` (Tesla data logger) to the `observability` namespace
+- **2026-03-19**: Added self-hosted Zitadel identity platform at login.00o.sh for SaaS development (network-isolated, external-only access, PostgreSQL backend, NetworkPolicy restricting traffic to Postgres egress and Envoy ingress only) — _later removed (see 2026-05-14)_
 - **2026-03-07**: Added ambersecurityinc runner scale set to actions-runner-system (minRunners: 1, maxRunners: 3, 25Gi storage, 1Password integration)
 - **2026-03-07**: Added ARC Grafana monitoring dashboard for runner autoscaling metrics
 - **2026-03-07**: Added VolSync mass point-in-time restore script (`scripts/volsync-restore-all.sh`) for all 16 VolSync-backed apps
@@ -877,9 +881,8 @@ Located in `kubernetes/apps/kubevirt/`, this namespace provides virtual machine 
 - **debian-server**: Debian 13 headless server (1 CPU, 1G RAM, 50Gi NFS storage)
 - **ubuntu-server**: Ubuntu server instance
 - **windows-server**: Windows Server 2022 with virtio drivers (2 CPU, 2G RAM, 60Gi NFS storage)
-- **freepbx-b1-k3s01**: FreePBX telephony/PBX system (with secrets)
-- **freepbx-b2-k3s01**: FreePBX telephony/PBX system (with secrets)
-- **freepbx-b3-k3s01**: FreePBX telephony/PBX system (with secrets)
+
+> The FreePBX VMs (`freepbx-b{1,2,3}-k3s01`) have been removed from the `virtualmachines/` directory; the matching `voip` HelmReleases are also disabled.
 
 **Storage**:
 - Uses NFS (nfs-fast storageClass) for VM disks with ReadWriteMany access
@@ -1212,5 +1215,5 @@ The repository includes a comprehensive MkDocs Material documentation site publi
 
 ---
 
-**Last Updated**: 2026-03-07
+**Last Updated**: 2026-05-14
 **Template Source**: [onedr0p/cluster-template](https://github.com/onedr0p/cluster-template)
