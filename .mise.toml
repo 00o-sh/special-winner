@@ -47,3 +47,6 @@ TALOSCONFIG = "{{config_root}}/talos/clusterconfig/talosconfig"
 "aqua:cue-lang/cue" = "0.16.1"              # CUE schema validation for config files
 "aqua:jqlang/jq" = "1.8.1"                  # JSON processor
 "aqua:mikefarah/yq" = "4.53.2"              # YAML processor
+
+# AI
+"claude-code" = "2.1.141"
