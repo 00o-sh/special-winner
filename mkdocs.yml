@@ -101,6 +101,7 @@ nav:
       - Overview: operations/index.md
       - Day-2 Operations: operations/day2.md
       - Backup & Recovery: operations/backup-recovery.md
+      - Node Loss Recovery: operations/node-loss-recovery.md
       - VM Management: operations/vm-management.md
       - Troubleshooting: operations/troubleshooting.md
   - Development:

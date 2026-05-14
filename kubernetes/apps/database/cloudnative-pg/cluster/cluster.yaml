@@ -44,6 +44,10 @@ spec:
       isWALArchiver: true
       parameters:
         barmanObjectName: cnpg-garage
+        # Old archive at s3://cnpg/postgres/ was orphaned after 2026-03-21 incident
+        # (WAL archiving broke; later timeline switchovers made resume impossible).
+        # Renamed to start a fresh archive while preserving the old prefix.
+        serverName: postgres-r2
 
   monitoring:
     enablePodMonitor: true

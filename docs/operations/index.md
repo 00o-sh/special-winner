@@ -23,5 +23,6 @@ Guides for managing the cluster day-to-day.
 
 - [Day-2 Operations](day2.md) -- Routine maintenance and upgrades
 - [Backup & Recovery](backup-recovery.md) -- VolSync, Kopia, and disaster recovery
+- [Node Loss Recovery](node-loss-recovery.md) -- Recovering from a permanently lost node (orphaned PVCs, dangling instances)
 - [VM Management](vm-management.md) -- KubeVirt virtual machine operations
 - [Troubleshooting](troubleshooting.md) -- Debugging common issues
