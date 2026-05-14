@@ -470,4 +470,4 @@ A few things this design depends on, which you should verify periodically:
 
 - [Backup & Recovery](backup-recovery.md) — VolSync architecture, Kopia repo layout, S3 backups
 - [Day-2 Operations](day2.md) — Routine operations
-- [`scripts/volsync-restore-all.sh`](../../scripts/volsync-restore-all.sh) — Bulk restore script
+- `scripts/volsync-restore-all.sh` — Bulk restore script in the repository root
