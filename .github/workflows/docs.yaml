@@ -4,7 +4,7 @@
 #
 # Versioning: every push to main deploys a unique snapshot via `mike`.
 #   - Version path: YYYY-MM-DD-<short-sha> (one per commit, never overwrites)
-#   - Display title: "YYYY-MM-DD HH:MM (<commit subject>)"
+#   - Display title: "YYYY-MM-DD (<commit subject>)"
 #   - The `latest` alias always points at the newest deploy.
 #
 # How it fits together with Cloudflare Pages:
@@ -57,11 +57,10 @@ jobs:
         id: version
         run: |
           DATE=$(date -u +%Y-%m-%d)
-          TIME=$(date -u +%H:%M)
           SHA=$(git rev-parse --short HEAD)
           SUBJECT=$(git log -1 --pretty=%s | head -c 80)
           VERSION="${DATE}-${SHA}"
-          TITLE="${DATE} ${TIME} (${SUBJECT})"
+          TITLE="${DATE} (${SUBJECT})"
           echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
           echo "title=${TITLE}"     >> "$GITHUB_OUTPUT"
           echo "Deploying ${VERSION} -> ${TITLE}"
