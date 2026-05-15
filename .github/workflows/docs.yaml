@@ -1,6 +1,19 @@
 ---
 # Builds the MkDocs Material documentation site and publishes to Cloudflare Pages.
 # Triggered on changes to docs/ or mkdocs.yml.
+#
+# Versioning: every push to main deploys a dated snapshot via `mike`.
+#   - Version path: YYYY-MM-DD (overwrites if same-day re-deploy)
+#   - Display title: "YYYY-MM-DD (<commit subject>)"
+#   - The `latest` alias always points at the newest deploy.
+#
+# How it fits together with Cloudflare Pages:
+#   - mike writes each version into its own subdir of the `gh-pages` branch
+#     plus a top-level versions.json that the Material theme reads to render
+#     the navbar dropdown.
+#   - We then deploy the entire gh-pages worktree to Cloudflare Pages, so all
+#     versions are served under docs.00o.sh/<version>/ with / redirecting to
+#     the default (latest).
 # yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
 name: Docs
 
@@ -15,7 +28,7 @@ on:
       - .github/workflows/docs.yaml
 
 permissions:
-  contents: read
+  contents: write   # mike commits to gh-pages
 
 jobs:
   build-and-deploy:
@@ -25,7 +38,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
-          persist-credentials: false
+          fetch-depth: 0   # mike needs full git history
 
       - name: Setup Python
         uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
@@ -33,10 +46,33 @@ jobs:
           python-version: "3.14.x"
 
       - name: Install dependencies
-        run: pip install mkdocs-material
+        run: pip install mkdocs-material mike
 
-      - name: Build site
-        run: mkdocs build --strict
+      - name: Configure git identity for mike
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Build version label
+        id: version
+        run: |
+          DATE=$(date -u +%Y-%m-%d)
+          SUBJECT=$(git log -1 --pretty=%s | head -c 80)
+          TITLE="${DATE} (${SUBJECT})"
+          echo "date=${DATE}"   >> "$GITHUB_OUTPUT"
+          echo "title=${TITLE}" >> "$GITHUB_OUTPUT"
+          echo "Deploying as: ${TITLE}"
+
+      - name: Deploy versioned docs to gh-pages
+        run: |
+          mike deploy --push --update-aliases \
+            --title "${{ steps.version.outputs.title }}" \
+            "${{ steps.version.outputs.date }}" latest
+          mike set-default --push latest
+
+      - name: Checkout gh-pages worktree for Cloudflare upload
+        run: |
+          git worktree add ./_site gh-pages
 
       - name: Create Cloudflare Pages project (if needed)
         uses: cloudflare/wrangler-action@9acf94ace14e7dc412b076f2c5c20b8ce93c79cd # v3.15.0
@@ -51,5 +87,5 @@ jobs:
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          workingDirectory: site
+          workingDirectory: _site
           command: pages deploy --project-name=special-winner-docs --branch main --commit-dirty=true .

@@ -66,6 +66,13 @@ plugins:
   - search
 
 extra:
+  # Version dropdown in the navbar, populated from gh-pages branch via mike.
+  # docs.yaml workflow deploys each push to main as `YYYY-MM-DD` with the
+  # `latest` alias pointing at the newest.
+  version:
+    provider: mike
+    default: latest
+    alias: true
   social:
     - icon: fontawesome/brands/github
       link: https://github.com/00o-sh/special-winner
