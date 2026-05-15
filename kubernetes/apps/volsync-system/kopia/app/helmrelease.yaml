@@ -32,6 +32,11 @@ spec:
               - --without-password
               - --disable-csrf-token-checks
             probes:
+              # Kopia's HTTP server briefly goes unresponsive during snapshot
+              # work / repository maintenance. The previous 1s timeout +
+              # failureThreshold 3 (= 30s before restart) was triggering 1-2
+              # restarts per day. Loosen to 5s timeout + 6 failures (= 60s)
+              # so transient load doesn't kill the pod.
               liveness: &probes
                 enabled: true
                 custom: true
@@ -41,8 +46,8 @@ spec:
                     port: *port
                   initialDelaySeconds: 0
                   periodSeconds: 10
-                  timeoutSeconds: 1
-                  failureThreshold: 3
+                  timeoutSeconds: 5
+                  failureThreshold: 6
               readiness: *probes
             securityContext:
               allowPrivilegeEscalation: false
