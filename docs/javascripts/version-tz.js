@@ -1,78 +1,88 @@
-// Rewrites ISO 8601 UTC timestamps in the Material version dropdown to the
-// viewer's local timezone.
+// Rewrites ISO 8601 UTC timestamps anywhere in the Material header (notably
+// the version selector emitted by docs.yaml as "<ISO> · <sha>") into a
+// locale-independent local-time format like "2026-05-15 13:30 CDT".
 //
-// docs.yaml emits version titles like "2026-05-15T18:30Z · 5b34e32".
-// This script finds those ISO timestamps in version-selector elements and
-// replaces them with a local-time string, e.g. "2026-05-15 1:30 PM CDT · 5b34e32".
+// Why so aggressive? Material renders the current-version button into the
+// header via inline text content updates that don't always fire a
+// childList MutationObserver; and the version dropdown list is built lazily
+// when first clicked. Polling + a wide DOM sweep catches all of:
+//   - first-paint render of the current-version button
+//   - lazy build of the dropdown list on click
+//   - any later text mutations
 //
-// Material renders the version selector both on initial page load (the
-// current-version button) and lazily when the dropdown is first opened (the
-// menu items). Plain DOM-ready isn't enough; we MutationObserver + poll the
-// version selector container to catch all of:
-//   - initial population of the current-version text
-//   - in-place text updates by Material's JS
-//   - menu items added when the dropdown opens
+// The format is fixed (24hr, ISO date) instead of toLocaleString() so it
+// reads the same way regardless of the viewer's browser locale.
 
 (function () {
   const ISO_RE = /(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(?::\d{2})?Z)/;
 
+  function pad(n) {
+    return String(n).padStart(2, "0");
+  }
+
+  function tzAbbrev(d) {
+    try {
+      const parts = new Intl.DateTimeFormat(undefined, {
+        timeZoneName: "short",
+      }).formatToParts(d);
+      const p = parts.find((x) => x.type === "timeZoneName");
+      return p ? p.value : "";
+    } catch (_) {
+      return "";
+    }
+  }
+
   function formatLocal(iso) {
     const d = new Date(iso);
     if (isNaN(d)) return iso;
-    return d.toLocaleString(undefined, {
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-      hour: "numeric",
-      minute: "2-digit",
-      timeZoneName: "short",
-    });
+    const date = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+    const time = `${pad(d.getHours())}:${pad(d.getMinutes())}`;
+    const tz = tzAbbrev(d);
+    return tz ? `${date} ${time} ${tz}` : `${date} ${time}`;
   }
 
-  function rewriteOne(node) {
-    if (!node) return false;
-    // walk text nodes under this element
-    let changed = false;
-    const walker = document.createTreeWalker(node, NodeFilter.SHOW_TEXT);
+  function rewriteWithin(root) {
+    if (!root) return;
+    const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
     let n;
     while ((n = walker.nextNode())) {
-      const m = n.nodeValue && n.nodeValue.match(ISO_RE);
-      if (m) {
-        n.nodeValue = n.nodeValue.replace(m[1], formatLocal(m[1]));
-        changed = true;
-      }
+      const text = n.nodeValue;
+      if (!text || !ISO_RE.test(text)) continue;
+      // .replace with a regex executes only the first match — fine, we only
+      // ever emit one ISO per node.
+      n.nodeValue = text.replace(ISO_RE, (m) => formatLocal(m));
     }
-    return changed;
   }
 
+  // Wide sweep: the page header is small, scanning it is cheap.
   function sweep() {
-    // Hit every plausible Material version-selector node.
-    document
-      .querySelectorAll(
-        ".md-version, .md-version__current, .md-version__title, .md-version__item"
-      )
-      .forEach(rewriteOne);
+    rewriteWithin(document.querySelector(".md-header"));
+    rewriteWithin(document.querySelector(".md-version")); // fallback if not in header
   }
 
-  // Initial sweep (covers the case where Material has already populated).
+  // Start observing as early as possible (Material may have already
+  // populated the header before DOMContentLoaded fires on a fast load).
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", sweep);
-  } else {
-    sweep();
   }
+  sweep();
 
-  // Catch later renders (dropdown lazy-opens, text replaced in-place).
-  new MutationObserver(sweep).observe(document.body, {
+  new MutationObserver(sweep).observe(document.documentElement, {
     childList: true,
     subtree: true,
     characterData: true,
   });
 
-  // Poll a few times in case the observer misses the very first Material
-  // render. Stops after ~3 seconds.
+  // Aggressive early polling: 100ms intervals for the first 2 seconds, then
+  // every second for the next 8 seconds, then stop. Catches anything the
+  // observer misses on initial render.
   let ticks = 0;
-  const poll = setInterval(() => {
+  const fast = setInterval(() => {
     sweep();
-    if (++ticks > 6) clearInterval(poll);
-  }, 500);
+    if (++ticks >= 20) {
+      clearInterval(fast);
+      const slow = setInterval(sweep, 1000);
+      setTimeout(() => clearInterval(slow), 8000);
+    }
+  }, 100);
 })();
