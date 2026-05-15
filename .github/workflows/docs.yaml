@@ -60,20 +60,33 @@ jobs:
 
       - name: Prepare docs branch state for mike
         run: |
-          # mike needs the docs branch to either (a) not exist, or (b) already
-          # be a mike-managed orphan branch (has versions.json at root).
-          # A docs branch that mirrors main's history causes mike to fail with
-          # "can't create a branch from itself" on fast-import.
+          # mike's first deploy needs the target branch to already exist as
+          # an orphan (it computes merge-base before creating). Cases:
+          #   - Branch missing -> create empty orphan and push.
+          #   - Branch exists, mike-managed (versions.json present) -> use it.
+          #   - Branch exists but isn't an orphan (e.g. mirror of main) ->
+          #     delete and recreate as orphan.
           git fetch origin --prune --quiet
+          NEEDS_INIT=true
           if git show-ref --verify --quiet "refs/remotes/origin/${DOCS_BRANCH}"; then
             if git show "refs/remotes/origin/${DOCS_BRANCH}:versions.json" >/dev/null 2>&1; then
               echo "docs branch is mike-managed; will deploy on top"
+              NEEDS_INIT=false
             else
-              echo "docs branch exists but lacks versions.json; resetting so mike can recreate"
+              echo "docs branch exists but isn't a mike orphan; deleting"
               git push origin --delete "${DOCS_BRANCH}"
             fi
           else
-            echo "docs branch doesn't exist yet; mike will create it"
+            echo "docs branch doesn't exist remotely"
+          fi
+          if [ "${NEEDS_INIT}" = "true" ]; then
+            echo "Initialising empty orphan ${DOCS_BRANCH} branch"
+            git checkout --orphan "${DOCS_BRANCH}"
+            git rm -rf . >/dev/null 2>&1 || true
+            git clean -fd
+            git commit --allow-empty -m "init: mike orphan branch for versioned docs"
+            git push origin "${DOCS_BRANCH}"
+            git checkout main
           fi
 
       - name: Build version label
