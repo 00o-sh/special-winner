@@ -41,23 +41,28 @@ CSI Driver NFS provides shared network storage:
 
 [VolSync](https://volsync.readthedocs.io/) handles volume replication and backup:
 
-- Backs up PersistentVolumeClaims to S3-compatible storage
-- Scheduled daily at 2 AM
+- Backs up PersistentVolumeClaims to the on-NFS **Kopia repository** at `/mnt/Speed/VolsyncKopia` (not Garage — VolSync's Kopia mover talks to a filesystem-backed repo, not S3)
+- Scheduled daily at 2 AM, retention 24h/7d/4w/6m/2y
 - Component available at `kubernetes/components/volsync/`
+- Apps using it: forgejo, plex, sonarr, radarr, prowlarr, bazarr, autobrr, qbittorrent, qui, seerr, tautulli, thelounge, unifi-toolkit, gatus, penpot — see `scripts/volsync-restore-all.sh` for the canonical list
 
 ### Garage
 
-[Garage](https://garagehq.deuxfleurs.fr/) provides S3-compatible storage as the backup destination:
+[Garage](https://garagehq.deuxfleurs.fr/) provides S3-compatible storage. Single-replica deployment in the cluster:
 
-- Self-hosted within the cluster
-- Used by VolSync and CloudNative-PG backups
+- **Data dir** lives on NFS (`/mnt/Speed/Kubernetes/apps/garage/data/`) — safe there because object shards are append-only files, no locking required.
+- **Meta dir** lives on a local `openebs-hostpath` PVC named `garage-meta`. LMDB (Garage's metadata store) does not work over NFS — file-lock semantics fail with `Resource temporarily unavailable`, leaving Garage running but unable to read its bucket/key tables. The PVC takes the meta off NFS.
+- **Off-node meta durability**: a `backup-sync` sidecar inside the Garage pod rsyncs `/meta/` (minus the live `db.lmdb/` dir, which is exclusively locked) to NFS at `/mnt/Speed/Kubernetes/apps/garage/meta-backup/` every 24h. PrometheusRules `GarageMetaBackupSidecarRestarted` and `GarageMetaBackupSidecarAbsent` alert via AlertManager → Discord if the sidecar fails.
+- **Used by**: CloudNative-PG (WAL + base backups), MariaDB Operator (scheduled backups), Kanidm (hourly JSON dumps via CronJob). Restore procedure documented in [Node Loss Recovery](../operations/node-loss-recovery.md#garage-metadata-recovery).
 
 ### Kopia
 
-[Kopia](https://kopia.io/) serves as the backup repository:
+[Kopia](https://kopia.io/) is the backup repository used by VolSync's mover:
 
-- Deduplication and encryption
-- Works with VolSync for volume-level backups
+- Filesystem-type repository at `/mnt/Speed/VolsyncKopia` on the NAS
+- Deduplication + encryption at rest
+- One repo, multiple `sourceIdentity` namespaces (one per app)
+- Repository credentials managed via the `volsync-template` 1Password item
 
 ## Snapshot Controller
 
