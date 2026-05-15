@@ -10,6 +10,11 @@ spec:
     name: kubevirt-manager
   interval: 1h
   values:
+    defaultPodOptions:
+      # app-template v5 doesn't auto-mount SA tokens by default. kubevirt-manager
+      # talks to the K8s API to manage VMIs and needs the token. No-op on v4,
+      # prevents regression on v5.
+      automountServiceAccountToken: true
     controllers:
       kubevirt-manager:
         strategy: RollingUpdate
