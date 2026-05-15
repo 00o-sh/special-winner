@@ -66,11 +66,14 @@ jobs:
           #   - Branch exists, mike-managed (versions.json present) -> use it.
           #   - Branch exists but isn't an orphan (e.g. mirror of main) ->
           #     delete and recreate as orphan.
+          # Fetch existing docs branch as a *local* ref (not just origin/docs)
+          # so mike's `git merge-base docs HEAD` can resolve it.
           git fetch origin --prune --quiet
           NEEDS_INIT=true
           if git show-ref --verify --quiet "refs/remotes/origin/${DOCS_BRANCH}"; then
             if git show "refs/remotes/origin/${DOCS_BRANCH}:versions.json" >/dev/null 2>&1; then
-              echo "docs branch is mike-managed; will deploy on top"
+              echo "docs branch is mike-managed; creating local tracking ref"
+              git fetch origin "${DOCS_BRANCH}:${DOCS_BRANCH}"
               NEEDS_INIT=false
             else
               echo "docs branch exists but isn't a mike orphan; deleting"
