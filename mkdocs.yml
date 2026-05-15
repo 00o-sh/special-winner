@@ -70,6 +70,11 @@ extra_javascript:
   # (emitted by the docs.yaml workflow) into the viewer's local timezone.
   - javascripts/version-tz.js
 
+extra_css:
+  # Pill styling for the alias label (e.g. "latest") so it doesn't mash
+  # visually against the version's SHA suffix.
+  - stylesheets/version-alias.css
+
 extra:
   # Version dropdown in the navbar, populated from the `docs` branch via mike.
   # docs.yaml workflow deploys each push to main as `YYYY-MM-DD-<sha>` with
