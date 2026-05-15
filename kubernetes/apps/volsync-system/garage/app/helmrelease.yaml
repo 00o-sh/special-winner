@@ -134,8 +134,10 @@ spec:
         globalMounts:
           - path: /data
       meta:
-        type: nfs
-        server: nas.3226texas.com
-        path: /mnt/Speed/Kubernetes/apps/garage/meta
+        # LMDB requires real block storage for safe file locks (NFS causes
+        # 'Resource temporarily unavailable' EAGAIN on every worker, leaving
+        # Garage running but unable to read buckets/keys). Use a local PVC.
+        # The PVC is backed up by VolSync to NFS for off-node durability.
+        existingClaim: garage-meta
         globalMounts:
           - path: /meta
