@@ -22,17 +22,6 @@ spec:
       garage:
         annotations:
           reloader.stakater.com/auto: "true"
-        initContainers:
-          # Tell the VolSync Kopia mover to skip the live db.lmdb dir (its
-          # lock.mdb is exclusively locked while Garage runs; we rely on
-          # Garage's own /meta/snapshots/ for consistent LMDB backup points).
-          write-kopiaignore:
-            image:
-              repository: busybox
-              tag: stable@sha256:73aaf090f3d85aa34ee199857f03fa3a95c8ede2ffd4cc2cdb5b94e566b11662
-            command: ["sh", "-c"]
-            args:
-              - printf 'db.lmdb/\n' > /meta/.kopiaignore && chmod 0644 /meta/.kopiaignore
         containers:
           app:
             image:
@@ -53,6 +42,32 @@ spec:
                 memory: 256Mi
               limits:
                 memory: 512Mi
+          # Off-node durability for Garage's LMDB meta. Garage's own
+          # /meta/snapshots/ is consistent (mdb_env_copy()'d); we ship those
+          # plus the small config files to NFS daily. On node loss, the
+          # restore Job in scripts/volsync-restore-all.sh wipes the PVC and
+          # repopulates from this NFS path.
+          backup-sync:
+            image:
+              repository: alpine
+              tag: "3"
+            command: ["sh", "-c"]
+            args:
+              - |
+                apk add --no-cache rsync >/dev/null
+                while true; do
+                  echo "[$(date -Iseconds)] meta-backup sync starting"
+                  rsync -rt --delete --exclude='db.lmdb' /meta/ /backup/ \
+                    && echo "[$(date -Iseconds)] meta-backup sync ok" \
+                    || echo "[$(date -Iseconds)] meta-backup sync FAILED"
+                  sleep 86400
+                done
+            resources:
+              requests:
+                cpu: 10m
+                memory: 32Mi
+              limits:
+                memory: 64Mi
     defaultPodOptions:
       securityContext:
         runAsNonRoot: true
@@ -148,7 +163,16 @@ spec:
         # LMDB requires real block storage for safe file locks (NFS causes
         # 'Resource temporarily unavailable' EAGAIN on every worker, leaving
         # Garage running but unable to read buckets/keys). Use a local PVC.
-        # The PVC is backed up by VolSync to NFS for off-node durability.
+        # Off-node durability is the backup-sync sidecar which rsyncs
+        # /meta/ (minus db.lmdb live dir) to /backup/ (NFS) every 24h.
         existingClaim: garage-meta
         globalMounts:
           - path: /meta
+      meta-backup:
+        type: nfs
+        server: nas.3226texas.com
+        path: /mnt/Speed/Kubernetes/apps/garage/meta-backup
+        advancedMounts:
+          garage:
+            backup-sync:
+              - path: /backup

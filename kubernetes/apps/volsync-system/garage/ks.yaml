@@ -39,17 +39,14 @@ spec:
   commonMetadata:
     labels:
       app.kubernetes.io/name: *app
-  components:
-    - ../../../../components/volsync
-  dependsOn:
-    - name: volsync
-    - name: onepassword
-      namespace: external-secrets
+  # VolSync component intentionally NOT used here: copyMethod=Direct on an
+  # RWO PVC races with the running Garage pod (we lost cluster_layout +
+  # snapshots/ when the mover and Garage were both attached). openebs-hostpath
+  # has no CSI snapshot support so copyMethod=Snapshot isn't an option either.
+  # Off-node durability is provided by a sidecar in the Garage HR that rsyncs
+  # /meta/snapshots/ to NFS periodically.
   interval: 1h
   path: ./kubernetes/apps/volsync-system/garage/meta
-  postBuild:
-    substitute:
-      APP: *app
   prune: true
   retryInterval: 2m
   sourceRef:
