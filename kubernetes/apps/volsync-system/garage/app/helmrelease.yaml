@@ -53,15 +53,31 @@ spec:
               tag: "3"
             command: ["sh", "-c"]
             args:
-              # Exit non-zero on any rsync failure / timeout. The container
-              # restart bumps kube_pod_container_status_restarts_total, which
-              # the GarageMetaBackupSidecarRestarted PrometheusRule alerts on.
+              # No `apk add` — runs as non-root which can't write apk's log.
+              # Pure POSIX cp / find loop. Exit non-zero on any failure so
+              # Kubernetes restarts the container; the GarageMetaBackupSidecar
+              # PrometheusRules alert on that restart counter.
               - |
                 set -e
-                apk add --no-cache rsync >/dev/null
                 while true; do
                   echo "[$(date -Iseconds)] meta-backup sync starting"
-                  timeout 30m rsync -rt --delete --exclude='db.lmdb' /meta/ /backup/
+                  # Small config files (everything except the live db.lmdb dir).
+                  for f in cluster_layout data_layout node_key node_key.pub peer_list lifecycle_worker_state scrub_info; do
+                    [ -f "/meta/$f" ] && cp -u "/meta/$f" "/backup/$f"
+                  done
+                  # Mirror snapshots/ (Garage writes consistent LMDB dumps here)
+                  mkdir -p /backup/snapshots
+                  for snap in /meta/snapshots/*/; do
+                    [ -d "$snap" ] || continue
+                    name=$(basename "$snap")
+                    [ -d "/backup/snapshots/$name" ] || cp -r "$snap" "/backup/snapshots/$name"
+                  done
+                  # Prune snapshots Garage has rotated out
+                  for bsnap in /backup/snapshots/*/; do
+                    [ -d "$bsnap" ] || continue
+                    name=$(basename "$bsnap")
+                    [ -d "/meta/snapshots/$name" ] || rm -rf "$bsnap"
+                  done
                   echo "[$(date -Iseconds)] meta-backup sync ok"
                   sleep 86400
                 done
