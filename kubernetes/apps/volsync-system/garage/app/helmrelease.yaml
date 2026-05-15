@@ -22,6 +22,13 @@ spec:
       garage:
         annotations:
           reloader.stakater.com/auto: "true"
+        initContainers:
+          # Tell the VolSync Kopia mover to skip the live db.lmdb dir (its
+          # lock.mdb is exclusively locked while Garage runs; we rely on
+          # Garage's own /meta/snapshots/ for consistent LMDB backup points).
+          write-kopiaignore:
+            image: busybox:stable@sha256:73aaf090f3d85aa34ee199857f03fa3a95c8ede2ffd4cc2cdb5b94e566b11662
+            command: ["sh","-c","printf 'db.lmdb/\n' > /meta/.kopiaignore && chmod 0644 /meta/.kopiaignore"]
         containers:
           app:
             image:
