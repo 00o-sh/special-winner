@@ -8,12 +8,12 @@
 #   - The `latest` alias always points at the newest deploy.
 #
 # How it fits together with Cloudflare Pages:
-#   - mike writes each version into its own subdir of the `gh-pages` branch
+#   - mike writes each version into its own subdir of the `docs` branch
 #     plus a top-level versions.json that the Material theme reads to render
 #     the navbar dropdown.
-#   - We then deploy the entire gh-pages worktree to Cloudflare Pages, so all
-#     versions are served under docs.00o.sh/<version>/ with / redirecting to
-#     the default (latest).
+#   - We then deploy the entire docs-branch worktree to Cloudflare Pages, so
+#     all versions are served under docs.00o.sh/<version>/ with / redirecting
+#     to the default (latest).
 # yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
 name: Docs
 
@@ -28,7 +28,12 @@ on:
       - .github/workflows/docs.yaml
 
 permissions:
-  contents: write   # mike commits to gh-pages
+  contents: write   # mike commits to the docs branch
+
+env:
+  # Git branch mike writes versioned docs to. Default is gh-pages; we use
+  # a separate branch so it's clear this is the docs deploy target.
+  DOCS_BRANCH: docs
 
 jobs:
   build-and-deploy:
@@ -65,16 +70,16 @@ jobs:
           echo "title=${TITLE}"     >> "$GITHUB_OUTPUT"
           echo "Deploying ${VERSION} -> ${TITLE}"
 
-      - name: Deploy versioned docs to gh-pages
+      - name: Deploy versioned docs to ${{ env.DOCS_BRANCH }} branch
         run: |
-          mike deploy --push --update-aliases \
+          mike deploy --branch "${DOCS_BRANCH}" --push --update-aliases \
             --title "${{ steps.version.outputs.title }}" \
             "${{ steps.version.outputs.version }}" latest
-          mike set-default --push latest
+          mike set-default --branch "${DOCS_BRANCH}" --push latest
 
-      - name: Checkout gh-pages worktree for Cloudflare upload
+      - name: Checkout ${{ env.DOCS_BRANCH }} worktree for Cloudflare upload
         run: |
-          git worktree add ./_site gh-pages
+          git worktree add ./_site "${DOCS_BRANCH}"
 
       - name: Create Cloudflare Pages project (if needed)
         uses: cloudflare/wrangler-action@9acf94ace14e7dc412b076f2c5c20b8ce93c79cd # v3.15.0
