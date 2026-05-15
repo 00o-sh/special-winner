@@ -104,7 +104,7 @@ jobs:
           ISO=$(date -u +%Y-%m-%dT%H:%MZ)
           SHA=$(git rev-parse --short HEAD)
           VERSION="${DATE}-${SHA}"
-          TITLE="${ISO} · ${SHA}"
+          TITLE="${ISO} (${SHA})"
           echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
           echo "title=${TITLE}"     >> "$GITHUB_OUTPUT"
           echo "Deploying ${VERSION} -> ${TITLE}"
