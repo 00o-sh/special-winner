@@ -97,14 +97,14 @@ jobs:
       - name: Build version label
         id: version
         run: |
-          # Title carries an ISO 8601 UTC timestamp prefix that JS in the page
-          # rewrites to the viewer's local timezone (see version-tz.js).
+          # Title is short: ISO 8601 UTC timestamp + short SHA.
+          # version-tz.js rewrites the timestamp to viewer-local in the browser.
+          # Full commit subject stays accessible via git log / the URL path.
           DATE=$(date -u +%Y-%m-%d)
           ISO=$(date -u +%Y-%m-%dT%H:%MZ)
           SHA=$(git rev-parse --short HEAD)
-          SUBJECT=$(git log -1 --pretty=%s | head -c 80)
           VERSION="${DATE}-${SHA}"
-          TITLE="${ISO} (${SUBJECT})"
+          TITLE="${ISO} · ${SHA}"
           echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
           echo "title=${TITLE}"     >> "$GITHUB_OUTPUT"
           echo "Deploying ${VERSION} -> ${TITLE}"

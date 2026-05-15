@@ -1,18 +1,20 @@
-// Rewrites ISO 8601 UTC timestamps in the Material version dropdown titles
-// to the viewer's local timezone.
+// Rewrites ISO 8601 UTC timestamps in the Material version dropdown to the
+// viewer's local timezone.
 //
-// The docs.yaml workflow emits dropdown titles like:
-//   "2026-05-15T18:30Z (commit subject)"
-// This script finds those ISO timestamps in version-selector menu items and
-// replaces them with a human-readable local-time string, e.g.:
-//   "2026-05-15 1:30 PM CDT (commit subject)"
+// docs.yaml emits version titles like "2026-05-15T18:30Z · 5b34e32".
+// This script finds those ISO timestamps in version-selector elements and
+// replaces them with a local-time string, e.g. "2026-05-15 1:30 PM CDT · 5b34e32".
 //
-// The Material theme populates the dropdown asynchronously after fetching
-// versions.json, so we use a MutationObserver to catch entries as they're
-// added to the DOM.
+// Material renders the version selector both on initial page load (the
+// current-version button) and lazily when the dropdown is first opened (the
+// menu items). Plain DOM-ready isn't enough; we MutationObserver + poll the
+// version selector container to catch all of:
+//   - initial population of the current-version text
+//   - in-place text updates by Material's JS
+//   - menu items added when the dropdown opens
 
 (function () {
-  const ISO_RE = /\b(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(?::\d{2})?Z)\b/;
+  const ISO_RE = /(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(?::\d{2})?Z)/;
 
   function formatLocal(iso) {
     const d = new Date(iso);
@@ -27,35 +29,50 @@
     });
   }
 
-  function rewriteNode(node) {
-    if (!node || node.nodeType !== Node.ELEMENT_NODE) return;
-    if (node.dataset && node.dataset.tzRewritten === "true") return;
-    const text = node.textContent;
-    const m = text && text.match(ISO_RE);
-    if (!m) return;
-    node.textContent = text.replace(m[1], formatLocal(m[1]));
-    if (node.dataset) node.dataset.tzRewritten = "true";
+  function rewriteOne(node) {
+    if (!node) return false;
+    // walk text nodes under this element
+    let changed = false;
+    const walker = document.createTreeWalker(node, NodeFilter.SHOW_TEXT);
+    let n;
+    while ((n = walker.nextNode())) {
+      const m = n.nodeValue && n.nodeValue.match(ISO_RE);
+      if (m) {
+        n.nodeValue = n.nodeValue.replace(m[1], formatLocal(m[1]));
+        changed = true;
+      }
+    }
+    return changed;
   }
 
-  function sweep(root) {
-    (root || document)
-      .querySelectorAll(".md-version__item, .md-version__current")
-      .forEach(rewriteNode);
+  function sweep() {
+    // Hit every plausible Material version-selector node.
+    document
+      .querySelectorAll(
+        ".md-version, .md-version__current, .md-version__title, .md-version__item"
+      )
+      .forEach(rewriteOne);
   }
 
-  // Initial sweep in case the dropdown is already populated.
+  // Initial sweep (covers the case where Material has already populated).
   if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", () => sweep());
+    document.addEventListener("DOMContentLoaded", sweep);
   } else {
     sweep();
   }
 
-  // Material lazy-renders the version list on first dropdown open; observe.
-  new MutationObserver((mutations) => {
-    for (const m of mutations) {
-      for (const n of m.addedNodes) {
-        if (n.nodeType === Node.ELEMENT_NODE) sweep(n);
-      }
-    }
-  }).observe(document.body, { childList: true, subtree: true });
+  // Catch later renders (dropdown lazy-opens, text replaced in-place).
+  new MutationObserver(sweep).observe(document.body, {
+    childList: true,
+    subtree: true,
+    characterData: true,
+  });
+
+  // Poll a few times in case the observer misses the very first Material
+  // render. Stops after ~3 seconds.
+  let ticks = 0;
+  const poll = setInterval(() => {
+    sweep();
+    if (++ticks > 6) clearInterval(poll);
+  }, 500);
 })();
