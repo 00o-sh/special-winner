@@ -58,6 +58,24 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
+      - name: Prepare docs branch state for mike
+        run: |
+          # mike needs the docs branch to either (a) not exist, or (b) already
+          # be a mike-managed orphan branch (has versions.json at root).
+          # A docs branch that mirrors main's history causes mike to fail with
+          # "can't create a branch from itself" on fast-import.
+          git fetch origin --prune --quiet
+          if git show-ref --verify --quiet "refs/remotes/origin/${DOCS_BRANCH}"; then
+            if git show "refs/remotes/origin/${DOCS_BRANCH}:versions.json" >/dev/null 2>&1; then
+              echo "docs branch is mike-managed; will deploy on top"
+            else
+              echo "docs branch exists but lacks versions.json; resetting so mike can recreate"
+              git push origin --delete "${DOCS_BRANCH}"
+            fi
+          else
+            echo "docs branch doesn't exist yet; mike will create it"
+          fi
+
       - name: Build version label
         id: version
         run: |
