@@ -91,21 +91,27 @@
       matchPackageNames: ["ghcr.io/siderolabs/installer"],
       matchFileNames: ["**/talosupgrade-singlenodemaster.yaml"],
       groupName: "talos-singlenodemaster",
-      commitMessageTopic: "talos ({{groupName}})",
+      group: {
+        commitMessageTopic: "{{{groupName}}}",
+      },
     },
     {
       matchManagers: ["custom.regex"],
       matchPackageNames: ["ghcr.io/siderolabs/installer"],
       matchFileNames: ["**/talosupgrade-node-01-pve.yaml"],
       groupName: "talos-node-01-pve",
-      commitMessageTopic: "talos ({{groupName}})",
+      group: {
+        commitMessageTopic: "{{{groupName}}}",
+      },
     },
     {
       matchManagers: ["custom.regex"],
       matchPackageNames: ["ghcr.io/siderolabs/installer"],
       matchFileNames: ["**/talosupgrade-node-02-pve.yaml"],
       groupName: "talos-node-02-pve",
-      commitMessageTopic: "talos ({{groupName}})",
+      group: {
+        commitMessageTopic: "{{{groupName}}}",
+      },
     },
     {
       description: "Kubernetes Group",
