@@ -10,7 +10,10 @@ spec:
     name: tuppr
   interval: 1h
   values:
-    replicaCount: 2
+    # HA: one replica per node so an in-progress Talos upgrade can't
+    # cripple the controller's quorum. Leader-election survives a
+    # single-node disruption (this is what bit us on 2026-05-16).
+    replicaCount: 3
     monitoring:
       serviceMonitor:
         enabled: true
