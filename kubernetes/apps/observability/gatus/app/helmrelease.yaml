@@ -65,6 +65,10 @@ spec:
               limits:
                 memory: 256Mi
     defaultPodOptions:
+      # app-template v5 doesn't auto-mount SA tokens by default. The gatus
+      # sidecar discovers HTTPRoutes/Services via the K8s API and needs the
+      # token. No-op on v4, prevents regression on v5.
+      automountServiceAccountToken: true
       securityContext:
         runAsNonRoot: true
         runAsUser: 1000

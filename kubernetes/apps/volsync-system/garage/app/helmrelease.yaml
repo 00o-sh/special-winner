@@ -42,6 +42,51 @@ spec:
                 memory: 256Mi
               limits:
                 memory: 512Mi
+          # Off-node durability for Garage's LMDB meta. Garage's own
+          # /meta/snapshots/ is consistent (mdb_env_copy()'d); we ship those
+          # plus the small config files to NFS daily. On node loss, the
+          # restore Job in scripts/volsync-restore-all.sh wipes the PVC and
+          # repopulates from this NFS path.
+          backup-sync:
+            image:
+              repository: alpine
+              tag: "3"
+            command: ["sh", "-c"]
+            args:
+              # No `apk add` — runs as non-root which can't write apk's log.
+              # Pure POSIX cp / find loop. Exit non-zero on any failure so
+              # Kubernetes restarts the container; the GarageMetaBackupSidecar
+              # PrometheusRules alert on that restart counter.
+              - |
+                set -e
+                while true; do
+                  echo "[$(date -Iseconds)] meta-backup sync starting"
+                  # Small config files (everything except the live db.lmdb dir).
+                  for f in cluster_layout data_layout node_key node_key.pub peer_list lifecycle_worker_state scrub_info; do
+                    [ -f "/meta/$f" ] && cp -u "/meta/$f" "/backup/$f"
+                  done
+                  # Mirror snapshots/ (Garage writes consistent LMDB dumps here)
+                  mkdir -p /backup/snapshots
+                  for snap in /meta/snapshots/*/; do
+                    [ -d "$snap" ] || continue
+                    name=$(basename "$snap")
+                    [ -d "/backup/snapshots/$name" ] || cp -r "$snap" "/backup/snapshots/$name"
+                  done
+                  # Prune snapshots Garage has rotated out
+                  for bsnap in /backup/snapshots/*/; do
+                    [ -d "$bsnap" ] || continue
+                    name=$(basename "$bsnap")
+                    [ -d "/meta/snapshots/$name" ] || rm -rf "$bsnap"
+                  done
+                  echo "[$(date -Iseconds)] meta-backup sync ok"
+                  sleep 86400
+                done
+            resources:
+              requests:
+                cpu: 10m
+                memory: 32Mi
+              limits:
+                memory: 64Mi
     defaultPodOptions:
       securityContext:
         runAsNonRoot: true
@@ -134,8 +179,19 @@ spec:
         globalMounts:
           - path: /data
       meta:
-        type: nfs
-        server: nas.3226texas.com
-        path: /mnt/Speed/Kubernetes/apps/garage/meta
+        # LMDB requires real block storage for safe file locks (NFS causes
+        # 'Resource temporarily unavailable' EAGAIN on every worker, leaving
+        # Garage running but unable to read buckets/keys). Use a local PVC.
+        # Off-node durability is the backup-sync sidecar which rsyncs
+        # /meta/ (minus db.lmdb live dir) to /backup/ (NFS) every 24h.
+        existingClaim: garage-meta
         globalMounts:
           - path: /meta
+      meta-backup:
+        type: nfs
+        server: nas.3226texas.com
+        path: /mnt/Speed/Kubernetes/apps/garage/meta-backup
+        advancedMounts:
+          garage:
+            backup-sync:
+              - path: /backup

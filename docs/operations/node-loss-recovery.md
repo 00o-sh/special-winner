@@ -28,8 +28,9 @@ This is by design — local storage trades durability for speed. The recovery mo
 | Workload type | Recovery source |
 |---|---|
 | HA databases (CNPG, MariaDB Galera) | Replicate from surviving instances |
-| Single-instance apps with VolSync (forgejo, teslamate, plane, etc.) | Restore from VolSync (Kopia repo on NFS) |
+| Single-instance apps with VolSync (forgejo, teslamate, etc.) | Restore from VolSync (Kopia repo on NFS) |
 | Apps with their own S3 backup cronjob (Kanidm) | Restore from S3 (Garage) via app-specific restore command |
+| **Garage itself** (the S3 service backing everything above) | Restore meta PVC from the NFS sidecar mirror (see [Garage metadata recovery](#garage-metadata-recovery)) |
 | CNPG-backed stateless apps (kguardian, teslamate, penpot) | Heal automatically once Postgres is up |
 | Stale/removed apps | Just delete the orphan resources |
 
@@ -412,6 +413,86 @@ kubectl delete replicationdestination -n <namespace> <app>-dst
 ```
 
 The bound `volsync-dst-<app>-dst-cache` PVC will GC when its owner is gone.
+
+## Garage metadata recovery
+
+Garage runs single-replica (no HA) and its meta dir cannot live on NFS — LMDB throws `Resource temporarily unavailable` on every background worker over NFS because mmap+file-lock semantics don't work there. So meta lives on a local `openebs-hostpath` PVC (`garage-meta`), which means if the node hosting it dies, the PVC dies with it. **Data lives on NFS and is safe**, but data shards are opaque without meta — losing meta = losing all S3 objects (CNPG WAL/base backups, MariaDB S3 backups, Kanidm hourly backups).
+
+The protection: a `backup-sync` sidecar **inside the Garage pod** (same controller) mirrors `/meta/` (minus the live `db.lmdb/` dir) to NFS at `/mnt/Speed/Kubernetes/apps/garage/meta-backup/` every 24h. It copies:
+
+- All config files (`cluster_layout`, `data_layout`, `node_key`, `node_key.pub`, `peer_list`, `lifecycle_worker_state`, `scrub_info`)
+- The `snapshots/` directory — Garage's own internal LMDB snapshots created via `mdb_env_copy()` (consistent, no locking issues)
+
+It does **not** copy the live `db.lmdb/` dir because Garage holds an exclusive flock on `lock.mdb`. The snapshot files inside `snapshots/` are the consistent recovery point.
+
+**Why not VolSync for this PVC?** VolSync's `copyMethod: Direct` mounts the source PVC into a mover pod concurrently with Garage. On RWO `openebs-hostpath`, this races and corrupts the metadata (we lost `cluster_layout` + `snapshots/` doing this once). `copyMethod: Snapshot` isn't an option either — `openebs-hostpath` doesn't support CSI VolumeSnapshots. So the in-pod sidecar approach sidesteps the whole RWO problem by never letting another pod mount the PVC.
+
+**Alerting:** the sidecar `set -e`'s and `exit`s on any failure → Kubernetes restarts it → `kube_pod_container_status_restarts_total` increments → the `GarageMetaBackupSidecarRestarted` PrometheusRule fires (warning, 5min for) → AlertManager → Discord. There's also a `GarageMetaBackupSidecarAbsent` (critical) for when the container isn't running at all.
+
+### Recovery procedure
+
+If `garage-meta` PVC is unusable (lost node, corrupted LMDB, etc.):
+
+```bash
+# 1. Stop Garage so nothing writes during restore
+kubectl -n volsync-system scale deploy garage --replicas=0
+kubectl -n volsync-system wait pod -l app.kubernetes.io/name=garage --for=delete --timeout=60s
+
+# 2. Run the restore Job (it picks the latest snapshot automatically)
+#    The same logic is in scripts/volsync-restore-all.sh phase_restore_garage_meta —
+#    that script's main() now calls it as Phase 6 after all VolSync restores.
+kubectl apply -f - <<'EOF'
+apiVersion: batch/v1
+kind: Job
+metadata: { name: garage-meta-restore, namespace: volsync-system }
+spec:
+  ttlSecondsAfterFinished: 600
+  backoffLimit: 0
+  template:
+    spec:
+      restartPolicy: Never
+      securityContext: { fsGroup: 10000, runAsUser: 10000, runAsGroup: 10000 }
+      containers:
+      - name: restore
+        image: alpine:3
+        command: ["sh","-c"]
+        args:
+        - |
+          set -eux
+          LATEST=$(ls -1 /backup/snapshots | sort | tail -1)
+          [ -z "$LATEST" ] && { echo "FATAL: no snapshots found"; exit 1; }
+          echo "Restoring from snapshot: $LATEST"
+          find /dst -mindepth 1 -delete
+          for f in cluster_layout data_layout node_key node_key.pub peer_list lifecycle_worker_state scrub_info; do
+            [ -e "/backup/$f" ] && cp -v "/backup/$f" "/dst/$f"
+          done
+          chmod 600 /dst/node_key
+          mkdir -p /dst/snapshots /dst/db.lmdb
+          cp -rv /backup/snapshots/. /dst/snapshots/
+          cp -v "/backup/snapshots/${LATEST}/db.lmdb" /dst/db.lmdb/data.mdb
+        volumeMounts:
+        - { name: backup, mountPath: /backup }
+        - { name: dst,    mountPath: /dst }
+      volumes:
+      - name: backup
+        nfs: { server: nas.3226texas.com, path: /mnt/Speed/Kubernetes/apps/garage/meta-backup }
+      - name: dst
+        persistentVolumeClaim: { claimName: garage-meta }
+EOF
+kubectl -n volsync-system wait --for=condition=Complete job/garage-meta-restore --timeout=10m
+
+# 3. Bring Garage back
+kubectl -n volsync-system scale deploy garage --replicas=1
+
+# 4. Verify it sees the original buckets/keys
+GP=$(kubectl get pod -n volsync-system -l app.kubernetes.io/name=garage -o jsonpath='{.items[0].metadata.name}')
+kubectl exec -n volsync-system "$GP" -c app -- /garage bucket list   # should show volsync-data, cnpg, kanidm, mariadb-backups, plane-uploads
+kubectl exec -n volsync-system "$GP" -c app -- /garage key list      # should show the GK... keys
+```
+
+If the restore Job picks a snapshot you don't want (e.g., latest is also corrupt), override by setting `LATEST=<timestamp>` explicitly in the script. List options first with `ls /mnt/Speed/Kubernetes/apps/garage/meta-backup/snapshots/` from any pod that mounts NFS.
+
+**Note: this is the same restore pattern as a fresh-PVC seed.** During the original incident we used this same flow to seed the brand-new `garage-meta` PVC from the previously-NFS-backed `meta/` directory.
 
 ## Recovering broken CNPG WAL archiving
 

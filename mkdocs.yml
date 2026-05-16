@@ -65,7 +65,25 @@ markdown_extensions:
 plugins:
   - search
 
+extra_javascript:
+  # Rewrites the ISO 8601 UTC timestamps in the version-dropdown titles
+  # (emitted by the docs.yaml workflow) into the viewer's local timezone.
+  - javascripts/version-tz.js
+
+extra_css:
+  # Pill styling for the alias label (e.g. "latest") so it doesn't mash
+  # visually against the version's SHA suffix.
+  - stylesheets/version-alias.css
+
 extra:
+  # Version dropdown in the navbar, populated from the `docs` branch via mike.
+  # docs.yaml workflow deploys each push to main as `YYYY-MM-DD-<sha>` with
+  # the `latest` alias pointing at the newest. Title carries an ISO UTC
+  # timestamp that version-tz.js rewrites to local time in the browser.
+  version:
+    provider: mike
+    default: latest
+    alias: true
   social:
     - icon: fontawesome/brands/github
       link: https://github.com/00o-sh/special-winner
@@ -94,6 +112,7 @@ nav:
       - Overview: applications/index.md
       - Media Stack: applications/media.md
       - FreePBX: applications/freepbx.md
+      - LibreSpeed: applications/librespeed.md
       - Virtualization: applications/virtualization.md
       - Observability: applications/observability.md
       - Utilities: applications/utilities.md

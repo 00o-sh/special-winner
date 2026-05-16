@@ -11,7 +11,7 @@ This document provides comprehensive guidance for AI assistants working with thi
 ### Core Components
 
 - **OS**: Talos Linux 1.13.0 (immutable Kubernetes OS)
-- **Orchestration**: Kubernetes 1.35.4
+- **Orchestration**: Kubernetes 1.36.1
 - **GitOps**: Flux CD 2.8.6 (declarative continuous delivery)
 - **CNI**: Cilium 1.19.3 (eBPF-based networking)
 - **Ingress**: Envoy Gateway v1.7.2 (HTTP routing)
@@ -780,7 +780,7 @@ talosctl logs --nodes <ip> --insecure
 
 This documentation applies to:
 - Talos Linux: 1.13.0
-- Kubernetes: 1.35.4
+- Kubernetes: 1.36.1
 - Flux CD: 2.8.6
 - Cilium: 1.19.3
 - Helm: 4.1.4
@@ -791,13 +791,17 @@ This documentation applies to:
 - SOPS: 3.13.0
 - CloudNative-PG: PostgreSQL 17.7
 - KubeVirt: 1.7.0
-- kGuardian: 1.7.0
+- kGuardian: 1.11.1
 - Kanidm: (identity provider)
 
 Check `.mise.toml` for exact versions of all tools.
 
 ## Recent Notable Changes
 
+- **2026-05-15**: Multi-event recovery session — node-01 and node-02 boot disks corrupted during Talos 1.12→1.13 upgrades; recovered CNPG (postgres-4 promoted, switched WAL archive serverName to `postgres-r2`), MariaDB Galera (rejoined after orphan PVC delete), Kanidm (restored from 2026-05-14 02:00 S3 backup + kanidmd recover-account for kaniop creds), Forgejo (VolSync restore), unifi-toolkit (VolSync restore). Wrote runbook at `docs/operations/node-loss-recovery.md`. Removed `plane` namespace entirely.
+- **2026-05-15**: Kubernetes upgraded to 1.36.1 (Tuppr-driven rolling kubelet upgrade); kguardian chart bumped to 1.11.1 (required strategy-conflict workaround — delete kguardian-db Deployment so Helm doesn't three-way-merge old rollingUpdate fields, plus postRenderer adding `storageClassName: openebs-hostpath` since chart now uses a PVC)
+- **2026-05-15**: Garage architecture changed — LMDB meta moved off NFS (where it threw `Resource temporarily unavailable` EAGAIN) onto a local `openebs-hostpath` PVC (`garage-meta`). Data dir stays on NFS. Off-node durability provided by an in-pod `backup-sync` sidecar that mirrors `/meta/` (minus live `db.lmdb/`) to `/mnt/Speed/Kubernetes/apps/garage/meta-backup/` daily. Restore Job added as Phase 6 to `scripts/volsync-restore-all.sh`. PrometheusRules `GarageMetaBackupSidecarRestarted` (warning) and `GarageMetaBackupSidecarAbsent` (critical) alert via existing AlertManager→Discord.
+- **2026-05-15**: Pre-staged 3 at-risk apps (homepage, gatus, kubevirt-manager) with explicit `automountServiceAccountToken: true` so they survive the upcoming app-template 4.6.2→5.0.1 chart bump (v5 default flips to not auto-mount). Other 35 app-template HRs unaffected.
 - **2026-05-14**: Documentation refresh — version bumps across README/docs/CLAUDE.md (Talos 1.13.0, Kubernetes 1.35.4, Flux 2.8.6, Cilium 1.19.3, Helm 4.1.4, SOPS 3.13.0, Python 3.14.5, Envoy Gateway v1.7.2) and updated deployed-applications listings
 - **2026-05-14**: Removed `ui-bakery` and `zitadel` namespaces from the cluster
 - **2026-05-14**: Disabled FreePBX HelmReleases in the `voip` namespace and removed the FreePBX KubeVirt VM manifests; `voip` namespace remains
@@ -1215,5 +1219,5 @@ The repository includes a comprehensive MkDocs Material documentation site publi
 
 ---
 
-**Last Updated**: 2026-05-14
+**Last Updated**: 2026-05-15
 **Template Source**: [onedr0p/cluster-template](https://github.com/onedr0p/cluster-template)

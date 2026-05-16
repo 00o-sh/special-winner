@@ -13,6 +13,12 @@ spec:
     fullnameOverride: blackbox-exporter-vpn
     strategy:
       type: Recreate
+    # Pin to singlenodemaster: macvlan frames are dropped by the
+    # Proxmox VM nodes (node-01-pve / node-02-pve). Remove once
+    # the Proxmox bridge is configured to forward unknown source
+    # MACs from the VMs.
+    nodeSelector:
+      kubernetes.io/hostname: singlenodemaster
     podAnnotations:
         k8s.v1.cni.cncf.io/networks: |-
           [{

@@ -71,9 +71,15 @@ spec:
           limits:
             memory: 2000Mi
         storageSpec:
+          # Local block storage instead of nfs-fast. Prometheus's TSDB
+          # discovery + WAL replay over NFS was taking long enough that the
+          # startup probe killed the pod before it ever finished loading.
+          # Metric history is loss-tolerant (regenerated from scrapes
+          # continuously); long-term retention can move to VictoriaMetrics
+          # later if needed.
           volumeClaimTemplate:
             spec:
-              storageClassName: nfs-fast
+              storageClassName: openebs-hostpath
               resources:
                 requests:
                   storage: 50Gi

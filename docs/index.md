@@ -9,7 +9,7 @@ Built on the [onedr0p/cluster-template](https://github.com/onedr0p/cluster-templ
 | Component | Technology | Version |
 |-----------|-----------|---------|
 | OS | Talos Linux | 1.13.0 |
-| Orchestration | Kubernetes | 1.35.4 |
+| Orchestration | Kubernetes | 1.36.1 |
 | GitOps | Flux CD | 2.8.6 |
 | CNI | Cilium | 1.19.3 |
 | Ingress | Envoy Gateway | v1.7.2 |
@@ -31,7 +31,7 @@ Built on the [onedr0p/cluster-template](https://github.com/onedr0p/cluster-templ
 - **Networking** -- Cilium, Envoy Gateway, Cloudflare Tunnel, Multus, Macvtap
 - **Storage** -- OpenEBS, VolSync, Garage S3, NFS
 - **CI/CD** -- GitHub Actions runners, Forgejo with CI runners
-- **Utilities** -- Plane, Homepage, Forgejo, SMTP relay, and more
+- **Utilities** -- Homepage, Forgejo, SMTP relay, and more
 
 ## Quick Links
 

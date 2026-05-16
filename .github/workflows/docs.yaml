@@ -1,6 +1,21 @@
 ---
 # Builds the MkDocs Material documentation site and publishes to Cloudflare Pages.
 # Triggered on changes to docs/ or mkdocs.yml.
+#
+# Versioning: every push to main deploys a unique snapshot via `mike`.
+#   - Version path: YYYY-MM-DD-<short-sha> (one per commit, never overwrites)
+#   - Display title contains an ISO 8601 UTC timestamp prefix that
+#     docs/javascripts/version-tz.js rewrites to the viewer's local timezone
+#     in the browser at render time.
+#   - The `latest` alias always points at the newest deploy.
+#
+# How it fits together with Cloudflare Pages:
+#   - mike writes each version into its own subdir of the `docs` branch
+#     plus a top-level versions.json that the Material theme reads to render
+#     the navbar dropdown.
+#   - We then deploy the entire docs-branch worktree to Cloudflare Pages, so
+#     all versions are served under docs.00o.sh/<version>/ with / redirecting
+#     to the default (latest).
 # yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
 name: Docs
 
@@ -15,7 +30,12 @@ on:
       - .github/workflows/docs.yaml
 
 permissions:
-  contents: read
+  contents: write   # mike commits to the docs branch
+
+env:
+  # Git branch mike writes versioned docs to. Default is gh-pages; we use
+  # a separate branch so it's clear this is the docs deploy target.
+  DOCS_BRANCH: docs
 
 jobs:
   build-and-deploy:
@@ -25,7 +45,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
-          persist-credentials: false
+          fetch-depth: 0   # mike needs full git history
 
       - name: Setup Python
         uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
@@ -33,10 +53,72 @@ jobs:
           python-version: "3.14.x"
 
       - name: Install dependencies
-        run: pip install mkdocs-material
+        run: pip install mkdocs-material mike
 
-      - name: Build site
-        run: mkdocs build --strict
+      - name: Configure git identity for mike
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Prepare docs branch state for mike
+        run: |
+          # mike's first deploy needs the target branch to already exist as
+          # an orphan (it computes merge-base before creating). Cases:
+          #   - Branch missing -> create empty orphan and push.
+          #   - Branch exists, mike-managed (versions.json present) -> use it.
+          #   - Branch exists but isn't an orphan (e.g. mirror of main) ->
+          #     delete and recreate as orphan.
+          # Fetch existing docs branch as a *local* ref (not just origin/docs)
+          # so mike's `git merge-base docs HEAD` can resolve it.
+          git fetch origin --prune --quiet
+          NEEDS_INIT=true
+          if git show-ref --verify --quiet "refs/remotes/origin/${DOCS_BRANCH}"; then
+            if git show "refs/remotes/origin/${DOCS_BRANCH}:versions.json" >/dev/null 2>&1; then
+              echo "docs branch is mike-managed; creating local tracking ref"
+              git fetch origin "${DOCS_BRANCH}:${DOCS_BRANCH}"
+              NEEDS_INIT=false
+            else
+              echo "docs branch exists but isn't a mike orphan; deleting"
+              git push origin --delete "${DOCS_BRANCH}"
+            fi
+          else
+            echo "docs branch doesn't exist remotely"
+          fi
+          if [ "${NEEDS_INIT}" = "true" ]; then
+            echo "Initialising empty orphan ${DOCS_BRANCH} branch"
+            git checkout --orphan "${DOCS_BRANCH}"
+            git rm -rf . >/dev/null 2>&1 || true
+            git clean -fd
+            git commit --allow-empty -m "init: mike orphan branch for versioned docs"
+            git push origin "${DOCS_BRANCH}"
+            git checkout main
+          fi
+
+      - name: Build version label
+        id: version
+        run: |
+          # Title is short: ISO 8601 UTC timestamp + short SHA.
+          # version-tz.js rewrites the timestamp to viewer-local in the browser.
+          # Full commit subject stays accessible via git log / the URL path.
+          DATE=$(date -u +%Y-%m-%d)
+          ISO=$(date -u +%Y-%m-%dT%H:%MZ)
+          SHA=$(git rev-parse --short HEAD)
+          VERSION="${DATE}-${SHA}"
+          TITLE="${ISO} (${SHA})"
+          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
+          echo "title=${TITLE}"     >> "$GITHUB_OUTPUT"
+          echo "Deploying ${VERSION} -> ${TITLE}"
+
+      - name: Deploy versioned docs to ${{ env.DOCS_BRANCH }} branch
+        run: |
+          mike deploy --branch "${DOCS_BRANCH}" --push --update-aliases \
+            --title "${{ steps.version.outputs.title }}" \
+            "${{ steps.version.outputs.version }}" latest
+          mike set-default --branch "${DOCS_BRANCH}" --push latest
+
+      - name: Checkout ${{ env.DOCS_BRANCH }} worktree for Cloudflare upload
+        run: |
+          git worktree add ./_site "${DOCS_BRANCH}"
 
       - name: Create Cloudflare Pages project (if needed)
         uses: cloudflare/wrangler-action@9acf94ace14e7dc412b076f2c5c20b8ce93c79cd # v3.15.0
@@ -51,5 +133,5 @@ jobs:
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          workingDirectory: site
+          workingDirectory: _site
           command: pages deploy --project-name=special-winner-docs --branch main --commit-dirty=true .

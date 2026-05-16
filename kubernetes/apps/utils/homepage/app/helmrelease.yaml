@@ -10,6 +10,11 @@ spec:
     name: homepage
   interval: 1h
   values:
+    defaultPodOptions:
+      # app-template v5 doesn't auto-mount SA tokens by default. Pin true now
+      # (no-op on v4) so homepage's K8s API client keeps working after the
+      # chart bump. Backwards-compatible with v4.
+      automountServiceAccountToken: true
     controllers:
       homepage:
         strategy: RollingUpdate

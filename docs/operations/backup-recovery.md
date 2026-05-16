@@ -4,10 +4,11 @@
 
 ```mermaid
 graph LR
-    PVC[PersistentVolumeClaims] -->|VolSync| Kopia[Kopia Repository]
-    Kopia -->|S3 API| Garage[Garage S3]
-    PG[PostgreSQL WAL] -->|barman-cloud| Garage
-    MDB[MariaDB Galera] -->|mysqldump| Garage
+    PVC[PersistentVolumeClaims] -->|VolSync| Kopia[Kopia Repository<br/>NFS: /mnt/Speed/VolsyncKopia]
+    PG[PostgreSQL WAL/base] -->|barman-cloud| Garage[Garage S3]
+    MDB[MariaDB Galera] -->|mariadb-operator Backup| Garage
+    KD[Kanidm hourly JSON] -->|CronJob aws s3 sync| Garage
+    GM[Garage meta PVC] -->|in-pod rsync sidecar| NFSGarage[NFS: garage/meta-backup]
     Git[Git Repository] -->|GitOps| State[Cluster State]
 ```
 
@@ -15,11 +16,15 @@ The cluster uses a layered backup strategy:
 
 | Data Type | Backup Method | Destination | Schedule |
 |-----------|--------------|-------------|----------|
-| Application config (PVCs) | VolSync + Kopia | Garage S3 | Daily at 2 AM |
-| PostgreSQL databases | barman-cloud (WAL + base backups) | Garage S3 | Continuous WAL + scheduled |
-| MariaDB databases | mysqldump (mariadb-operator Backup CR) | Garage S3 | Every 6 hours |
+| Application PVCs | VolSync + Kopia | NFS Kopia repo (`/mnt/Speed/VolsyncKopia`) | Daily at 2 AM |
+| PostgreSQL databases | barman-cloud (WAL + base backups) | Garage S3 (`s3://cnpg/postgres-r2/`) | Continuous WAL + scheduled |
+| MariaDB databases | mariadb-operator Backup CR | Garage S3 (`s3://mariadb-backups/`) | Every 6 hours |
+| Kanidm identity DB | `kanidm-backup-sync` CronJob (`aws s3 sync`) | Garage S3 (`s3://kanidm/backups/`) | Hourly |
+| Garage's own LMDB meta | in-pod `backup-sync` sidecar (rsync) | NFS (`/mnt/Speed/Kubernetes/apps/garage/meta-backup/`) | Daily |
 | Cluster state | Git repository | GitHub | On every push |
 | Secrets | SOPS-encrypted in Git + 1Password | GitHub + 1Password | On every push |
+
+**Note on backup destinations:** VolSync and Garage's meta backup go to **NFS**; everything else goes to **Garage S3**. Garage's own metadata is on a local PVC and can't be safely backed up via VolSync (RWO + no CSI snapshot support), so a sidecar rsync was used instead — see [Node Loss Recovery — Garage metadata recovery](node-loss-recovery.md#garage-metadata-recovery).
 
 ## VolSync
 
