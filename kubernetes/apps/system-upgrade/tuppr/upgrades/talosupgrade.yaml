@@ -3,27 +3,6 @@
 # independently (no group rule). To upgrade a node: merge its PR;
 # Tuppr's controller picks up the version change for that one CR
 # and rolls only that node.
-#
-# Health checks and policy are shared via YAML anchors below.
-
-# Shared health checks: VolSync RS not mid-sync, all nodes Ready.
-__healthChecks: &healthChecks
-  - apiVersion: volsync.backube/v1alpha1
-    kind: ReplicationSource
-    description: VolSync replication sources are not synchronizing
-    expr: |-
-      status.conditions.filter(c, c.type == "Synchronizing").all(c, c.status == "False")
-    timeout: 10m
-  - apiVersion: v1
-    kind: Node
-    description: All nodes are ready
-    expr: |
-      status.conditions.filter(c, c.type == "Ready").all(c, c.status == "True")
-    timeout: 10m
-
-__policy: &policy
-  rebootMode: powercycle
----
 # yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/tuppr.home-operations.com/talosupgrade_v1alpha1.json
 apiVersion: tuppr.home-operations.com/v1alpha1
 kind: TalosUpgrade
@@ -36,8 +15,21 @@ spec:
   talos:
     # renovate: datasource=docker depName=ghcr.io/siderolabs/installer
     version: v1.13.0
-  policy: *policy
-  healthChecks: *healthChecks
+  policy:
+    rebootMode: powercycle
+  healthChecks:
+    - apiVersion: volsync.backube/v1alpha1
+      kind: ReplicationSource
+      description: VolSync replication sources are not synchronizing
+      expr: |-
+        status.conditions.filter(c, c.type == "Synchronizing").all(c, c.status == "False")
+      timeout: 10m
+    - apiVersion: v1
+      kind: Node
+      description: All nodes are ready
+      expr: |
+        status.conditions.filter(c, c.type == "Ready").all(c, c.status == "True")
+      timeout: 10m
 ---
 # yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/tuppr.home-operations.com/talosupgrade_v1alpha1.json
 apiVersion: tuppr.home-operations.com/v1alpha1
@@ -51,8 +43,21 @@ spec:
   talos:
     # renovate: datasource=docker depName=ghcr.io/siderolabs/installer
     version: v1.13.2
-  policy: *policy
-  healthChecks: *healthChecks
+  policy:
+    rebootMode: powercycle
+  healthChecks:
+    - apiVersion: volsync.backube/v1alpha1
+      kind: ReplicationSource
+      description: VolSync replication sources are not synchronizing
+      expr: |-
+        status.conditions.filter(c, c.type == "Synchronizing").all(c, c.status == "False")
+      timeout: 10m
+    - apiVersion: v1
+      kind: Node
+      description: All nodes are ready
+      expr: |
+        status.conditions.filter(c, c.type == "Ready").all(c, c.status == "True")
+      timeout: 10m
 ---
 # yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/tuppr.home-operations.com/talosupgrade_v1alpha1.json
 apiVersion: tuppr.home-operations.com/v1alpha1
@@ -66,5 +71,18 @@ spec:
   talos:
     # renovate: datasource=docker depName=ghcr.io/siderolabs/installer
     version: v1.13.0
-  policy: *policy
-  healthChecks: *healthChecks
+  policy:
+    rebootMode: powercycle
+  healthChecks:
+    - apiVersion: volsync.backube/v1alpha1
+      kind: ReplicationSource
+      description: VolSync replication sources are not synchronizing
+      expr: |-
+        status.conditions.filter(c, c.type == "Synchronizing").all(c, c.status == "False")
+      timeout: 10m
+    - apiVersion: v1
+      kind: Node
+      description: All nodes are ready
+      expr: |
+        status.conditions.filter(c, c.type == "Ready").all(c, c.status == "True")
+      timeout: 10m
