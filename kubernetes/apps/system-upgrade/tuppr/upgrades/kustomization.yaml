@@ -4,4 +4,9 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
   - ./kubernetesupgrade.yaml
-  - ./talosupgrade.yaml
+  # Talos: one TalosUpgrade CR per node, scoped via nodeSelector,
+  # so Renovate opens one PR per node and upgrades are operator-
+  # driven node-by-node. See ./README.md for the workflow.
+  - ./talosupgrade-singlenodemaster.yaml
+  - ./talosupgrade-node-01-pve.yaml
+  - ./talosupgrade-node-02-pve.yaml

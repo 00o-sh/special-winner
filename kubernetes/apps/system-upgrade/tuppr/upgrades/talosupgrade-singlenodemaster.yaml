@@ -1,0 +1,34 @@
+---
+# Per-node TalosUpgrade CR for `singlenodemaster`.
+#
+# This is one of three files in this directory; together they replace
+# what used to be a single cluster-wide TalosUpgrade. The split exists
+# so Renovate opens one PR per node on a new Talos release — see
+# upgrades/README.md for the workflow and the rationale.
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/tuppr.home-operations.com/talosupgrade_v1alpha1.json
+apiVersion: tuppr.home-operations.com/v1alpha1
+kind: TalosUpgrade
+metadata:
+  name: talos-singlenodemaster
+spec:
+  nodeSelector:
+    matchLabels:
+      kubernetes.io/hostname: singlenodemaster
+  talos:
+    # renovate: datasource=docker depName=ghcr.io/siderolabs/installer
+    version: v1.13.0
+  policy:
+    rebootMode: powercycle
+  healthChecks:
+    - apiVersion: volsync.backube/v1alpha1
+      kind: ReplicationSource
+      description: VolSync replication sources are not synchronizing
+      expr: |-
+        status.conditions.filter(c, c.type == "Synchronizing").all(c, c.status == "False")
+      timeout: 10m
+    - apiVersion: v1
+      kind: Node
+      description: All nodes are ready
+      expr: |
+        status.conditions.filter(c, c.type == "Ready").all(c, c.status == "True")
+      timeout: 10m

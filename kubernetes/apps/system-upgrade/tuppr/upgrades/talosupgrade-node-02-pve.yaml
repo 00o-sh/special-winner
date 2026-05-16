@@ -1,0 +1,30 @@
+---
+# Per-node TalosUpgrade CR for `node-02-pve`.
+# See upgrades/README.md for design rationale.
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/tuppr.home-operations.com/talosupgrade_v1alpha1.json
+apiVersion: tuppr.home-operations.com/v1alpha1
+kind: TalosUpgrade
+metadata:
+  name: talos-node-02-pve
+spec:
+  nodeSelector:
+    matchLabels:
+      kubernetes.io/hostname: node-02-pve
+  talos:
+    # renovate: datasource=docker depName=ghcr.io/siderolabs/installer
+    version: v1.13.0
+  policy:
+    rebootMode: powercycle
+  healthChecks:
+    - apiVersion: volsync.backube/v1alpha1
+      kind: ReplicationSource
+      description: VolSync replication sources are not synchronizing
+      expr: |-
+        status.conditions.filter(c, c.type == "Synchronizing").all(c, c.status == "False")
+      timeout: 10m
+    - apiVersion: v1
+      kind: Node
+      description: All nodes are ready
+      expr: |
+        status.conditions.filter(c, c.type == "Ready").all(c, c.status == "True")
+      timeout: 10m
