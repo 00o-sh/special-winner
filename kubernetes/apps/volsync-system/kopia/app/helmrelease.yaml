@@ -29,10 +29,9 @@ spec:
               - secretRef:
                   name: kopia-secret
             # Kopia 0.23 forces --without-password to bind loopback-only,
-            # so we run an authenticated server instead. --insecure lets
-            # the server speak HTTP (Envoy Gateway terminates TLS).
+            # so we run an authenticated server instead. The image's
+            # entrypoint already passes --insecure (Envoy terminates TLS).
             args:
-              - --insecure
               - --server-username=$(KOPIA_SERVER_USERNAME)
               - --server-password=$(KOPIA_SERVER_PASSWORD)
               - --disable-csrf-token-checks
