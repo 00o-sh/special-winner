@@ -49,4 +49,4 @@ TALOSCONFIG = "{{config_root}}/talos/clusterconfig/talosconfig"
 "aqua:mikefarah/yq" = "4.53.2"              # YAML processor
 
 # AI
-"claude-code" = "2.1.141"
+"claude-code" = "2.1.143"
