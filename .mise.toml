@@ -20,7 +20,7 @@ TALOSCONFIG = "{{config_root}}/talos/clusterconfig/talosconfig"
 
 # Talos Linux management
 "aqua:budimanjojo/talhelper" = "3.1.10"         # Talos config generator and helper
-"aqua:siderolabs/talos" = "1.13.0"            # Talos CLI (talosctl) for node management
+"aqua:siderolabs/talos" = "1.13.2"            # Talos CLI (talosctl) for node management
 
 # Kubernetes tools
 "aqua:kubernetes/kubectl" = "1.34.0"           # Kubernetes CLI
