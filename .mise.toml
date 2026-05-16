@@ -33,7 +33,7 @@ TALOSCONFIG = "{{config_root}}/talos/clusterconfig/talosconfig"
 "aqua:kubevirt/kubevirt/virtctl" = "1.8.2"    # KubeVirt VM management CLI
 
 # Networking
-"aqua:cilium/cilium-cli" = "0.19.2"           # Cilium CNI management and connectivity testing
+"aqua:cilium/cilium-cli" = "0.19.3"           # Cilium CNI management and connectivity testing
 "aqua:cloudflare/cloudflared" = "2026.5.0"    # Cloudflare Tunnel client
 
 # Secret management
