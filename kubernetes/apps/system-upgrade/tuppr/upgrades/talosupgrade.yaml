@@ -14,7 +14,7 @@ spec:
       kubernetes.io/hostname: singlenodemaster
   talos:
     # renovate: datasource=docker depName=ghcr.io/siderolabs/installer
-    version: v1.13.0
+    version: v1.13.2
   policy:
     rebootMode: powercycle
   healthChecks:
@@ -70,7 +70,7 @@ spec:
       kubernetes.io/hostname: node-02-pve
   talos:
     # renovate: datasource=docker depName=ghcr.io/siderolabs/installer
-    version: v1.13.0
+    version: v1.13.2
   policy:
     rebootMode: powercycle
   healthChecks:
