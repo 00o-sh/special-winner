@@ -265,6 +265,15 @@
       matchUpdateTypes: ["pin"],
       labels: ["type/pin"],
     },
+    {
+      // cilium-cli 0.19.3 is reported as latest by Renovate but
+      // never released on GitHub (latest published is v0.19.2).
+      // Mise install fails with HTTP 404. Remove once upstream
+      // actually cuts the release.
+      matchManagers: ["mise"],
+      matchPackageNames: ["cilium/cilium-cli"],
+      allowedVersions: "!=0.19.3",
+    },
   ],
   customDatasources: {
     "onepassword-cli": {
