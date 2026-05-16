@@ -41,12 +41,16 @@ spec:
               # failureThreshold 3 (= 30s before restart) was triggering 1-2
               # restarts per day. Loosen to 5s timeout + 6 failures (= 60s)
               # so transient load doesn't kill the pod.
+              #
+              # TCP probe (not HTTP): with --server-username/--server-password
+              # enabled, kopia returns 401 on every endpoint including '/',
+              # which kubelet's httpGet treats as failure. TCP just confirms
+              # the listener is up — sufficient for liveness/readiness.
               liveness: &probes
                 enabled: true
                 custom: true
                 spec:
-                  httpGet:
-                    path: /
+                  tcpSocket:
                     port: *port
                   initialDelaySeconds: 0
                   periodSeconds: 10
