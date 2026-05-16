@@ -22,12 +22,6 @@ spec:
             storage: 1Gi
         accessModes:
           - ReadWriteOnce
-    # TEMP: force bootstrap from mariadb-0 after the 2026-05-16 Tuppr
-    # upgrade left all three nodes with seqno=-1 (unclean shutdown).
-    # Operator can't pick a winner on its own. REVERT this field as
-    # soon as cluster is healthy (otherwise every reconcile re-bootstraps).
-    recovery:
-      forceClusterBootstrapInPod: mariadb-0
 
   storage:
     size: 20Gi
