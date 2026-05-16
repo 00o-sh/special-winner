@@ -274,6 +274,14 @@
       matchPackageNames: ["cilium/cilium-cli"],
       allowedVersions: "!=0.19.3",
     },
+    {
+      // Homepage runs from a fork (kopia widget fix upstream refused
+      // to merge). The image uses a rolling "nightly" tag — Renovate
+      // can't bump the tag (no semver), but with pinDigests it tracks
+      // and bumps the digest whenever the fork's nightly is rebuilt.
+      matchPackageNames: ["ghcr.io/00o-sh/homepage"],
+      pinDigests: true,
+    },
   ],
   customDatasources: {
     "onepassword-cli": {
