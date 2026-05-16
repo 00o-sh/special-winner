@@ -1,37 +1,30 @@
 ---
-# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/monitoring.coreos.com/scrapeconfig_v1alpha1.json
-apiVersion: monitoring.coreos.com/v1alpha1
-kind: ScrapeConfig
-metadata:
-  name: node-exporter
-spec:
-  # Note: Requires node_exporter running on NAS at nas.3226texas.com:9100
-  # Install: https://github.com/prometheus/node_exporter
-  staticConfigs:
-    - targets:
-        - nas.3226texas.com:9100
-  metricsPath: /metrics
-  relabelings:
-    - action: replace
-      targetLabel: job
-      replacement: node-exporter
----
-# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/monitoring.coreos.com/scrapeconfig_v1alpha1.json
-apiVersion: monitoring.coreos.com/v1alpha1
-kind: ScrapeConfig
-metadata:
-  name: smartctl-exporter
-spec:
-  # Note: Requires smartctl_exporter running on NAS at nas.3226texas.com:9633
-  # Install: https://github.com/prometheus-community/smartctl_exporter
-  # Monitors disk health (SMART data)
-  staticConfigs:
-    - targets:
-        - nas.3226texas.com:9633
-  metricsPath: /metrics
-  relabelings:
-    - action: replace
-      targetLabel: job
-      replacement: smartctl-exporter
----
+# NAS scrape configs disabled — node_exporter and smartctl_exporter were
+# never installed on the NAS, so scraping them just produces persistent
+# TargetDown alerts. Re-enable after installing on the NAS:
+#   - node_exporter:     https://github.com/prometheus/node_exporter
+#   - smartctl_exporter: https://github.com/prometheus-community/smartctl_exporter
+#
+# apiVersion: monitoring.coreos.com/v1alpha1
+# kind: ScrapeConfig
+# metadata:
+#   name: node-exporter
+# spec:
+#   staticConfigs:
+#     - targets: ["nas.3226texas.com:9100"]
+#   metricsPath: /metrics
+#   relabelings:
+#     - { action: replace, targetLabel: job, replacement: node-exporter }
+# ---
+# apiVersion: monitoring.coreos.com/v1alpha1
+# kind: ScrapeConfig
+# metadata:
+#   name: smartctl-exporter
+# spec:
+#   staticConfigs:
+#     - targets: ["nas.3226texas.com:9633"]
+#   metricsPath: /metrics
+#   relabelings:
+#     - { action: replace, targetLabel: job, replacement: smartctl-exporter }
+#
 # Note: Removed JetKVM scrape configs (onedr0p-specific hardware)
