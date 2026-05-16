@@ -123,7 +123,13 @@ jobs:
         run: curl -fsSL https://raw.githubusercontent.com/siderolabs/talos/b412ffdbc29d77a81aed88be62f21bc2999afcde/website/static/install | sh
 
       - name: Pull Image
-        run: talosctl --nodes $NODE image pull "${MATRIX_IMAGE}"
+        # flux-local v8.1.0 occasionally emits an image entry with two
+        # @sha256:... digests concatenated (seen with rolling tags whose
+        # underlying digest changed between branches). Strip everything
+        # after the first digest so talosctl gets a valid OCI reference.
+        run: |
+          IMAGE="$(echo "${MATRIX_IMAGE}" | sed -E 's/(@sha256:[a-f0-9]{64}).*$/\1/')"
+          talosctl --nodes $NODE image pull "$IMAGE"
 
   success:
     if: ${{ !cancelled() }}
