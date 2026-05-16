@@ -28,8 +28,13 @@ spec:
             envFrom:
               - secretRef:
                   name: kopia-secret
+            # Kopia 0.23 forces --without-password to bind loopback-only,
+            # so we run an authenticated server instead. --insecure lets
+            # the server speak HTTP (Envoy Gateway terminates TLS).
             args:
-              - --without-password
+              - --insecure
+              - --server-username=$(KOPIA_SERVER_USERNAME)
+              - --server-password=$(KOPIA_SERVER_PASSWORD)
               - --disable-csrf-token-checks
             probes:
               # Kopia's HTTP server briefly goes unresponsive during snapshot
@@ -76,6 +81,8 @@ spec:
         annotations:
           gatus.home-operations.com/endpoint: |-
             group: storage
+            conditions:
+              - "[STATUS] == 401"
           gethomepage.dev/enabled: "true"
           gethomepage.dev/group: Storage
           gethomepage.dev/name: Kopia
