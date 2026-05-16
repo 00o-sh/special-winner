@@ -42,8 +42,8 @@ spec:
   receivers:
     - name: blackhole
     - name: discord
-      webhookConfigs:
-        - urlSecret:
+      discordConfigs:
+        - apiURL:
             name: alertmanager-secret
             key: DISCORD_WEBHOOK_URL
           sendResolved: true
