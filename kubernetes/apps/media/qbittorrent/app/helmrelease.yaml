@@ -60,6 +60,12 @@ spec:
             "ips": ["192.168.56.10/24"],
             "mac": "32:0b:d8:1f:b6:e4"
           }]
+      # Pin to singlenodemaster: macvlan frames are dropped by the
+      # Proxmox VM nodes (node-01-pve / node-02-pve). Remove once
+      # the Proxmox bridge is configured to forward unknown source
+      # MACs from the VMs.
+      nodeSelector:
+        kubernetes.io/hostname: singlenodemaster
       securityContext:
         runAsNonRoot: true
         runAsUser: 1000
