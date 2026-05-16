@@ -12,7 +12,7 @@ spec:
       kubernetes.io/hostname: node-02-pve
   talos:
     # renovate: datasource=docker depName=talos-node-02-pve packageName=ghcr.io/siderolabs/installer
-    version: v1.13.0
+    version: v1.13.2
   policy:
     rebootMode: powercycle
   healthChecks:
