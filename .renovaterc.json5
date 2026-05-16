@@ -91,27 +91,24 @@
       matchPackageNames: ["/siderolabs/installer/"],
       matchFileNames: ["**/talosupgrade-singlenodemaster.yaml"],
       groupName: "talos-singlenodemaster",
-      group: {
-        commitMessageTopic: "{{{groupName}}}",
-      },
+      // Top-level (not group.*) — each per-node PR has a single dep,
+      // so Renovate doesn't fire group-mode title rendering. We need
+      // the regular commitMessageTopic.
+      commitMessageTopic: "{{{groupName}}}",
     },
     {
       matchDatasources: ["docker"],
       matchPackageNames: ["/siderolabs/installer/"],
       matchFileNames: ["**/talosupgrade-node-01-pve.yaml"],
       groupName: "talos-node-01-pve",
-      group: {
-        commitMessageTopic: "{{{groupName}}}",
-      },
+      commitMessageTopic: "{{{groupName}}}",
     },
     {
       matchDatasources: ["docker"],
       matchPackageNames: ["/siderolabs/installer/"],
       matchFileNames: ["**/talosupgrade-node-02-pve.yaml"],
       groupName: "talos-node-02-pve",
-      group: {
-        commitMessageTopic: "{{{groupName}}}",
-      },
+      commitMessageTopic: "{{{groupName}}}",
     },
     {
       description: "Kubernetes Group",
