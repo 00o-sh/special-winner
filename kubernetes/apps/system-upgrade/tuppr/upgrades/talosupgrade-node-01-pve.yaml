@@ -11,7 +11,7 @@ spec:
     matchLabels:
       kubernetes.io/hostname: node-01-pve
   talos:
-    # renovate: datasource=docker depName=ghcr.io/siderolabs/installer
+    # renovate: datasource=docker depName=talos-node-01-pve packageName=ghcr.io/siderolabs/installer
     version: v1.13.2
   policy:
     rebootMode: powercycle

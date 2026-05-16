@@ -75,41 +75,6 @@
         commitMessageTopic: "{{{groupName}}} group",
       },
     },
-    // ─────────────────────────────────────────────────────────────────
-    // Per-node TalosUpgrade — one PR per node on each Talos release.
-    //
-    // Each TalosUpgrade CR lives in its own file (one per node) under
-    // kubernetes/apps/system-upgrade/tuppr/upgrades/. Renovate's
-    // default dedup batches identical (depName, currentValue, newValue)
-    // bumps into one PR, which defeats the per-node model. Giving each
-    // file its OWN groupName forces Renovate to compute a distinct
-    // branch and open a separate PR for each, even when two nodes
-    // happen to be on the same currentValue. See
-    // kubernetes/apps/system-upgrade/tuppr/upgrades/README.md.
-    {
-      matchDatasources: ["docker"],
-      matchPackageNames: ["/siderolabs/installer/"],
-      matchFileNames: ["**/talosupgrade-singlenodemaster.yaml"],
-      groupName: "talos-singlenodemaster",
-      // Top-level (not group.*) — each per-node PR has a single dep,
-      // so Renovate doesn't fire group-mode title rendering. We need
-      // the regular commitMessageTopic.
-      commitMessageTopic: "{{{groupName}}}",
-    },
-    {
-      matchDatasources: ["docker"],
-      matchPackageNames: ["/siderolabs/installer/"],
-      matchFileNames: ["**/talosupgrade-node-01-pve.yaml"],
-      groupName: "talos-node-01-pve",
-      commitMessageTopic: "{{{groupName}}}",
-    },
-    {
-      matchDatasources: ["docker"],
-      matchPackageNames: ["/siderolabs/installer/"],
-      matchFileNames: ["**/talosupgrade-node-02-pve.yaml"],
-      groupName: "talos-node-02-pve",
-      commitMessageTopic: "{{{groupName}}}",
-    },
     {
       description: "Kubernetes Group",
       groupName: "kubernetes",
@@ -334,7 +299,9 @@
         // version: 1.15.1
         // # renovate: datasource=docker depName=ghcr.io/siderolabs/kubelet
         // KUBERNETES_VERSION=v1.31.1
-        "datasource=(?<datasource>\\S+) depName=(?<depName>\\S+)( repository=(?<registryUrl>\\S+))?\\n.+(:\\s|=)(&\\S+\\s)?(?<currentValue>\\S+)",
+        // # renovate: datasource=docker depName=talos-singlenodemaster packageName=ghcr.io/siderolabs/installer
+        // version: v1.13.0   (depName is the display/PR-title name, packageName is the registry lookup)
+        "datasource=(?<datasource>\\S+) depName=(?<depName>\\S+)( packageName=(?<packageName>\\S+))?( repository=(?<registryUrl>\\S+))?\\n.+(:\\s|=)(&\\S+\\s)?(?<currentValue>\\S+)",
         // # renovate: datasource=docker depName=ghcr.io/prometheus-operator/prometheus-operator
         // https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.80.0/example/prometheus-operator-crd/monitoring.coreos.com_alertmanagerconfigs.yaml
         "datasource=(?<datasource>\\S+) depName=(?<depName>\\S+)\\n.+/(?<currentValue>(v|\\d)[^/]+)",
