@@ -75,22 +75,37 @@
         commitMessageTopic: "{{{groupName}}} group",
       },
     },
+    // ─────────────────────────────────────────────────────────────────
+    // Per-node TalosUpgrade — one PR per node on each Talos release.
+    //
+    // Each TalosUpgrade CR lives in its own file (one per node) under
+    // kubernetes/apps/system-upgrade/tuppr/upgrades/. Renovate's
+    // default dedup batches identical (depName, currentValue, newValue)
+    // bumps into one PR, which defeats the per-node model. Giving each
+    // file its OWN groupName forces Renovate to compute a distinct
+    // branch and open a separate PR for each, even when two nodes
+    // happen to be on the same currentValue. See
+    // kubernetes/apps/system-upgrade/tuppr/upgrades/README.md.
     {
-      // Each TalosUpgrade CR lives in its own file (one per node).
-      // Renovate's default dedup batches identical (depName, currentValue,
-      // newValue) bumps into a single PR, which would defeat the per-node
-      // model. Forcing a unique groupName per file ensures one PR per
-      // node on each Talos release. See
-      // kubernetes/apps/system-upgrade/tuppr/upgrades/README.md.
-      description: "Per-node TalosUpgrade — one PR per node",
       matchManagers: ["custom.regex"],
       matchPackageNames: ["ghcr.io/siderolabs/installer"],
-      matchFileNames: [
-        "kubernetes/apps/system-upgrade/tuppr/upgrades/talosupgrade-*.yaml",
-      ],
-      additionalBranchPrefix: "{{parentDir}}-{{packageFileDir}}-",
-      commitMessageTopic: "{{depName}} ({{baseDir}})",
-      groupName: null,
+      matchFileNames: ["**/talosupgrade-singlenodemaster.yaml"],
+      groupName: "talos-singlenodemaster",
+      commitMessageTopic: "talos ({{groupName}})",
+    },
+    {
+      matchManagers: ["custom.regex"],
+      matchPackageNames: ["ghcr.io/siderolabs/installer"],
+      matchFileNames: ["**/talosupgrade-node-01-pve.yaml"],
+      groupName: "talos-node-01-pve",
+      commitMessageTopic: "talos ({{groupName}})",
+    },
+    {
+      matchManagers: ["custom.regex"],
+      matchPackageNames: ["ghcr.io/siderolabs/installer"],
+      matchFileNames: ["**/talosupgrade-node-02-pve.yaml"],
+      groupName: "talos-node-02-pve",
+      commitMessageTopic: "talos ({{groupName}})",
     },
     {
       description: "Kubernetes Group",
