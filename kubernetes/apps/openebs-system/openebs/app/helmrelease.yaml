@@ -18,7 +18,14 @@ spec:
       localpv:
         image:
           registry: quay.io/
-        basePath: &hostPath /var/mnt/local-hostpath
+        # New PVCs land on whichever node openebs-hostpath schedules them to,
+        # using this basePath. On singlenodemaster the UserVolumeConfig at
+        # talos/patches/singlenodemaster/user-volume-nvme.yaml mounts the
+        # 512GB NVMe SSD here; on node-01/node-02 it's just a directory on
+        # the system disk (their disks have plenty of free space).
+        # Existing PVs reference their original absolute path, so this change
+        # only affects newly-provisioned PVCs going forward.
+        basePath: &hostPath /var/mnt/nvme-data
       hostpathClass:
         enabled: true
         name: openebs-hostpath

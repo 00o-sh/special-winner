@@ -1,0 +1,17 @@
+---
+# Format and mount the 512GB NVMe SSD that ships in singlenodemaster but
+# was never claimed by Talos. Once applied, Talos auto-mounts the volume
+# at /var/mnt/nvme-data; we point openebs-hostpath at it so PVCs land on
+# the bigger / faster disk instead of the 128GB SATA system disk.
+#
+# Disk selector matches on transport=nvme (only nvme0n1 fits).
+apiVersion: v1alpha1
+kind: UserVolumeConfig
+name: nvme-data
+provisioning:
+  diskSelector:
+    match: disk.transport == "nvme"
+  minSize: 100GB
+  maxSize: 600GB
+filesystem:
+  type: xfs
