@@ -18,8 +18,8 @@ spec:
         containers:
           app:
             image:
-              repository: docker.io/cloudflare/cloudflared
-              tag: 2026.5.0
+              repository: ghcr.io/00o-sh/cloudflared-distroless
+              tag: 2026.5.0@sha256:1faa54eda11d43d0f767ed0cfefb0e28072cdda564ed059c3d79f5ec3c5a4e4a
             env:
               NO_AUTOUPDATE: true
               TUNNEL_METRICS: 0.0.0.0:8080
