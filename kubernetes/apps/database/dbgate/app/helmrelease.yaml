@@ -17,7 +17,7 @@ spec:
           app:
             image:
               repository: dbgate/dbgate
-              tag: 7.1.11-alpine
+              tag: 7.1.12-alpine
             env:
               CONNECTIONS: postgres-cluster,mariadb-cluster
               LABEL_postgres-cluster: Postgres Cluster
