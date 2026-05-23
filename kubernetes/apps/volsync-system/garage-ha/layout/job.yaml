@@ -5,15 +5,43 @@
 # assigns distinct zones (z1/z2/z3) with 100 GiB capacity each, and applies
 # layout version 1.
 #
-# Connects to the cluster via the headless service to one of the garage-ha
-# pods using GARAGE_RPC_HOST + GARAGE_RPC_SECRET.
+# Implementation note: dxflrs/garage is distroless (no /bin/sh), so the
+# Job can't `sh -c '/garage …'` directly. Instead, the Job uses kubectl
+# to exec the `/garage` binary inside one of the running garage-ha-0/1/2
+# pods. This needs an SA with pods/exec on the garage-ha StatefulSet.
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: garage-ha-layout
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: garage-ha-layout
+rules:
+  - apiGroups: [""]
+    resources: [pods, pods/exec]
+    verbs: [get, list, create]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: garage-ha-layout
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: garage-ha-layout
+subjects:
+  - kind: ServiceAccount
+    name: garage-ha-layout
+    namespace: volsync-system
+---
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: garage-ha-layout-v1
-  # Job uses a distinct app.kubernetes.io/name so the StatefulSet's
-  # anti-affinity rule (which targets app.kubernetes.io/name=garage-ha)
-  # doesn't reject the Job pod from every node.
+  # Bumped name so Flux applies a new Job (v1 already exists, failed
+  # earlier because dxflrs/garage has no /bin/sh).
+  name: garage-ha-layout-v2
   labels:
     app.kubernetes.io/name: garage-ha-layout
 spec:
@@ -25,39 +53,35 @@ spec:
         app.kubernetes.io/name: garage-ha-layout
     spec:
       restartPolicy: OnFailure
+      serviceAccountName: garage-ha-layout
+      automountServiceAccountToken: true
       securityContext:
         runAsNonRoot: true
-        runAsUser: 10000
-        runAsGroup: 10000
+        runAsUser: 65532
+        runAsGroup: 65532
         seccompProfile:
           type: RuntimeDefault
       containers:
         - name: layout
-          image: dxflrs/garage:v2.3.0@sha256:866bd13ed2038ba7e7190e840482bc27234c4afaf77be8cfa439ae088c1e4690
+          image: docker.io/bitnami/kubectl:1.36.1
           securityContext:
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: true
             capabilities:
               drop: [ALL]
-          env:
-            - name: GARAGE_RPC_HOST
-              value: garage-ha-0.garage-ha-headless.volsync-system.svc.cluster.local:3901
-            - name: GARAGE_RPC_SECRET
-              valueFrom:
-                secretKeyRef:
-                  name: garage-ha-secret
-                  key: GARAGE_RPC_SECRET
-          command: [/bin/sh, -c]
+          command: [/bin/bash, -c]
           args:
             - |
               set -eu
+              POD=garage-ha-0
+              NS=volsync-system
+
+              g() { kubectl -n "$NS" exec "$POD" -c app -- /garage "$@"; }
 
               echo "[$(date -Iseconds)] waiting for 3 healthy nodes…"
               status=""
               for i in $(seq 1 120); do
-                status=$(/garage status 2>/dev/null || true)
-                # The garage status table starts after the HEALTHY NODES header.
-                # Count node-id lines (first column is 16 hex chars).
+                status=$(g status 2>/dev/null || true)
                 count=$(printf '%s\n' "$status" | awk '
                   /HEALTHY NODES/ { in_block=1; next }
                   /^==/           { in_block=0 }
@@ -73,7 +97,7 @@ spec:
               done
               if [ "$count" -lt 3 ]; then
                 echo "ERROR: timed out waiting for 3 healthy nodes" >&2
-                /garage status >&2 || true
+                printf '%s\n' "$status" >&2 || true
                 exit 1
               fi
 
@@ -85,7 +109,6 @@ spec:
               fi
               echo "[$(date -Iseconds)] $no_role node(s) without role; assigning zones…"
 
-              # Extract node IDs by hostname (StatefulSet gives stable hostnames).
               ID0=$(printf '%s\n' "$status" | awk '/garage-ha-0/{print $1; exit}')
               ID1=$(printf '%s\n' "$status" | awk '/garage-ha-1/{print $1; exit}')
               ID2=$(printf '%s\n' "$status" | awk '/garage-ha-2/{print $1; exit}')
@@ -96,13 +119,10 @@ spec:
               fi
               echo "[$(date -Iseconds)] node IDs: 0=$ID0 1=$ID1 2=$ID2"
 
-              # Three distinct zones (z1/z2/z3) so the 3-way replication has
-              # one copy per failure domain. Capacity 100 GiB per node matches
-              # the PV size in persistentvolumes.yaml.
-              /garage layout assign --zone z1 --capacity 100000000000 "$ID0"
-              /garage layout assign --zone z2 --capacity 100000000000 "$ID1"
-              /garage layout assign --zone z3 --capacity 100000000000 "$ID2"
-              /garage layout apply --version 1
+              g layout assign --zone z1 --capacity 100000000000 "$ID0"
+              g layout assign --zone z2 --capacity 100000000000 "$ID1"
+              g layout assign --zone z3 --capacity 100000000000 "$ID2"
+              g layout apply --version 1
 
               echo "[$(date -Iseconds)] layout v1 applied"
-              /garage status
+              g status
