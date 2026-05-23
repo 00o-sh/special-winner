@@ -1,0 +1,19 @@
+---
+# Mount the second virtio disk (sdb, ~137 GB) at /var/mnt/garage-data so it
+# can host the Garage 3-zone replica running on this node. The PVE nodes'
+# system disk (sda) stays in place for everything else — this disk is
+# dedicated to Garage data only.
+#
+# Selector picks the smaller of the two virtio disks: sda is the rotational
+# system disk (~275 GB), sdb is the dedicated non-rotational data disk
+# (~137 GB). disk.rotational == false matches sdb only.
+apiVersion: v1alpha1
+kind: UserVolumeConfig
+name: garage-data
+provisioning:
+  diskSelector:
+    match: disk.transport == "virtio" && !disk.rotational
+  minSize: 100GB
+  maxSize: 150GB
+filesystem:
+  type: xfs

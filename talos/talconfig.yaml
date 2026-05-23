@@ -99,6 +99,7 @@ nodes:
           ip: 10.0.6.10
     patches:
       - "@./patches/vm-node/machine-kubelet.yaml"
+      - "@./patches/node-01-pve/user-volume-garage.yaml"
 
   - hostname: "node-02-pve"
     ipAddress: "10.0.6.213"
@@ -138,6 +139,7 @@ nodes:
           ip: 10.0.6.10
     patches:
       - "@./patches/vm-node/machine-kubelet.yaml"
+      - "@./patches/node-02-pve/user-volume-garage.yaml"
 
 
 # Global patches
