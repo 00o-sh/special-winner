@@ -1,0 +1,162 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s-labs/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: &app garage-ha
+spec:
+  interval: 2h
+  chartRef:
+    kind: OCIRepository
+    name: garage-ha-app
+  install:
+    remediation:
+      retries: 3
+  upgrade:
+    cleanupOnFail: true
+    remediation:
+      strategy: rollback
+      retries: 3
+  values:
+    controllers:
+      garage:
+        type: statefulset
+        replicas: 3
+        annotations:
+          reloader.stakater.com/auto: "true"
+        statefulset:
+          podManagementPolicy: Parallel
+          volumeClaimTemplates:
+            - name: data
+              accessMode: ReadWriteOnce
+              size: 100Gi
+              storageClass: garage-local
+              globalMounts:
+                - path: /data
+        containers:
+          app:
+            image:
+              repository: dxflrs/garage
+              tag: v2.3.0@sha256:866bd13ed2038ba7e7190e840482bc27234c4afaf77be8cfa439ae088c1e4690
+            envFrom:
+              - secretRef:
+                  name: garage-ha-secret
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities:
+                drop:
+                  - ALL
+            resources:
+              requests:
+                cpu: 100m
+                memory: 256Mi
+              limits:
+                memory: 512Mi
+    defaultPodOptions:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10000
+        runAsGroup: 10000
+        fsGroup: 10000
+        fsGroupChangePolicy: OnRootMismatch
+        seccompProfile:
+          type: RuntimeDefault
+      # One pod per node — Garage's 3-zone topology depends on each replica
+      # being on a distinct node so a node loss takes out exactly one zone.
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchLabels:
+                  app.kubernetes.io/name: *app
+              topologyKey: kubernetes.io/hostname
+    # Chart creates the ServiceAccount; the matching ClusterRole/Binding
+    # for the GarageNode CRD lives in rbac.yaml.
+    serviceAccount:
+      garage-ha: {}
+    service:
+      # Headless service used by kubernetes_discovery to enumerate peers.
+      headless:
+        controller: garage
+        clusterIP: None
+        ports:
+          rpc:
+            port: 3901
+      # Client-facing ClusterIP service (S3, admin, web). Other apps
+      # (CNPG, MariaDB, Kanidm) will point here after Phase 4 cutover.
+      app:
+        controller: garage
+        ports:
+          api:
+            port: &port 3903
+          web:
+            port: &webPort 3902
+          s3:
+            port: &s3Port 3900
+    route:
+      api:
+        annotations:
+          gatus.home-operations.com/endpoint: |-
+            name: Garage S3 API (HA)
+            group: storage
+            interval: 1m
+            urlPath: /health
+            conditions:
+              - "[STATUS] >= 200 && [STATUS] < 405"
+        hostnames:
+          - garage-ha-api.00o.sh
+        parentRefs:
+          - name: envoy-internal
+            namespace: network
+            sectionName: https
+        rules:
+          - backendRefs:
+              - name: *app
+                port: *port
+      s3:
+        annotations:
+          gatus.home-operations.com/endpoint: |-
+            name: Garage S3 (HA)
+            group: storage
+            interval: 1m
+            urlPath: /health
+            conditions:
+              - "[STATUS] >= 200 && [STATUS] < 405"
+        hostnames:
+          - garage-ha-s3.00o.sh
+        parentRefs:
+          - name: envoy-internal
+            namespace: network
+            sectionName: https
+        rules:
+          - backendRefs:
+              - name: *app
+                port: *s3Port
+      web:
+        annotations:
+          gatus.home-operations.com/endpoint: |-
+            name: Garage Bucket Web Access (HA)
+            group: storage
+            interval: 1m
+            urlPath: /
+            conditions:
+              - "[STATUS] >= 200 && [STATUS] < 405"
+        hostnames:
+          - garage-ha-web.00o.sh
+        parentRefs:
+          - name: envoy-internal
+            namespace: network
+            sectionName: https
+        rules:
+          - backendRefs:
+              - name: *app
+                port: *webPort
+    persistence:
+      config:
+        enabled: true
+        type: configMap
+        name: garage-ha
+        globalMounts:
+          - path: /etc/garage.toml
+            subPath: configuration.toml

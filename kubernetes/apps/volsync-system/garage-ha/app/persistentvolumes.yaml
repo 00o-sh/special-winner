@@ -1,0 +1,88 @@
+---
+# Three pre-created PVs, one per node, for the Garage HA StatefulSet's
+# volumeClaimTemplate. Each PV pins to a specific node via nodeAffinity;
+# Garage pods schedule via anti-affinity (one-per-node), and each pod's
+# PVC binds to the PV whose nodeAffinity matches the scheduled node.
+#
+# Volumes are `hostPath` with `type: DirectoryOrCreate` so kubelet creates
+# the path on first mount — no manual mkdir needed on any node.
+# - PVE nodes: path is on the sdb mount set up by Talos UserVolumeConfig.
+# - singlenodemaster: path is a subdirectory of the existing /var/mnt/nvme-data
+#   mount; kubelet creates the subdirectory the first time.
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: garage-ha-data-singlenodemaster
+  labels:
+    app.kubernetes.io/name: garage-ha
+spec:
+  capacity:
+    storage: 100Gi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: garage-local
+  volumeMode: Filesystem
+  hostPath:
+    path: /var/mnt/nvme-data/garage-data
+    type: DirectoryOrCreate
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: kubernetes.io/hostname
+              operator: In
+              values:
+                - singlenodemaster
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: garage-ha-data-node-01-pve
+  labels:
+    app.kubernetes.io/name: garage-ha
+spec:
+  capacity:
+    storage: 100Gi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: garage-local
+  volumeMode: Filesystem
+  hostPath:
+    path: /var/mnt/garage-data
+    type: DirectoryOrCreate
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: kubernetes.io/hostname
+              operator: In
+              values:
+                - node-01-pve
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: garage-ha-data-node-02-pve
+  labels:
+    app.kubernetes.io/name: garage-ha
+spec:
+  capacity:
+    storage: 100Gi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: garage-local
+  volumeMode: Filesystem
+  hostPath:
+    path: /var/mnt/garage-data
+    type: DirectoryOrCreate
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: kubernetes.io/hostname
+              operator: In
+              values:
+                - node-02-pve

@@ -1,0 +1,12 @@
+---
+# Dedicated StorageClass for Garage HA replicas. No dynamic provisioning —
+# each PV is hand-crafted with a per-node path and node affinity (see
+# persistentvolumes.yaml). WaitForFirstConsumer ensures a PVC binds only
+# after its pod is scheduled, picking the PV whose node matches.
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: garage-local
+provisioner: kubernetes.io/no-provisioner
+volumeBindingMode: WaitForFirstConsumer
+reclaimPolicy: Retain
