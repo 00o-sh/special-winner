@@ -1,12 +1,9 @@
 ---
-# ServiceAccount + RBAC for Garage's kubernetes-discovery feature. Garage
-# uses a `GarageNode` CRD entry per peer to advertise itself and discover
-# others, so each instance needs to read/write that CRD across the cluster.
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  name: garage-ha
----
+# RBAC for Garage's kubernetes-discovery feature. Garage uses a `GarageNode`
+# CRD entry per peer to advertise itself and discover others, so each
+# instance needs to read/write that CRD across the cluster.
+# The ServiceAccount itself is created by the app-template chart via
+# `serviceAccount.garage-ha: {}` in helmrelease.yaml.
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:

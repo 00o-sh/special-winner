@@ -54,8 +54,6 @@ spec:
               limits:
                 memory: 512Mi
     defaultPodOptions:
-      serviceAccount:
-        name: garage-ha
       securityContext:
         runAsNonRoot: true
         runAsUser: 10000
@@ -73,14 +71,10 @@ spec:
                 matchLabels:
                   app.kubernetes.io/name: *app
               topologyKey: kubernetes.io/hostname
+    # Chart creates the ServiceAccount; the matching ClusterRole/Binding
+    # for the GarageNode CRD lives in rbac.yaml.
     serviceAccount:
-      garage-ha:
-        # ServiceAccount itself is created by rbac.yaml (with the matching
-        # ClusterRole/Binding for the GarageNode CRD); referenced above
-        # via defaultPodOptions.serviceAccount.name. This block exists only
-        # so app-template doesn't auto-create a competing SA.
-        identifier: garage-ha
-        enabled: false
+      garage-ha: {}
     service:
       # Headless service used by kubernetes_discovery to enumerate peers.
       headless:
