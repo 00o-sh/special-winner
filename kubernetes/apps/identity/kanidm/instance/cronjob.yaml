@@ -41,7 +41,7 @@ spec:
                   fi
               env:
                 - name: S3_ENDPOINT
-                  value: http://garage.volsync-system.svc.cluster.local:3900
+                  value: http://garage-ha-app.volsync-system.svc.cluster.local:3900
                 - name: AWS_ACCESS_KEY_ID
                   valueFrom:
                     secretKeyRef:

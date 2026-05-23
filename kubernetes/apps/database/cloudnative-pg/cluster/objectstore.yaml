@@ -6,7 +6,7 @@ metadata:
 spec:
   configuration:
     destinationPath: s3://cnpg/
-    endpointURL: http://garage.volsync-system.svc.cluster.local:3900
+    endpointURL: http://garage-ha-app.volsync-system.svc.cluster.local:3900
     s3Credentials:
       accessKeyId:
         name: cloudnative-pg-secret
