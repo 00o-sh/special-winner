@@ -500,6 +500,11 @@ app/freepbx-b3-k3s01:
       - any-glob-to-any-file:
           - kubernetes/apps/voip/freepbx-b3-k3s01/**/*
 
+app/garage-ha:
+  - changed-files:
+      - any-glob-to-any-file:
+          - kubernetes/apps/volsync-system/garage-ha/**/*
+
 app/garage:
   - changed-files:
       - any-glob-to-any-file:

@@ -302,6 +302,9 @@
 - name: app/freepbx-b3-k3s01
   color: "6f42c1"
   description: "freepbx-b3-k3s01 in voip"
+- name: app/garage-ha
+  color: "6f42c1"
+  description: "garage-ha in volsync-system"
 - name: app/garage
   color: "6f42c1"
   description: "garage in volsync-system"
