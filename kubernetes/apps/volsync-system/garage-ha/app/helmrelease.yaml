@@ -72,6 +72,11 @@ spec:
               limits:
                 memory: 512Mi
     defaultPodOptions:
+      # app-template v5 doesn't auto-mount SA tokens by default. Garage's
+      # kubernetes_discovery feature talks to the K8s API to publish/discover
+      # its GarageNode CRD entries; without the token, peers never see each
+      # other.
+      automountServiceAccountToken: true
       securityContext:
         runAsNonRoot: true
         runAsUser: 10000
