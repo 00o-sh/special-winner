@@ -4,11 +4,11 @@
 # Garage pods schedule via anti-affinity (one-per-node), and each pod's
 # PVC binds to the PV whose nodeAffinity matches the scheduled node.
 #
-# PVE node paths (/var/mnt/garage-data) are dedicated mounts of sdb, set
-# up by Talos UserVolumeConfig in talos/patches/node-0{1,2}-pve/.
-# singlenodemaster reuses its existing /var/mnt/nvme-data mount; the
-# garage-data/ subdirectory there is created by an init Job before this
-# manifest is applied (see PR description).
+# Volumes are `hostPath` with `type: DirectoryOrCreate` so kubelet creates
+# the path on first mount — no manual mkdir needed on any node.
+# - PVE nodes: path is on the sdb mount set up by Talos UserVolumeConfig.
+# - singlenodemaster: path is a subdirectory of the existing /var/mnt/nvme-data
+#   mount; kubelet creates the subdirectory the first time.
 apiVersion: v1
 kind: PersistentVolume
 metadata:
@@ -23,8 +23,9 @@ spec:
   persistentVolumeReclaimPolicy: Retain
   storageClassName: garage-local
   volumeMode: Filesystem
-  local:
+  hostPath:
     path: /var/mnt/nvme-data/garage-data
+    type: DirectoryOrCreate
   nodeAffinity:
     required:
       nodeSelectorTerms:
@@ -48,8 +49,9 @@ spec:
   persistentVolumeReclaimPolicy: Retain
   storageClassName: garage-local
   volumeMode: Filesystem
-  local:
+  hostPath:
     path: /var/mnt/garage-data
+    type: DirectoryOrCreate
   nodeAffinity:
     required:
       nodeSelectorTerms:
@@ -73,8 +75,9 @@ spec:
   persistentVolumeReclaimPolicy: Retain
   storageClassName: garage-local
   volumeMode: Filesystem
-  local:
+  hostPath:
     path: /var/mnt/garage-data
+    type: DirectoryOrCreate
   nodeAffinity:
     required:
       nodeSelectorTerms:
