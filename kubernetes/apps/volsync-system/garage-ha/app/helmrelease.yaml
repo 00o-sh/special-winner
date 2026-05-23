@@ -33,6 +33,24 @@ spec:
               storageClass: garage-local
               globalMounts:
                 - path: /data
+        initContainers:
+          # hostPath / local PVs don't honor fsGroup, so the directory
+          # kubelet creates is root:root mode 0755 and the non-root Garage
+          # process can't write. Chown to the pod's UID/GID once per start.
+          chown-data:
+            image:
+              repository: ghcr.io/home-operations/busybox
+              tag: 1.37.0@sha256:026ed7273270ec08f6902b4ae8334c23b473e5394bec3bbbdbfe580c710d50bc
+            command: ["sh", "-c", "chown -R 10000:10000 /data"]
+            securityContext:
+              runAsUser: 0
+              runAsGroup: 0
+              runAsNonRoot: false
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities:
+                drop: [ALL]
+                add: [CHOWN]
         containers:
           app:
             image:
