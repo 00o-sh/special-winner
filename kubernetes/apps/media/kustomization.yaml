@@ -5,7 +5,7 @@ namespace: media
 
 components:
   - ../../components/alerts
-  - ../../components/sops
+  - ../../components/cluster-secrets
 
 resources:
   - ./namespace.yaml
