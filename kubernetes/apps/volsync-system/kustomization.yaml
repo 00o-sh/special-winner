@@ -79,3 +79,4 @@ resources:
   - ./kopia/ks.yaml
   - ./volsync/ks.yaml
   - ./garage/ks.yaml
+  - ./garage-ha/ks.yaml

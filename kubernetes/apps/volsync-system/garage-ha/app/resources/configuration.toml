@@ -1,0 +1,32 @@
+metadata_dir = "/data/meta"
+data_dir = "/data/data"
+db_engine = "lmdb"
+metadata_auto_snapshot_interval = "6h"
+
+replication_factor = 3
+compression_level = 2
+
+rpc_bind_addr = "[::]:3901"
+# Auto-pick the pod IP from the cluster pod CIDR for inter-instance RPC.
+# Pod CIDR is defined in cluster.yaml (172.30.0.0/16, see CLAUDE.md).
+rpc_public_addr_subnet = "172.30.0.0/16"
+
+[s3_api]
+s3_region = "USTX01"
+api_bind_addr = "[::]:3900"
+root_domain = ".garage-s3.00o.sh"
+
+[s3_web]
+bind_addr = "[::]:3902"
+root_domain = ".garage-web.00o.sh"
+
+[admin]
+api_bind_addr = "[::]:3903"
+
+# Peer discovery: each pod registers itself in a `GarageNode` CRD entry
+# in this namespace; peers find each other by listing the CRD. RBAC for
+# the CRD is granted via rbac.yaml.
+[kubernetes_discovery]
+namespace = "volsync-system"
+service_name = "garage-ha-headless"
+skip_crd = false

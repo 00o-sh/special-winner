@@ -1,0 +1,85 @@
+---
+# Three pre-created PVs, one per node, for the Garage HA StatefulSet's
+# volumeClaimTemplate. Each PV pins to a specific node via nodeAffinity;
+# Garage pods schedule via anti-affinity (one-per-node), and each pod's
+# PVC binds to the PV whose nodeAffinity matches the scheduled node.
+#
+# PVE node paths (/var/mnt/garage-data) are dedicated mounts of sdb, set
+# up by Talos UserVolumeConfig in talos/patches/node-0{1,2}-pve/.
+# singlenodemaster reuses its existing /var/mnt/nvme-data mount; the
+# garage-data/ subdirectory there is created by an init Job before this
+# manifest is applied (see PR description).
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: garage-ha-data-singlenodemaster
+  labels:
+    app.kubernetes.io/name: garage-ha
+spec:
+  capacity:
+    storage: 100Gi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: garage-local
+  volumeMode: Filesystem
+  local:
+    path: /var/mnt/nvme-data/garage-data
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: kubernetes.io/hostname
+              operator: In
+              values:
+                - singlenodemaster
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: garage-ha-data-node-01-pve
+  labels:
+    app.kubernetes.io/name: garage-ha
+spec:
+  capacity:
+    storage: 100Gi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: garage-local
+  volumeMode: Filesystem
+  local:
+    path: /var/mnt/garage-data
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: kubernetes.io/hostname
+              operator: In
+              values:
+                - node-01-pve
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: garage-ha-data-node-02-pve
+  labels:
+    app.kubernetes.io/name: garage-ha
+spec:
+  capacity:
+    storage: 100Gi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: garage-local
+  volumeMode: Filesystem
+  local:
+    path: /var/mnt/garage-data
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: kubernetes.io/hostname
+              operator: In
+              values:
+                - node-02-pve
