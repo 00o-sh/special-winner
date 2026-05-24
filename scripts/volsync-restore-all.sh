@@ -200,76 +200,6 @@ function phase_wait_for_restores() {
     log info "Restore phase complete"
 }
 
-function phase_restore_garage_meta() {
-    # garage-meta is NOT a VolSync-managed PVC (RWO + no CSI snapshot support
-    # makes copyMethod=Direct unsafe; we corrupted the PVC trying it). It's
-    # backed up by an in-pod sidecar that rsyncs /meta/ to NFS daily. Restore
-    # = stop Garage, copy NFS → PVC, seed db.lmdb from the latest snapshot,
-    # start Garage.
-    log info "Phase 6: Restoring garage-meta from NFS"
-
-    log info "Scaling Garage to 0"
-    kubectl -n volsync-system scale deploy garage --replicas=0
-    kubectl -n volsync-system wait pod \
-        -l app.kubernetes.io/name=garage \
-        --for=delete --timeout=60s 2>/dev/null || true
-
-    log info "Applying garage-meta restore Job"
-    kubectl delete job -n volsync-system garage-meta-restore --ignore-not-found
-    kubectl apply -f - <<'EOF'
-apiVersion: batch/v1
-kind: Job
-metadata: { name: garage-meta-restore, namespace: volsync-system }
-spec:
-  ttlSecondsAfterFinished: 600
-  backoffLimit: 0
-  template:
-    spec:
-      restartPolicy: Never
-      securityContext: { fsGroup: 10000, runAsUser: 10000, runAsGroup: 10000 }
-      containers:
-      - name: restore
-        image: alpine:3
-        command: ["sh","-c"]
-        args:
-        - |
-          set -eux
-          LATEST=$(ls -1 /backup/snapshots 2>/dev/null | sort | tail -1)
-          if [ -z "$LATEST" ]; then
-            echo "FATAL: no snapshots found under /backup/snapshots/"; exit 1
-          fi
-          echo "Restoring from snapshot: $LATEST"
-          find /dst -mindepth 1 -delete
-          for f in cluster_layout data_layout node_key node_key.pub peer_list lifecycle_worker_state scrub_info; do
-            [ -e "/backup/$f" ] && cp -v "/backup/$f" "/dst/$f"
-          done
-          chmod 600 /dst/node_key
-          mkdir -p /dst/snapshots /dst/db.lmdb
-          cp -rv /backup/snapshots/. /dst/snapshots/
-          cp -v "/backup/snapshots/${LATEST}/db.lmdb" /dst/db.lmdb/data.mdb
-        volumeMounts:
-        - { name: backup, mountPath: /backup }
-        - { name: dst,    mountPath: /dst }
-      volumes:
-      - name: backup
-        nfs: { server: nas.3226texas.com, path: /mnt/Speed/Kubernetes/apps/garage/meta-backup }
-      - name: dst
-        persistentVolumeClaim: { claimName: garage-meta }
-EOF
-
-    log info "Waiting for restore Job to complete (timeout 10m)"
-    if ! kubectl -n volsync-system wait --for=condition=Complete \
-            job/garage-meta-restore --timeout=10m; then
-        log warn "garage-meta restore Job did not complete"
-        kubectl logs -n volsync-system -l job-name=garage-meta-restore --tail=30
-        log warn "Continuing anyway; Garage will start with whatever's on the PVC"
-    fi
-
-    log info "Scaling Garage back to 1"
-    kubectl -n volsync-system scale deploy garage --replicas=1
-    log info "garage-meta restore complete"
-}
-
 function phase_resume_kustomizations() {
     log info "Phase 5: Resuming Flux Kustomizations"
     for entry in "${APPS[@]}"; do
@@ -296,7 +226,6 @@ function main() {
     phase_scale_down
     phase_patch_replication_destinations
     phase_wait_for_restores
-    phase_restore_garage_meta
     phase_resume_kustomizations
 
     log info "Done. Monitor with: flux get ks -A && kubectl get replicationdestination -A"
