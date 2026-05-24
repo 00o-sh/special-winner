@@ -121,14 +121,14 @@ spec:
       api:
         annotations:
           gatus.home-operations.com/endpoint: |-
-            name: Garage S3 API (HA)
+            name: Garage S3 API
             group: storage
             interval: 1m
             urlPath: /health
             conditions:
               - "[STATUS] >= 200 && [STATUS] < 405"
         hostnames:
-          - garage-ha-api.00o.sh
+          - garage-api.00o.sh
         parentRefs:
           - name: envoy-internal
             namespace: network
@@ -140,14 +140,14 @@ spec:
       s3:
         annotations:
           gatus.home-operations.com/endpoint: |-
-            name: Garage S3 (HA)
+            name: Garage S3
             group: storage
             interval: 1m
             urlPath: /health
             conditions:
               - "[STATUS] >= 200 && [STATUS] < 405"
         hostnames:
-          - garage-ha-s3.00o.sh
+          - garage-s3.00o.sh
         parentRefs:
           - name: envoy-internal
             namespace: network
@@ -159,14 +159,14 @@ spec:
       web:
         annotations:
           gatus.home-operations.com/endpoint: |-
-            name: Garage Bucket Web Access (HA)
+            name: Garage Bucket Web Access
             group: storage
             interval: 1m
             urlPath: /
             conditions:
               - "[STATUS] >= 200 && [STATUS] < 405"
         hostnames:
-          - garage-ha-web.00o.sh
+          - garage-web.00o.sh
         parentRefs:
           - name: envoy-internal
             namespace: network
