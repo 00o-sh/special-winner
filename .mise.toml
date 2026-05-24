@@ -2,6 +2,12 @@
 # Run `mise trust && mise install` to install all tools.
 # Versions are pinned for reproducibility; Renovate updates them automatically.
 
+[plugins]
+# Backend for installing krew kubectl plugins via mise. Pinned to a commit
+# SHA (not the tag) because mise can't fetch annotated tags via `#ref`.
+# renovate: datasource=github-tags depName=soupglasses/mise-krew
+krew = "https://github.com/soupglasses/mise-krew#49c405114856112d2d4cc1eb55eddee0249f5f51" # 2.1.0
+
 [env]
 _.python.venv = { path = "{{config_root}}/.venv", create = true }
 KUBECONFIG = "{{config_root}}/kubeconfig"
