@@ -2,6 +2,10 @@
 
 This document provides comprehensive guidance for AI assistants working with this Kubernetes cluster template repository.
 
+## Session State
+
+**Read this first.** Active session context — work-in-progress, recent incidents, running background monitors, open threads — lives in `.claude/session.md` (untracked, local-only). Check it at the start of every session and update it as work proceeds. Keep entries terse and dated.
+
 ## Project Overview
 
 **Repository**: Kubernetes Cluster Template (based on onedr0p/cluster-template)
@@ -757,7 +761,8 @@ talosctl logs --nodes <ip> --insecure
 **voip**: VoIP and telephony (currently inactive — namespace exists but all HelmReleases commented out)
 
 **volsync-system**: Backup and replication
-- garage (S3-compatible storage backend)
+- garage-ha (3-zone HA S3-compatible storage backend; 3-replica StatefulSet, replication_factor=3, one zone per node)
+- garage-ha-webui (browser UI for garage-ha at garage.00o.sh)
 - kopia (backup repository)
 - volsync (volume replication)
 
@@ -798,6 +803,9 @@ Check `.mise.toml` for exact versions of all tools.
 
 ## Recent Notable Changes
 
+- **2026-05-24**: `feat(mise): register soupglasses/mise-krew backend` (#1038) — kubectl plugins can now be pinned in `.mise.toml` as `"krew:<plugin>" = "<version>"` and managed by mise alongside aqua/pipx tools. Backend itself pinned to v2.1.0 with a Renovate hint.
+- **2026-05-23 → 2026-05-24**: **Garage 3-zone HA migration** (PRs #1020, #1021, #1023, #1024, #1026, #1028, #1029, #1034, #1036) — replaced the single-instance `garage` deployment with a 3-replica `garage-ha` StatefulSet (one pod per node, anti-affinity, replication_factor=3). Migration phases: (1) Talos UserVolumeConfig mounted sdb on PVE nodes at `/var/mnt/garage-data`; (2) StatefulSet + pre-created hostPath PVs (`DirectoryOrCreate` so kubelet auto-creates the directory) + StorageClass `garage-local` + RBAC for `GarageNode` CRD (kubernetes_discovery); fix PRs landed initContainer chown for non-root pod, `automountServiceAccountToken: true`, and a Job-pod label that avoided the StatefulSet's anti-affinity; (3) layout bootstrap documented in `kubernetes/apps/volsync-system/garage-ha/README.md` (in-cluster Job dropped — distroless garage image + non-idempotent `garage layout apply --version N` made it more complex than it was worth); rclone-synced ~38 GB of unique blocks (~287 GiB logical) old→new with consumer credentials preserved (same key IDs imported); (4) cut over CNPG `objectstore.yaml`, MariaDB `Backup`, and Kanidm backup-sync CronJob endpoints from `garage.volsync-system.svc...` to `garage-ha-app.volsync-system.svc...`; (5) decommissioned old garage (Deployment + `garage-meta` PVC + `garage-webui` + Phase 6 of `volsync-restore-all.sh` + the `GarageMetaBackupSidecar*` PrometheusRules) and stood up `garage-ha-webui` against the new cluster; (6) HTTPRoute hostnames moved back to canonical `garage{,-api,-s3,-web}.00o.sh` (dropped the `garage-ha-` prefix). Mid-migration learning: 300 MiB/s rclone bursts wedged SNM's XFS into an `lstat → input/output error` state with no kernel-side errors; reboot remounted cleanly, garage anti-entropy resynced the third zone. NAS-side `/mnt/Speed/Kubernetes/apps/garage/` (9.4 GB orphan data) reclaimed.
+- **2026-05-22 → 2026-05-23**: **SOPS retirement** (PRs #1013, #1014, #1015, #1016, #1017) — migrated all in-cluster `*.sops.yaml` secrets to `ExternalSecret` + 1Password. Per-app PRs covered cloudflare-dns, cloudflare-tunnel, cert-manager, flux-instance (github-webhook-token), and the cluster-wide `cluster-secrets` Secret used by Flux `postBuild.substituteFrom` (moved the kustomize component from `components/sops/` to `components/cluster-secrets/`). Existing 1Password items contained matching values; only `flux-instance` and `cluster-secrets` items needed creating. Bootstrap items (`bootstrap/*.sops.yaml`) intentionally left for a future bootstrap-script rewrite to use `op` directly.
 - **2026-05-15**: Multi-event recovery session — node-01 and node-02 boot disks corrupted during Talos 1.12→1.13 upgrades; recovered CNPG (postgres-4 promoted, switched WAL archive serverName to `postgres-r2`), MariaDB Galera (rejoined after orphan PVC delete), Kanidm (restored from 2026-05-14 02:00 S3 backup + kanidmd recover-account for kaniop creds), Forgejo (VolSync restore), unifi-toolkit (VolSync restore). Wrote runbook at `docs/operations/node-loss-recovery.md`. Removed `plane` namespace entirely.
 - **2026-05-15**: Kubernetes upgraded to 1.36.1 (Tuppr-driven rolling kubelet upgrade); kguardian chart bumped to 1.11.1 (required strategy-conflict workaround — delete kguardian-db Deployment so Helm doesn't three-way-merge old rollingUpdate fields, plus postRenderer adding `storageClassName: openebs-hostpath` since chart now uses a PVC)
 - **2026-05-15**: Garage architecture changed — LMDB meta moved off NFS (where it threw `Resource temporarily unavailable` EAGAIN) onto a local `openebs-hostpath` PVC (`garage-meta`). Data dir stays on NFS. Off-node durability provided by an in-pod `backup-sync` sidecar that mirrors `/meta/` (minus live `db.lmdb/`) to `/mnt/Speed/Kubernetes/apps/garage/meta-backup/` daily. Restore Job added as Phase 6 to `scripts/volsync-restore-all.sh`. PrometheusRules `GarageMetaBackupSidecarRestarted` (warning) and `GarageMetaBackupSidecarAbsent` (critical) alert via existing AlertManager→Discord.
