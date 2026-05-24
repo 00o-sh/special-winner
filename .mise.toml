@@ -2,6 +2,9 @@
 # Run `mise trust && mise install` to install all tools.
 # Versions are pinned for reproducibility; Renovate updates them automatically.
 
+[settings]
+experimental = true  # Required for custom backends (mise-krew)
+
 [plugins]
 # Backend for installing krew kubectl plugins via mise. Pinned to a commit
 # SHA (not the tag) because mise can't fetch annotated tags via `#ref`.
@@ -37,6 +40,11 @@ TALOSCONFIG = "{{config_root}}/talos/clusterconfig/talosconfig"
 "aqua:yannh/kubeconform" = "0.7.0"            # Kubernetes manifest validation
 "aqua:derailed/k9s" = "0.50.18"               # Terminal-based Kubernetes dashboard
 "aqua:kubevirt/kubevirt/virtctl" = "1.8.2"    # KubeVirt VM management CLI
+
+# kubectl plugins (via mise-krew backend; registered in [plugins])
+"krew:tree" = "v0.6.0"                        # kubectl tree (owner-reference graph)
+"krew:node-shell" = "v1.11.0"                 # Shell into a node via privileged pod (Talos-friendly)
+"krew:cnpg" = "v1.29.1"                       # CloudNativePG cluster operations
 
 # Networking
 "aqua:cilium/cilium-cli" = "0.19.2"           # Cilium CNI management and connectivity testing
