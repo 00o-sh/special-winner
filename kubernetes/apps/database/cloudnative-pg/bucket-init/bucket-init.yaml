@@ -29,10 +29,10 @@ spec:
             - /bin/sh
             - -c
             - |
-              aws --endpoint-url http://garage.volsync-system.svc.cluster.local:3900 \
+              aws --endpoint-url http://garage-ha-app.volsync-system.svc.cluster.local:3900 \
                 s3api head-bucket --bucket cnpg 2>/dev/null && \
                 echo "Bucket cnpg already exists" && exit 0
-              aws --endpoint-url http://garage.volsync-system.svc.cluster.local:3900 \
+              aws --endpoint-url http://garage-ha-app.volsync-system.svc.cluster.local:3900 \
                 s3 mb s3://cnpg && \
                 echo "Bucket cnpg created successfully"
           securityContext:

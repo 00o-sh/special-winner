@@ -15,7 +15,7 @@ spec:
     s3:
       bucket: mariadb-backups
       prefix: galera
-      endpoint: garage.volsync-system.svc.cluster.local:3900
+      endpoint: garage-ha-app.volsync-system.svc.cluster.local:3900
       region: USTX01
       accessKeyIdSecretKeyRef:
         name: mariadb-secret
