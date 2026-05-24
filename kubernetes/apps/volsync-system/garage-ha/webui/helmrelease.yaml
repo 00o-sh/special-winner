@@ -62,7 +62,7 @@ spec:
             name: Garage Portal
             group: storage
         hostnames:
-          - garage-ha.00o.sh
+          - garage.00o.sh
         parentRefs:
           - name: envoy-internal
             namespace: network
