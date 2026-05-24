@@ -305,9 +305,6 @@
 - name: app/garage-ha
   color: "6f42c1"
   description: "garage-ha in volsync-system"
-- name: app/garage
-  color: "6f42c1"
-  description: "garage in volsync-system"
 - name: app/kopia
   color: "6f42c1"
   description: "kopia in volsync-system"
