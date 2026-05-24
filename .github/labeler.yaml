@@ -505,11 +505,6 @@ app/garage-ha:
       - any-glob-to-any-file:
           - kubernetes/apps/volsync-system/garage-ha/**/*
 
-app/garage:
-  - changed-files:
-      - any-glob-to-any-file:
-          - kubernetes/apps/volsync-system/garage/**/*
-
 app/kopia:
   - changed-files:
       - any-glob-to-any-file:
