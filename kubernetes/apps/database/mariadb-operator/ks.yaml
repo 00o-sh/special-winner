@@ -25,7 +25,7 @@ spec:
     - name: mariadb-operator
     - name: onepassword
       namespace: external-secrets
-    - name: garage
+    - name: garage-ha
       namespace: volsync-system
   interval: 1h
   path: ./kubernetes/apps/database/mariadb-operator/bucket-init
