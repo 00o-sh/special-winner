@@ -1,0 +1,89 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/kustomize.toolkit.fluxcd.io/kustomization_v1.json
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: posthog-bucket-init
+  namespace: analytics
+spec:
+  commonMetadata:
+    labels:
+      app.kubernetes.io/name: posthog-bucket-init
+  dependsOn:
+    - name: onepassword
+      namespace: external-secrets
+    - name: garage-ha
+      namespace: volsync-system
+  interval: 1h
+  path: ./kubernetes/apps/analytics/posthog/bucket-init
+  prune: true
+  retryInterval: 2m
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+    namespace: flux-system
+  targetNamespace: analytics
+  timeout: 5m
+  wait: true
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/kustomize.toolkit.fluxcd.io/kustomization_v1.json
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: posthog-db-init
+  namespace: analytics
+spec:
+  commonMetadata:
+    labels:
+      app.kubernetes.io/name: posthog-db-init
+  dependsOn:
+    - name: onepassword
+      namespace: external-secrets
+    - name: postgres-cluster
+      namespace: database
+  interval: 1h
+  path: ./kubernetes/apps/analytics/posthog/db-init
+  prune: true
+  retryInterval: 2m
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+    namespace: flux-system
+  targetNamespace: analytics
+  timeout: 5m
+  wait: true
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/kustomize.toolkit.fluxcd.io/kustomization_v1.json
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: posthog
+  namespace: analytics
+spec:
+  commonMetadata:
+    labels:
+      app.kubernetes.io/name: posthog
+  dependsOn:
+    - name: posthog-bucket-init
+    - name: posthog-db-init
+    - name: kafka
+      namespace: database
+    - name: clickhouse-cluster
+      namespace: database
+    - name: dragonfly
+      namespace: database
+  interval: 1h
+  path: ./kubernetes/apps/analytics/posthog/app
+  postBuild:
+    substituteFrom:
+      - kind: Secret
+        name: cluster-secrets
+  prune: true
+  retryInterval: 2m
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+    namespace: flux-system
+  targetNamespace: analytics
+  timeout: 15m
+  wait: false
