@@ -43,7 +43,7 @@ spec:
     - name: cloudnative-pg
     - name: onepassword
       namespace: external-secrets
-    - name: garage
+    - name: garage-ha
       namespace: volsync-system
   interval: 1h
   path: ./kubernetes/apps/database/cloudnative-pg/bucket-init
