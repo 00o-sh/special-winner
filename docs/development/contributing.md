@@ -81,7 +81,7 @@ securityContext:
 3. Don't skip `task configure` after template changes
 4. Don't push directly to main
 5. Be aware of **Helm v4** breaking changes from v3
-6. Some workflows need the self-hosted runner (`special-winner-runner`)
+6. Some workflows need the self-hosted runner (`00o-sh-runner`)
 
 ## Bash Script Conventions
 

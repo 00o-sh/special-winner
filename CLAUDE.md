@@ -468,7 +468,7 @@ When adding a new Kubernetes application:
 6. **Don't add comments/docstrings** to code you didn't modify
 7. **Don't create abstractions** for one-time operations
 8. **Be aware of Helm v4** - The repository uses Helm 4.1.1, which has breaking changes from v3 (see bootstrap scripts)
-9. **Self-hosted runners** - Be aware that some workflows run on `special-winner-runner` (self-hosted) which has cluster access
+9. **Self-hosted runners** - Be aware that some workflows run on `00o-sh-runner` (self-hosted) which has cluster access
 
 ### File Location Reference
 
@@ -566,7 +566,7 @@ Automated container image pre-pulling workflow:
 - Extracts images from Flux manifests on PRs
 - Compares images between PR and main branch
 - Automatically pulls new images to cluster nodes using Talosctl
-- Runs on self-hosted runner (special-winner-runner)
+- Runs on self-hosted runner (00o-sh-runner)
 - Prevents image pull delays during deployments
 - Max parallel pulls: 4
 
@@ -575,7 +575,7 @@ CRD schema extraction and publishing:
 - Scheduled daily and on workflow changes
 - Extracts Kubernetes CRD schemas using datreeio/crd-extractor
 - Publishes schemas to Cloudflare Pages (kubernetes-schemas project)
-- Runs on self-hosted runner (special-winner-runner)
+- Runs on self-hosted runner (00o-sh-runner)
 - Uses Python 3.14 and Node 24.x for processing
 - Enables IDE autocompletion and validation for custom resources
 
@@ -659,7 +659,7 @@ talosctl logs --nodes <ip> --insecure
 ### Current Namespaces and Applications
 
 **actions-runner-system**: GitHub Actions Infrastructure
-- actions-runner-controller (self-hosted runner controller with scale sets for special-winner and ambersecurityinc orgs)
+- actions-runner-controller (self-hosted runner controller with scale sets for 00o-sh, ambersecurityinc, bbbconsulting, bitbybitconsulting, and thetechnetwork orgs)
 
 **cert-manager**: Certificate management
 - cert-manager
@@ -948,9 +948,12 @@ Located in `kubernetes/apps/actions-runner-system/`, this system provides self-h
 - **actions-runner-controller**: Manages GitHub Actions Runner Scale Sets
 - **runners**: Ephemeral runner pods that execute GitHub Actions workflows
 
-**Runner Scale Sets**:
-- **special-winner**: Runners for this repository's workflows
-- **ambersecurityinc**: Runners for the ambersecurityinc GitHub organization (minRunners: 1, maxRunners: 3, 25Gi storage)
+**Runner Scale Sets** (all authenticate via one shared GitHub App; per-org INSTALLATION_ID overlays in 1Password):
+- **00o-sh**: Runners for the 00o-sh GitHub user account (minRunners: 1, maxRunners: 3, 25Gi storage)
+- **ambersecurityinc**: Runners for the ambersecurityinc GitHub organization (minRunners: 1, maxRunners: 5, 25Gi storage)
+- **bbbconsulting**: Runners for the BBBConsulting GitHub organization (minRunners: 0, maxRunners: 5, 25Gi storage)
+- **bitbybitconsulting**: Runners for the BitByBitConsulting GitHub organization (minRunners: 0, maxRunners: 5, 25Gi storage)
+- **thetechnetwork**: Runners for the TheTechNetwork GitHub organization (minRunners: 0, maxRunners: 5, 25Gi storage)
 
 **How it works**:
 - Uses GitHub's official Actions Runner Controller (ARC) architecture

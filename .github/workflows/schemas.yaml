@@ -1,7 +1,7 @@
 ---
 # Extracts CRD schemas from the cluster and publishes to Cloudflare Pages.
 # Enables IDE autocompletion and validation for custom Kubernetes resources.
-# Runs daily on schedule and on self-hosted runner (special-winner-runner).
+# Runs daily on schedule and on self-hosted runner (00o-sh-runner).
 # yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
 name: Schemas
 
@@ -24,7 +24,7 @@ permissions:
 jobs:
   main:
     name: Schemas
-    runs-on: special-winner-runner
+    runs-on: 00o-sh-runner
     permissions:
       contents: read
       packages: write

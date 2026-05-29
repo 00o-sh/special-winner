@@ -50,7 +50,7 @@ Pre-pulls container images to cluster nodes:
 - Extracts images from Flux manifests on PRs
 - Compares images between PR and main branch
 - Pulls new images via Talosctl
-- Runs on self-hosted runner (`special-winner-runner`)
+- Runs on self-hosted runner (`00o-sh-runner`)
 - Max 4 parallel pulls
 
 ### schemas.yaml
@@ -123,7 +123,7 @@ flux-local test --enable-helm --all-namespaces
 
 This workflow runs on the self-hosted runner and needs cluster access:
 
-1. Check that the `special-winner-runner` pods are running:
+1. Check that the `00o-sh-runner` pods are running:
 
     ```sh
     kubectl -n actions-runner-system get pods
