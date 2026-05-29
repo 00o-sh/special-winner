@@ -1,7 +1,7 @@
 ---
 # Pre-pulls new container images to cluster nodes on PRs.
 # Compares images between PR and main branch, then pulls new ones via Talosctl.
-# Runs on self-hosted runner (special-winner-runner) with cluster access.
+# Runs on self-hosted runner (00o-sh-runner) with cluster access.
 # yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
 name: Image Pull
 
@@ -110,7 +110,7 @@ jobs:
     if: ${{ needs.diff.outputs.images != '[]' }}
     needs: diff
     name: Image Pull - Pull Images
-    runs-on: special-winner-runner
+    runs-on: 00o-sh-runner
     strategy:
       matrix:
         image: ${{ fromJSON(needs.diff.outputs.images) }}
