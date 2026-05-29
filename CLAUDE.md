@@ -659,7 +659,7 @@ talosctl logs --nodes <ip> --insecure
 ### Current Namespaces and Applications
 
 **actions-runner-system**: GitHub Actions Infrastructure
-- actions-runner-controller (self-hosted runner controller with scale sets for special-winner and ambersecurityinc orgs)
+- actions-runner-controller (self-hosted runner controller with scale sets for special-winner, ambersecurityinc, thetechnetwork, and bbbconsulting orgs)
 
 **cert-manager**: Certificate management
 - cert-manager
@@ -951,6 +951,8 @@ Located in `kubernetes/apps/actions-runner-system/`, this system provides self-h
 **Runner Scale Sets**:
 - **special-winner**: Runners for this repository's workflows
 - **ambersecurityinc**: Runners for the ambersecurityinc GitHub organization (minRunners: 1, maxRunners: 3, 25Gi storage)
+- **thetechnetwork**: Runners for the TheTechNetwork GitHub organization (minRunners: 0, maxRunners: 5, 25Gi storage)
+- **bbbconsulting**: Runners for the BBBConsulting GitHub organization (minRunners: 0, maxRunners: 5, 25Gi storage)
 
 **How it works**:
 - Uses GitHub's official Actions Runner Controller (ARC) architecture
