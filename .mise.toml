@@ -34,7 +34,7 @@ TALOSCONFIG = "{{config_root}}/talos/clusterconfig/talosconfig"
 # Kubernetes tools
 "aqua:kubernetes/kubectl" = "1.34.0"           # Kubernetes CLI
 "aqua:helm/helm" = "4.2.1"                    # Helm v4 package manager (breaking changes from v3)
-"aqua:helmfile/helmfile" = "1.5.2"            # Declarative Helm chart management
+"aqua:helmfile/helmfile" = "1.5.3"            # Declarative Helm chart management
 "aqua:fluxcd/flux2" = "2.8.8"                 # Flux CD GitOps toolkit CLI
 "aqua:kubernetes-sigs/kustomize" = "5.7.1"    # Kustomize for manifest composition
 "aqua:yannh/kubeconform" = "0.8.0"            # Kubernetes manifest validation
