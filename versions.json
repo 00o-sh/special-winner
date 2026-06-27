@@ -1,10 +1,15 @@
 [
   {
-    "version": "2026-06-06-12fd8f7f",
-    "title": "2026-06-06T01:16Z (12fd8f7f)",
+    "version": "2026-06-27-e58a369d",
+    "title": "2026-06-27T05:57Z (e58a369d)",
     "aliases": [
       "latest"
     ]
+  },
+  {
+    "version": "2026-06-06-12fd8f7f",
+    "title": "2026-06-06T01:16Z (12fd8f7f)",
+    "aliases": []
   },
   {
     "version": "2026-05-29-fbd103b3",
