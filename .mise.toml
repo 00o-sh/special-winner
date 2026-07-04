@@ -52,7 +52,7 @@ TALOSCONFIG = "{{config_root}}/talos/clusterconfig/talosconfig"
 
 # Secret management
 "aqua:FiloSottile/age" = "1.3.1"              # Age encryption for SOPS
-"aqua:getsops/sops" = "3.13.1"               # Secret encryption in Git
+"aqua:getsops/sops" = "3.13.2"               # Secret encryption in Git
 "aqua:1password/cli" = "2.34.1"             # 1Password CLI
 
 # Utilities
