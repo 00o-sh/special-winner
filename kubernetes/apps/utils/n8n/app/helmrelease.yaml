@@ -26,7 +26,7 @@ spec:
           app:
             image:
               repository: docker.n8n.io/n8nio/n8n
-              tag: 2.22.2@sha256:bf26d48e2be3d8a2bda50c5494dc603f495c2d98bd186793773b0204f3e7e0c3
+              tag: 2.30.3@sha256:4e9de05de2f87c34774d71a93dd9aca924adb930c4c7f2f7797b84fa93327be5
             env:
               GENERIC_TIMEZONE: America/New_York
               N8N_HOST: n8n.00o.sh
