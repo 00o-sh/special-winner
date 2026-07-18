@@ -58,7 +58,7 @@ TALOSCONFIG = "{{config_root}}/talos/clusterconfig/talosconfig"
 # Utilities
 "aqua:cli/cli" = "2.96.0"                     # GitHub CLI (gh)
 "aqua:go-task/task" = "3.52.0"               # Task runner (Taskfile.yaml)
-"aqua:cue-lang/cue" = "0.17.0"              # CUE schema validation for config files
+"aqua:cue-lang/cue" = "0.17.1"              # CUE schema validation for config files
 "aqua:jqlang/jq" = "1.8.1"                  # JSON processor
 "aqua:mikefarah/yq" = "4.53.3"              # YAML processor
 "aqua:tmux/tmux-builds" = "3.6a"            # Terminal multiplexer (prebuilt binaries)
