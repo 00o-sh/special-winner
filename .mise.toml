@@ -39,7 +39,7 @@ TALOSCONFIG = "{{config_root}}/talos/clusterconfig/talosconfig"
 "aqua:kubernetes-sigs/kustomize" = "5.7.1"    # Kustomize for manifest composition
 "aqua:yannh/kubeconform" = "0.8.0"            # Kubernetes manifest validation
 "aqua:derailed/k9s" = "0.51.0"               # Terminal-based Kubernetes dashboard
-"aqua:kubevirt/kubevirt/virtctl" = "1.8.4"    # KubeVirt VM management CLI
+"aqua:kubevirt/kubevirt/virtctl" = "1.9.0"    # KubeVirt VM management CLI
 
 # kubectl plugins (via mise-krew backend; registered in [plugins])
 "krew:tree" = "v0.6.0"                        # kubectl tree (owner-reference graph)
