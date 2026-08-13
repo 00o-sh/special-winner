@@ -16,7 +16,7 @@ spec:
           app:
             image: &image
               repository: ghcr.io/librespeed/speedtest
-              tag: 6.1.0
+              tag: 6.2.1
             env: &env
               MODE: backend
             probes:
