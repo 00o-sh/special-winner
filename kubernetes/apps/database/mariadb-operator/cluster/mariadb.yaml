@@ -8,7 +8,7 @@ spec:
     name: mariadb-secret
     key: root-password
 
-  image: docker.io/library/mariadb:11.8@sha256:be1ef4fe5f14589325c08a41c76334097ce66c86264b75e1d28342c742782a61
+  image: docker.io/library/mariadb:11.8@sha256:2439dcd7d14010ecd1ff7a4e1c5abe8e208c34fe35290744deeeaac3569043c3
 
   replicas: 3
 
