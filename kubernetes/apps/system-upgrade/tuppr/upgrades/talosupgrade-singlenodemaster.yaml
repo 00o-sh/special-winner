@@ -16,7 +16,7 @@ spec:
       kubernetes.io/hostname: singlenodemaster
   talos:
     # renovate: datasource=docker depName=talos-singlenodemaster packageName=ghcr.io/siderolabs/installer
-    version: v1.13.2
+    version: v1.13.10
   policy:
     rebootMode: powercycle
   healthChecks:
