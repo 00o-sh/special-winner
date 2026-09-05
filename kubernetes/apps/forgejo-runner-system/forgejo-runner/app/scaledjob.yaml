@@ -16,7 +16,7 @@ spec:
         serviceAccountName: forgejo-runner
         initContainers:
           - name: dind
-            image: docker:29-dind@sha256:7d85d0eda291f1a7ab6df4a9d1802b5ad4cf9145a088bd11188c78dcb5c7392b
+            image: docker:29-dind@sha256:5efed980cba3fc126cf54e21a5a6ff8849d05b6e0623d6e7612f48e9cd6cd17e
             restartPolicy: Always
             securityContext:
               privileged: true
