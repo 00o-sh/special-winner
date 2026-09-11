@@ -29,7 +29,7 @@ spec:
           containers:
             - name: backup-sync
               # renovate: datasource=docker depName=amazon/aws-cli
-              image: amazon/aws-cli:2.34.53@sha256:cf53765c0de54ad3a8ea21818f1c4c845a8cf7ca87831c078a00fef244031493
+              image: amazon/aws-cli:2.36.44@sha256:e8467f2c319f9bc9a1471808a69949a76915e9c95eaf4a09ece9f9e85fd32747
               command: ["/bin/sh", "-c"]
               args:
                 - |
