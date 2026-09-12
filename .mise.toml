@@ -25,7 +25,7 @@ TALOSCONFIG = "{{config_root}}/talos/clusterconfig/talosconfig"
 "crane" = "0.22.1"                             # Container image inspection and management
 
 # Template rendering
-"pipx:makejinja" = "2.8.2"                     # Jinja2 template engine for cluster configuration
+"pipx:makejinja" = "2.8.3"                     # Jinja2 template engine for cluster configuration
 
 # Talos Linux management
 "aqua:budimanjojo/talhelper" = "3.1.17"         # Talos config generator and helper
