@@ -1,0 +1,65 @@
+---
+# Single-replica ClickHouse for PostHog OLAP backend. Backed by openebs-hostpath
+# on whichever node it lands. Can scale to a sharded/replicated cluster later
+# when event volume warrants it; the operator supports online reshape.
+apiVersion: clickhouse.altinity.com/v1
+kind: ClickHouseInstallation
+metadata:
+  name: posthog
+spec:
+  configuration:
+    users:
+      # Plaintext-from-secret pattern — operator hashes before persisting to ZK.
+      posthog/password:
+        valueFrom:
+          secretKeyRef:
+            name: clickhouse-posthog
+            key: password
+      posthog/networks/ip: "::/0"
+      posthog/profile: default
+      posthog/quota: default
+    clusters:
+      - name: posthog
+        layout:
+          shardsCount: 1
+          replicasCount: 1
+        templates:
+          podTemplate: clickhouse
+          dataVolumeClaimTemplate: data
+  defaults:
+    templates:
+      podTemplate: clickhouse
+      dataVolumeClaimTemplate: data
+  templates:
+    podTemplates:
+      - name: clickhouse
+        spec:
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 101
+            runAsGroup: 101
+            fsGroup: 101
+            seccompProfile:
+              type: RuntimeDefault
+          containers:
+            - name: clickhouse
+              image: clickhouse/clickhouse-server:25.3
+              securityContext:
+                allowPrivilegeEscalation: false
+                readOnlyRootFilesystem: false
+                capabilities:
+                  drop: [ALL]
+              resources:
+                requests:
+                  cpu: 500m
+                  memory: 1Gi
+                limits:
+                  memory: 3Gi
+    volumeClaimTemplates:
+      - name: data
+        spec:
+          accessModes: [ReadWriteOnce]
+          storageClassName: openebs-hostpath
+          resources:
+            requests:
+              storage: 50Gi

@@ -1,0 +1,46 @@
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: posthog-bucket-init
+  labels:
+    app.kubernetes.io/name: posthog-bucket-init
+spec:
+  backoffLimit: 5
+  ttlSecondsAfterFinished: 86400
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: posthog-bucket-init
+    spec:
+      restartPolicy: OnFailure
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65532
+        runAsGroup: 65532
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: init
+          # renovate: datasource=docker depName=amazon/aws-cli
+          image: amazon/aws-cli:2.34.53@sha256:cf53765c0de54ad3a8ea21818f1c4c845a8cf7ca87831c078a00fef244031493
+          envFrom:
+            - secretRef:
+                name: posthog-s3
+          env:
+            - name: AWS_REGION
+              value: USTX01
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: [ALL]
+          command: [/bin/sh, -c]
+          args:
+            - |
+              aws --endpoint-url http://garage-ha-app.volsync-system.svc.cluster.local:3900 \
+                s3api head-bucket --bucket posthog 2>/dev/null && \
+                echo "Bucket posthog already exists" && exit 0
+              aws --endpoint-url http://garage-ha-app.volsync-system.svc.cluster.local:3900 \
+                s3 mb s3://posthog && \
+                echo "Bucket posthog created successfully"

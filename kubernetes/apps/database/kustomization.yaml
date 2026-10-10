@@ -13,3 +13,6 @@ resources:
   - ./dbgate/ks.yaml
   - ./dragonfly/ks.yaml
   - ./mariadb-operator/ks.yaml
+  - ./strimzi-kafka-operator/ks.yaml
+  - ./kafka/ks.yaml
+  - ./clickhouse/ks.yaml
