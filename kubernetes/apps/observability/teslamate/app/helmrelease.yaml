@@ -18,7 +18,7 @@ spec:
           init-db:
             image:
               repository: ghcr.io/home-operations/postgres-init
-              tag: 18@sha256:5086f94abc783f1147d7c2a32c01db00ab594820026e4f6a82ac2af3dbde7fc7
+              tag: 18@sha256:87627baaddb0cabed4ebe033e75038e5c7b6b081c18e86514c99067179a90719
             envFrom:
               - secretRef:
                   name: teslamate-secret
@@ -45,7 +45,7 @@ spec:
             #     UPDATE as postgres below so the result is identical)
             image:
               repository: ghcr.io/home-operations/postgres-init
-              tag: 18@sha256:5086f94abc783f1147d7c2a32c01db00ab594820026e4f6a82ac2af3dbde7fc7
+              tag: 18@sha256:87627baaddb0cabed4ebe033e75038e5c7b6b081c18e86514c99067179a90719
             command:
               - /bin/sh
               - -c
