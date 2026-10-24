@@ -28,7 +28,7 @@ spec:
                 mountPath: /var/lib/docker
         containers:
           - name: runner
-            image: code.forgejo.org/forgejo/runner:12.10.1@sha256:3d49075f9115054ae2485d8cea2819296a904dfd4f00017285168028615d8533
+            image: code.forgejo.org/forgejo/runner:13.2.0@sha256:ca3d5eea46004789a175d1369eec6829d3ea9bfbe2011a06625b4bdaa55f7552
             command:
               - sh
               - -c
