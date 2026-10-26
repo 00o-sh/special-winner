@@ -71,7 +71,7 @@ spec:
                 path: /spec/template/spec/initContainers
                 value:
                   - name: init-db
-                    image: ghcr.io/home-operations/postgres-init:18@sha256:5086f94abc783f1147d7c2a32c01db00ab594820026e4f6a82ac2af3dbde7fc7
+                    image: ghcr.io/home-operations/postgres-init:18@sha256:87627baaddb0cabed4ebe033e75038e5c7b6b081c18e86514c99067179a90719
                     envFrom:
                       - secretRef:
                           name: kguardian-secret
