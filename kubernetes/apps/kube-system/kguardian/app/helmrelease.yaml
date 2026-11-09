@@ -20,11 +20,11 @@ spec:
     broker:
       image:
         repository: ghcr.io/kguardian-dev/kguardian/broker
-        tag: v1.9.1@sha256:65261cdfa672c7ad61044e4fe58d945cc5b422dd64de6341aa23c46fd555570e
+        tag: v1.20.1@sha256:abc3d2a6c9de26909f42eae5b2de7c2ecb3e7795d76867eb0c0d030779b400a3
     controller:
       image:
         repository: ghcr.io/kguardian-dev/kguardian/controller
-        tag: v1.8.2
+        tag: v1.17.2
       initContainer:
         image:
           repository: busybox
@@ -38,7 +38,7 @@ spec:
     frontend:
       image:
         repository: ghcr.io/kguardian-dev/kguardian/frontend
-        tag: v1.9.0@sha256:32bb6300f51f0bdc3040d6bfa524c8ad56ecd27feb76fb28f9e46dcda7eede83
+        tag: v1.21.1@sha256:9b1b93399627485b62939bc06b351b4177f1e6d4d02ea25f0699f50b6fd210ef
     llmBridge:
       enabled: false
     mcpServer:
