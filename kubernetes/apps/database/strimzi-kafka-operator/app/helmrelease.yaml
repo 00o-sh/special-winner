@@ -1,0 +1,37 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: strimzi-kafka-operator
+spec:
+  interval: 1h
+  chart:
+    spec:
+      # renovate: datasource=helm depName=strimzi-kafka-operator
+      chart: strimzi-kafka-operator
+      version: 1.0.0
+      sourceRef:
+        kind: HelmRepository
+        name: strimzi
+  install:
+    remediation:
+      retries: 3
+    crds: CreateReplace
+  upgrade:
+    cleanupOnFail: true
+    remediation:
+      strategy: rollback
+      retries: 3
+    crds: CreateReplace
+  values:
+    # Watch Kafka custom resources across all namespaces so consumers
+    # (e.g., analytics/posthog) can reference Kafka clusters living here.
+    watchAnyNamespace: true
+    replicas: 1
+    resources:
+      requests:
+        cpu: 100m
+        memory: 256Mi
+      limits:
+        memory: 512Mi
+    nodeSelector: {}

@@ -1,0 +1,177 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s-labs/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: &app posthog
+spec:
+  interval: 2h
+  chartRef:
+    kind: OCIRepository
+    name: posthog
+  install:
+    remediation:
+      retries: 3
+  upgrade:
+    cleanupOnFail: true
+    remediation:
+      strategy: rollback
+      retries: 3
+  values:
+    defaultPodOptions:
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65534
+        runAsGroup: 65534
+        seccompProfile:
+          type: RuntimeDefault
+
+    # ── Shared image config across all controllers ───────────────────────
+    # PostHog publishes only SHA-tagged images. Track via Renovate digest
+    # hint below; bump SHA when a release we want to pin to ships.
+    # renovate: datasource=docker depName=posthog/posthog
+    _shared_image: &image
+      # renovate: ignore
+      repository: posthog/posthog
+      # The tag here is a known stable as of writing; update during PRs.
+      tag: "release-1.43.0"
+
+    controllers:
+      # ── Migrations Job — runs once on install/upgrade, blocks rollout ──
+      migrate:
+        type: job
+        annotations:
+          # Run before the long-running pods come up; rerun on chart upgrade.
+          helm.sh/hook: post-install,post-upgrade
+          helm.sh/hook-weight: "-5"
+          helm.sh/hook-delete-policy: before-hook-creation
+        job:
+          backoffLimit: 3
+          ttlSecondsAfterFinished: 86400
+        containers:
+          app:
+            image: *image
+            command: [/bin/bash, -c]
+            args:
+              - |
+                set -e
+                python manage.py migrate
+                python manage.py migrate_clickhouse
+            envFrom: &envFrom
+              - secretRef:
+                  name: posthog-secret
+            env: &env
+              SITE_URL: "https://posthog.${SECRET_DOMAIN}"
+              IS_BEHIND_PROXY: "True"
+              DISABLE_SECURE_SSL_REDIRECT: "False"
+              # PostHog auto-creates Kafka topics on startup if allowed.
+              KAFKA_AUTO_CREATE_TOPICS_ENABLE: "True"
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: false
+              capabilities:
+                drop: [ALL]
+            resources:
+              requests: { cpu: 200m, memory: 512Mi }
+              limits:   { memory: 1Gi }
+
+      # ── Web (capture + UI + admin) ───────────────────────────────────
+      web:
+        replicas: 1
+        annotations:
+          reloader.stakater.com/auto: "true"
+        containers:
+          app:
+            image: *image
+            command: [/bin/bash, -c]
+            args: ["./bin/docker-server"]
+            envFrom: *envFrom
+            env: *env
+            probes:
+              liveness:  &probes
+                enabled: true
+                custom: true
+                spec:
+                  httpGet: { path: /_health, port: 8000 }
+                  initialDelaySeconds: 30
+                  periodSeconds: 10
+              readiness: *probes
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: false
+              capabilities:
+                drop: [ALL]
+            resources:
+              requests: { cpu: 200m, memory: 512Mi }
+              limits:   { memory: 1Gi }
+
+      # ── Celery worker (background tasks) ──────────────────────────────
+      worker:
+        replicas: 1
+        annotations:
+          reloader.stakater.com/auto: "true"
+        containers:
+          app:
+            image: *image
+            command: [/bin/bash, -c]
+            args: ["./bin/docker-worker"]
+            envFrom: *envFrom
+            env: *env
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: false
+              capabilities:
+                drop: [ALL]
+            resources:
+              requests: { cpu: 200m, memory: 512Mi }
+              limits:   { memory: 1Gi }
+
+      # ── Plugin server (event ingest pipeline; Kafka → CH) ─────────────
+      plugins:
+        replicas: 1
+        annotations:
+          reloader.stakater.com/auto: "true"
+        containers:
+          app:
+            image: *image
+            command: [/bin/bash, -c]
+            args: ["./bin/plugin-server"]
+            envFrom: *envFrom
+            env: *env
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: false
+              capabilities:
+                drop: [ALL]
+            resources:
+              requests: { cpu: 200m, memory: 512Mi }
+              limits:   { memory: 1Gi }
+
+    service:
+      web:
+        controller: web
+        ports:
+          http:
+            port: &port 8000
+
+    route:
+      web:
+        annotations:
+          gatus.home-operations.com/endpoint: |-
+            name: PostHog
+            group: analytics
+            interval: 1m
+            urlPath: /_health
+            conditions:
+              - "[STATUS] == 200"
+        hostnames:
+          - posthog.${SECRET_DOMAIN}
+        parentRefs:
+          - name: envoy-internal
+            namespace: network
+            sectionName: https
+        rules:
+          - backendRefs:
+              - name: web
+                port: *port
