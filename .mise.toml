@@ -64,4 +64,4 @@ TALOSCONFIG = "{{config_root}}/talos/clusterconfig/talosconfig"
 "aqua:tmux/tmux-builds" = "3.8"            # Terminal multiplexer (prebuilt binaries)
 
 # AI
-"claude-code" = "2.1.319"
+"claude-code" = "2.1.325"
