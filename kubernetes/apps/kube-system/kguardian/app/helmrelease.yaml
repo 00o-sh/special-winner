@@ -34,7 +34,7 @@ spec:
     database:
       image:
         repository: postgres
-        tag: 18-alpine@sha256:96d56f7f57c6aacd1fcb908bc83b345ec5f83231ee486dd66a1baadce274db88
+        tag: 18-alpine@sha256:b6972e1115a4ff8eba5d7f7d19184926d1e16d7d1136ae1e1a7ebf286da0f015
     frontend:
       image:
         repository: ghcr.io/kguardian-dev/kguardian/frontend
