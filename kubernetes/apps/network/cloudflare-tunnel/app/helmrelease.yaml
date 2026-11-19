@@ -19,7 +19,7 @@ spec:
           app:
             image:
               repository: ghcr.io/00o-sh/cloudflared-distroless
-              tag: 2026.5.0@sha256:1faa54eda11d43d0f767ed0cfefb0e28072cdda564ed059c3d79f5ec3c5a4e4a
+              tag: 2026.8.3@sha256:6c183126b8465eb5b55e07b3af1cee2a2f48493996313f94fb167b33919b4f72
             env:
               NO_AUTOUPDATE: true
               TUNNEL_METRICS: 0.0.0.0:8080
